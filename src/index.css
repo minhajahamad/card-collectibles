@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Krona+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+
+@import 'tailwindcss';
+
+@theme {
+  --font-company: Bebas Neue, sans-serif;
+  --font-username: Red Hat Display, sans-serif;
+  --font-sans: Kumbh sans, sans-serif;
+  --font-credits: Krona one, sans-serif;
+}
+
+/* index.css or globals.css */
+.clipped-logo {
+  clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+}
+
+.MuiIndicator-span {
+  max-width: 100%;
+  width: 100%;
+  background-color: #107d91;
+  border-radius: 2px;
+}

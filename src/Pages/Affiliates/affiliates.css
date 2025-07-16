@@ -1,0 +1,12 @@
+.custom-table .ant-table-thead > tr > th {
+  background-color: #09778e1f !important;
+}
+
+.ant-table-body::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Edge */
+}
+
+.ant-table-body {
+  overflow-y: scroll;
+  scrollbar-width: none; /* For Firefox */
+}
