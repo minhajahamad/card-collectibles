@@ -151,7 +151,14 @@ const SideBar = () => {
         </div>
 
         {/* Log Out Button */}
-        <div className="mx-auto flex gap-2 items-center border-2 border-[#107D91] group rounded-[64px] px-3 py-2 shadow-[0px_2px_16.4px_0px_#0000001C] hover:shadow-none transition-all duration-200 ease-in-out cursor-pointer">
+        <div
+          onClick={() => {
+            setTimeout(() => {
+              navigate('/');
+            }, 250);
+          }}
+          className="mx-auto flex gap-2 items-center border-2 border-[#107D91] group rounded-[64px] px-3 py-2 shadow-[0px_2px_16.4px_0px_#0000001C] hover:shadow-none transition-all duration-200 ease-in-out cursor-pointer"
+        >
           <CiPower className="text-[#C84047] text-[20px] group-active:scale-90 transition duration-150 ease-in-out" />
           <p className="text-[18px] text-[#707070]">Log Out</p>
         </div>

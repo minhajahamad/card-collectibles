@@ -160,13 +160,15 @@
 // export default Landin;
 
 import React from 'react';
-import NavBar from '../../Components/NavBar/navBar';
 import LandinHero from '../../Components/Landin-Hero/landinHero';
-
+import LandinJoin from '../../Components/Landin-Join/landinJoin';
+import Footer from '../../Components/Footer/footer';
 const Landin = () => {
   return (
     <div>
       <LandinHero />
+      {/* <LandinJoin />
+      <Footer /> */}
     </div>
   );
 };

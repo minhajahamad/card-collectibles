@@ -22,15 +22,15 @@ const LandinHero = () => {
       <NavBar onLoginClick={() => setIsmodalOpen(true)} />
       {isModalOpen && <Modal onClose={() => setIsmodalOpen(false)} />}
       <div className="flex flex-col  xl:h-screen relative">
-        <div className="bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] xl:h-[70%] xl:pl-25 xl:py-10">
-          <div className="flex flex-col gap-5 items-center xl:items-start py-10 xl:py-0  xl:gap-4  ">
+        <div className="bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] xl:h-[70%] xl:pl-[100px] xl:py-10">
+          <div className="flex flex-col gap-5 items-center xl:items-start py-10 xl:py-0  xl:gap-4 w-fit  ">
             <div className="flex items-center gap-1 bg-white px-5 w-fit py-3 rounded-[76px] shadow-md shadow-[#0000001C] hover:shadow-none cursor-pointer transition-all duration-400 ease-in-out ">
               <CiStar className="text-[#EEBB4E] text-[20px] " />
               <p className="text-[14px] text-[#15ABA0] font-semibold font-raleway ">
                 Early Access Available
               </p>
             </div>
-            <div className="text-center xl:text-left leading-tight xl:leading-normal px-5">
+            <div className="text-center xl:text-left leading-tight xl:leading-normal ">
               <p className="font-raleway text-[32px] xl:text-[70px] font-extrabold">
                 Start Selling your
               </p>

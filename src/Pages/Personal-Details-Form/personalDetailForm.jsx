@@ -305,7 +305,7 @@ const SellingDetailForm = () => {
               navigate('/user/profile');
             }, 200);
           }}
-          className="w-[120px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[16px] flex items-center justify-center absolute bottom-0 right-[20px] active:scale-95 transition-all duration-300 ease-in-out cursor-pointer"
+          className="w-[120px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[16px] flex items-center justify-center absolute bottom-[20px] right-[20px] active:scale-95 transition-all duration-300 ease-in-out cursor-pointer"
         >
           <p>Continue</p>
         </div>

@@ -1,0 +1,51 @@
+import React from 'react';
+
+const Footer = () => {
+  return (
+    <div className="flex justify-between bg-[#010816] font-raleway py-10 pl-15 pr-30">
+      <div className="flex flex-col gap-3">
+        <img src="/Images/logo.png " className="w-[158px] h-[70px]" />
+        <p className="text-[15px] font-medium text-[#9BA3AE] ">
+          The premier platform for trading cards, comics, and collectibles.{' '}
+          <br />
+          Join thousands of sellers building their business with us. <br />
+          <span className="text-[#7E7E7E]">
+            © 2024 Collected Company. All rights reserved.
+          </span>
+        </p>
+      </div>
+      <div className="flex flex-col gap-5 text-[15px] font-medium text-[#9BA3AE]  w-[10%] ">
+        <p className="text-white text-[18px] font-extrabold ">Platform</p>
+        <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer">
+          How It Works?
+        </p>
+        <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer ">
+          Pricing
+        </p>
+        <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer ">
+          Features
+        </p>
+        <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer ">
+          support
+        </p>
+      </div>
+      <div className="flex flex-col gap-5 text-[15px] font-medium text-[#9BA3AE] w-[10%] ">
+        <p className="text-white text-[18px] font-extrabold ">Company</p>
+        <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer ">
+          About
+        </p>
+        <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer ">
+          Contact
+        </p>
+        <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer ">
+          Privacy Policy
+        </p>
+        <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer ">
+          Terms of Service
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Footer;
