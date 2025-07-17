@@ -30,7 +30,7 @@ const LandinHero = () => {
                 Early Access Available
               </p>
             </div>
-            <div className="text-center xl:text-left leading-tight xl:leading-normal">
+            <div className="text-center xl:text-left leading-tight xl:leading-normal px-5">
               <p className="font-raleway text-[32px] xl:text-[70px] font-extrabold">
                 Start Selling your
               </p>
@@ -62,7 +62,7 @@ const LandinHero = () => {
                     0px 4px 15.7px 0px rgba(0, 163, 151, 0.14),
                     0px 4px 106px 0px rgba(16, 125, 145, 0.14)`,
               }}
-              className="bg-white xl:hidden rounded-[35px] w-[385px] h-[170px] px-4    flex flex-col  mt-5 mx-auto "
+              className="bg-white xl:hidden rounded-[35px] w-[95%] h-[170px] px-4    flex flex-col  mt-5 mx-auto "
             >
               <div className="h-[50%] border-b border-[#E9E9E9] flex flex-col items-center py-5 ">
                 <p className="font-bold font-raleway text-[23px] text-[#00A397]">
