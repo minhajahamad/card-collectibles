@@ -229,7 +229,11 @@ const PersonalDetailForm = ({ onNext }) => {
         </form>
         <div
           className="w-[100px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[18px] flex items-center justify-center absolute bottom-[20px] right-[20px] active:scale-95 transition-all duration-300 ease-in-out cursor-pointer"
-          onClick={onNext}
+          onClick={() => {
+            setTimeout(() => {
+              onNext();
+            }, 300);
+          }}
         >
           <p>Next</p>
         </div>
@@ -238,29 +242,87 @@ const PersonalDetailForm = ({ onNext }) => {
   );
 };
 
-const SellerDetailForm = () => {
+const SellingDetailForm = () => {
   return (
-    <div className="h-[80%] flex items-center justify-center">
-      <h1 className="text-2xl text-[#464646] font-bold">
-        Seller Detail Form — Coming Soon
-      </h1>
+    <div className="h-[80%] flex py-10">
+      <div className="border-r border-[#DEDEDE] w-[50%] px-10 flex flex-col gap-5">
+        <form className="flex flex-col gap-8">
+          <div className="flex flex-col gap-1">
+            <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
+              Store Name
+            </label>
+            <input
+              className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
+              placeholder="Store"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
+              Category
+            </label>
+            <div className="flex gap-5">
+              <label className="flex gap-1 items-center font-regular text-[#464646]">
+                <input type="checkbox" className="cursor-pointer" />
+                TCG
+              </label>
+              <label className="flex gap-1 items-center font-regular text-[#464646]">
+                <input type="checkbox" className="cursor-pointer" />
+                Comics
+              </label>
+              <label className="flex gap-1 items-center font-regular text-[#464646]">
+                <input type="checkbox" className="cursor-pointer" />
+                Collectibles
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-col xl:flex-row  xl:items-center gap-1">
+            <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
+              Inventory Estimate
+            </label>
+            <select
+              className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
+              placeholder="Enter Your Number"
+            />
+          </div>
+        </form>
+      </div>
+      <div className="w-[50%] px-10 relative ">
+        <form className="flex flex-col gap-1">
+          <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
+            Specialization
+          </label>
+          <textarea
+            style={{ overflowY: 'scroll', scrollbarWidth: 'none' }}
+            className="w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto "
+            placeholder="Eg: Welcome to Itachi Stores, your destination for rare and collectible comics. We specialize in curating vintage issues, limited editions, and must-have graphic novels for dedicated fans and serious collectors alike. Discover the stories that shaped generations."
+          ></textarea>
+        </form>
+        <div className="w-[120px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[16px] flex items-center justify-center absolute bottom-0 right-[20px] active:scale-95 transition-all duration-300 ease-in-out cursor-pointer">
+          <p>Continue</p>
+        </div>
+      </div>
     </div>
   );
 };
-
 const Stepper = ({ step }) => (
-  <div className="flex items-center gap-6">
+  <div className="flex items-center gap-6 relative">
+    {/* Step 1 */}
+    {/* Step 1 */}
     <div className="flex flex-col items-center">
       <div
         className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${
-          step === 1 ? 'bg-[#464646] text-white' : 'bg-[#E0E0E0] text-[#a0a0a0]'
+          step === 1
+            ? 'bg-[#464646] text-white'
+            : step > 1
+            ? 'bg-[#16B338] text-white'
+            : 'bg-[#E0E0E0] text-[#a0a0a0]'
         }`}
       >
         1
       </div>
       <p
         className={`text-xs text-center mt-2 leading-tight ${
-          step === 1 ? 'text-[#464646]' : 'text-[#a0a0a0]'
+          step >= 1 ? 'text-[#464646]' : 'text-[#a0a0a0]'
         }`}
       >
         Personal
@@ -268,7 +330,17 @@ const Stepper = ({ step }) => (
         Details Form
       </p>
     </div>
-    <div className="w-28 h-[2px] bg-[#D3D3D3]" />
+
+    {/* Progress Line with Animation */}
+    <div className="relative w-28 h-[8px] bg-[#D3D3D3] overflow-hidden rounded-sm">
+      <div
+        className={`h-full transition-all duration-1000 ${
+          step === 2 ? 'w-full' : 'w-0'
+        } bg-gradient-to-r from-[#16B338] via-[#16B338] to-[#C7C7C7]`}
+      />
+    </div>
+
+    {/* Step 2 */}
     <div className="flex flex-col items-center">
       <div
         className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${
@@ -298,14 +370,16 @@ const MultiStepForm = () => {
       <div className="w-[90%] h-[85%] shadow-[0_0_17px_0_#00000014] transition-all duration-400 bg-white rounded-[14px] flex flex-col px-5">
         <div className="h-[20%] border-b border-[#DEDEDE] flex justify-between px-10">
           <div className="font-sans font-bold text-[40px] text-[#464646] items-center flex">
-            <p>{step === 1 ? 'Personal Detail Form' : 'Seller Detail Form'}</p>
+            <p>
+              {step === 1 ? 'Personal Details Form' : 'Selling Details Form'}
+            </p>
           </div>
           <Stepper step={step} />
         </div>
         {step === 1 ? (
           <PersonalDetailForm onNext={() => setStep(2)} />
         ) : (
-          <SellerDetailForm />
+          <SellingDetailForm />
         )}
       </div>
     </div>
