@@ -7,6 +7,7 @@ import { Spiral } from 'ldrs/react';
 import 'ldrs/react/Spiral.css';
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const Modal = ({ onClose }) => {
   const [showOtp, setShowOtp] = useState(false);
@@ -43,6 +44,8 @@ const Modal = ({ onClose }) => {
       }
     }
   };
+
+  const navigate = useNavigate();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
@@ -175,6 +178,7 @@ const Modal = ({ onClose }) => {
                       setVerifyOtpLoader(true);
                       setTimeout(() => {
                         setVerifyOtpLoader(false);
+                        navigate('/user/personal-details');
                       }, 1500);
                     }}
                     className="bg-[#467EF8] rounded-[12px] w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
