@@ -10,7 +10,7 @@ const HelpSupport = () => {
         <SideBar />
         <div
           style={{ overflowY: 'scroll', scrollbarWidth: 'none' }}
-          className="w-[75%] h-[600px] border border-[#DEDEDE] rounded-[14px] hover:shadow-[0_0_17px_0_#00000014] transition-all duration-400 mt-[60px] font-sans xl:px-10 xl:pt-8 overflow-y-auto "
+          className="w-[75%] h-[600px] border border-[#DEDEDE] rounded-[14px] shadow-[0_0_17px_0_#00000014]  mt-[60px] font-sans xl:px-10 xl:pt-8 overflow-y-auto "
         >
           <p className="text-[35px] font-bold text-[#464646]">Privacy Policy</p>
           <p className="text-[16px] font-light text-[#777] mb-4">

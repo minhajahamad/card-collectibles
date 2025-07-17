@@ -132,8 +132,9 @@
 // };
 
 // export default PersonalDetailForm;
-
 import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const PersonalDetailForm = ({ onNext }) => {
   return (
@@ -243,8 +244,9 @@ const PersonalDetailForm = ({ onNext }) => {
 };
 
 const SellingDetailForm = () => {
+  const navigate = useNavigate();
   return (
-    <div className="h-[80%] flex py-10">
+    <div className="h-[80%] flex py-5">
       <div className="border-r border-[#DEDEDE] w-[50%] px-10 flex flex-col gap-5">
         <form className="flex flex-col gap-8">
           <div className="flex flex-col gap-1">
@@ -297,20 +299,30 @@ const SellingDetailForm = () => {
             placeholder="Eg: Welcome to Itachi Stores, your destination for rare and collectible comics. We specialize in curating vintage issues, limited editions, and must-have graphic novels for dedicated fans and serious collectors alike. Discover the stories that shaped generations."
           ></textarea>
         </form>
-        <div className="w-[120px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[16px] flex items-center justify-center absolute bottom-0 right-[20px] active:scale-95 transition-all duration-300 ease-in-out cursor-pointer">
+        <div
+          onClick={() => {
+            setTimeout(() => {
+              navigate('/user/profile');
+            }, 200);
+          }}
+          className="w-[120px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[16px] flex items-center justify-center absolute bottom-0 right-[20px] active:scale-95 transition-all duration-300 ease-in-out cursor-pointer"
+        >
           <p>Continue</p>
         </div>
       </div>
     </div>
   );
 };
-const Stepper = ({ step }) => (
+
+// Progress Bar
+const Stepper = ({ step, setStep }) => (
   <div className="flex items-center gap-6 relative">
-    {/* Step 1 */}
-    {/* Step 1 */}
-    <div className="flex flex-col items-center">
+    <div
+      className="flex flex-col items-center cursor-pointer"
+      onClick={() => setStep(1)}
+    >
       <div
-        className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${
+        className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ${
           step === 1
             ? 'bg-[#464646] text-white'
             : step > 1
@@ -321,7 +333,7 @@ const Stepper = ({ step }) => (
         1
       </div>
       <p
-        className={`text-xs text-center mt-2 leading-tight ${
+        className={`text-xs text-center mt-2 leading-tight transition-all duration-300 ${
           step >= 1 ? 'text-[#464646]' : 'text-[#a0a0a0]'
         }`}
       >
@@ -330,8 +342,6 @@ const Stepper = ({ step }) => (
         Details Form
       </p>
     </div>
-
-    {/* Progress Line with Animation */}
     <div className="relative w-28 h-[8px] bg-[#D3D3D3] overflow-hidden rounded-sm">
       <div
         className={`h-full transition-all duration-1000 ${
@@ -339,18 +349,16 @@ const Stepper = ({ step }) => (
         } bg-gradient-to-r from-[#16B338] via-[#16B338] to-[#C7C7C7]`}
       />
     </div>
-
-    {/* Step 2 */}
     <div className="flex flex-col items-center">
       <div
-        className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${
+        className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ${
           step === 2 ? 'bg-[#464646] text-white' : 'bg-[#E0E0E0] text-[#a0a0a0]'
         }`}
       >
         2
       </div>
       <p
-        className={`text-xs text-center mt-2 leading-tight ${
+        className={`text-xs text-center mt-2 leading-tight transition-all duration-300 ${
           step === 2 ? 'text-[#464646]' : 'text-[#a0a0a0]'
         }`}
       >
@@ -374,7 +382,7 @@ const MultiStepForm = () => {
               {step === 1 ? 'Personal Details Form' : 'Selling Details Form'}
             </p>
           </div>
-          <Stepper step={step} />
+          <Stepper step={step} setStep={setStep} />
         </div>
         {step === 1 ? (
           <PersonalDetailForm onNext={() => setStep(2)} />

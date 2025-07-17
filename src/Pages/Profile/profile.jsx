@@ -131,7 +131,7 @@ const Profile = () => {
       <NavBar />
       <div className="flex py-5 px-5 md:px-15 md:py-15 xl:py-0 xl:px-0">
         <SideBar />
-        <div className=" w-full    xl:w-[75%] md:h-[700px] xl:max-h-[600px] font-sans border border-[#DEDEDE] xl:mt-15 rounded-[14px] shadow-[0_0_17px_0_#00000014] xl:shadow-none xl:hover:shadow-[0_0_17px_0_#00000014] transition-all duration-400 xl:px-10 xl:pt-8 ">
+        <div className=" w-full    xl:w-[75%] md:h-[700px] xl:max-h-[600px] font-sans border border-[#DEDEDE] xl:mt-15 rounded-[14px] shadow-[0_0_17px_0_#00000014]  xl:px-10 xl:pt-8 ">
           {/* Title + Tabs */}
           <div className="relative ">
             <p className="text-[24px] md:text-[30px]  p-5 xl:p-0 lg:text-[32px] text-[#464646] font-bold">
@@ -193,14 +193,8 @@ const Profile = () => {
                       Name
                     </label>
                     <div className="flex flex-col xl:flex-row gap-5">
-                      <input
-                        className="w-[90%]   xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                        placeholder="First Name"
-                      />
-                      <input
-                        className=" w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                        placeholder="Last Name"
-                      />
+                      <input className="w-[90%]   xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                      <input className=" w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
                     </div>
                   </div>
 
@@ -208,20 +202,14 @@ const Profile = () => {
                     <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
                       Email
                     </label>
-                    <input
-                      className="w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                      placeholder="name@gmail.com"
-                    />
+                    <input className="w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
                       Phone Number
                     </label>
-                    <input
-                      className="w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                      placeholder="Enter Your Number"
-                    />
+                    <input className="w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
                   </div>
                 </form>
               </div>
@@ -232,36 +220,15 @@ const Profile = () => {
                     Addresses
                   </label>
                   <div className="flex flex-col gap-4">
-                    <input
-                      className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                      placeholder="House name, Flat no"
-                    />
-                    <input
-                      className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                      placeholder="Street address"
-                    />
-                    <input
-                      className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                      placeholder="Street address"
-                    />
+                    <input className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                    <input className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                    <input className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
                     <div className="flex flex-col xl:flex-row gap-[10px]">
-                      <input
-                        className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                        placeholder="City"
-                      />
-                      <input
-                        className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                        placeholder="State"
-                      />
+                      <input className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                      <input className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
                     </div>
-                    <input
-                      className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                      placeholder="Country"
-                    />
-                    <input
-                      className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                      placeholder="Pin"
-                    />
+                    <input className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                    <input className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
                   </div>
                 </form>
               </div>
@@ -279,10 +246,7 @@ const Profile = () => {
                       Store Name
                     </label>
                     <div className="flex gap-5">
-                      <input
-                        className="w-[90%] xl:w-[290px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                        placeholder="Enter your store name"
-                      />
+                      <input className="w-[90%] xl:w-[290px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
                     </div>
                   </div>
 
@@ -310,10 +274,7 @@ const Profile = () => {
                     <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
                       Inventory Estimate
                     </label>
-                    <select
-                      className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
-                      placeholder="Enter Your Number"
-                    />
+                    <select className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
                   </div>
                 </form>
               </div>
@@ -326,7 +287,6 @@ const Profile = () => {
                   <textarea
                     style={{ overflowY: 'scroll', scrollbarWidth: 'none' }}
                     className="w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto "
-                    placeholder="Eg: Welcome to Itachi Stores, your destination for rare and collectible comics. We specialize in curating vintage issues, limited editions, and must-have graphic novels for dedicated fans and serious collectors alike. Discover the stories that shaped generations."
                   ></textarea>
                 </form>
               </div>

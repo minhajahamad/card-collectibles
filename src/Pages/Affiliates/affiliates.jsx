@@ -107,7 +107,7 @@ const Affiliates = () => {
       <NavBar />
       <div className="flex py-5 px-5 md:px-15 md:py-15 xl:py-0 xl:px-0">
         <SideBar />
-        <div className="w-full xl:w-[75%] max-h-[600px] flex flex-col gap-3 font-sans border border-[#DEDEDE] rounded-[14px] shadow-[0_0_17px_0_#00000014] xl:shadow-none xl:hover:shadow-[0_0_17px_0_#00000014] transition-all duration-400 xl:mt-15 xl:px-10 xl:pt-8   scrollbar-none">
+        <div className="w-full xl:w-[75%] max-h-[600px] flex flex-col gap-3 font-sans border border-[#DEDEDE] rounded-[14px] shadow-[0_0_17px_0_#00000014]  xl:mt-15 xl:px-10 xl:pt-8   scrollbar-none">
           <div className="flex flex-col gap-5 relative ">
             <div className="flex flex-col gap-1">
               <p className="text-[32px] text-[#464646] font-bold ">Name</p>

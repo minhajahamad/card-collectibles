@@ -33,7 +33,7 @@ const NavBar = ({ onLoginClick }) => {
         onClick={onLoginClick}
         className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
       >
-        <p>Login/SignUp</p>
+        <p>SignUp</p>
       </div>
     </nav>
   );
