@@ -2,7 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Krona+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
 
 @theme {
@@ -10,6 +12,9 @@
   --font-username: Red Hat Display, sans-serif;
   --font-sans: Kumbh sans, sans-serif;
   --font-credits: Krona one, sans-serif;
+  --font-montserrat: 'Montserrat', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+  --font-raleway: 'Raleway', sans-serif;
 }
 
 /* index.css or globals.css */
@@ -22,4 +27,36 @@
   width: 100%;
   background-color: #107d91;
   border-radius: 2px;
+}
+
+/* Marquee effect */
+.marquee-track {
+  display: flex;
+  width: fit-content;
+  animation: marquee 5s linear infinite;
+}
+
+.marquee-image {
+  flex-shrink: 0;
+  padding-right: 1.5rem;
+  /* Optional: Give fixed width to image for consistent loop */
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.fade-effect {
+  mask-image: linear-gradient(
+    to right,
+    rgba(219, 148, 255, 0),
+    rgb(0, 155, 122) 20%,
+    rgb(0, 155, 122) 80%,
+    rgba(216, 108, 255, 0)
+  );
 }

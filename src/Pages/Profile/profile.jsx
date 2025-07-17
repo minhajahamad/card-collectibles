@@ -131,7 +131,7 @@ const Profile = () => {
       <NavBar />
       <div className="flex py-5 px-5 md:px-15 md:py-15 xl:py-0 xl:px-0">
         <SideBar />
-        <div className=" w-full    xl:w-[75%] md:h-[700px] xl:max-h-[600px] font-sans border border-[#DEDEDE] xl:mt-15 rounded-[14px] shadow-[0_0_17px_0_#00000014] xl:hover:shadow-[0_0_17px_0_#00000014] transition-all duration-400 xl:px-10 xl:pt-8 ">
+        <div className=" w-full    xl:w-[75%] md:h-[700px] xl:max-h-[600px] font-sans border border-[#DEDEDE] xl:mt-15 rounded-[14px] shadow-[0_0_17px_0_#00000014] xl:shadow-none xl:hover:shadow-[0_0_17px_0_#00000014] transition-all duration-400 xl:px-10 xl:pt-8 ">
           {/* Title + Tabs */}
           <div className="relative ">
             <p className="text-[24px] md:text-[30px]  p-5 xl:p-0 lg:text-[32px] text-[#464646] font-bold">
