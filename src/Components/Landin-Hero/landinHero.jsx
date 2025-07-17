@@ -56,13 +56,56 @@ const LandinHero = () => {
                 ))}
               </div>
             </div>
+            <div
+              style={{
+                boxShadow: `
+                    0px 4px 15.7px 0px rgba(0, 163, 151, 0.14),
+                    0px 4px 106px 0px rgba(16, 125, 145, 0.14)`,
+              }}
+              className="bg-white xl:hidden rounded-[35px] w-[385px] h-[170px] px-4    flex flex-col  mt-5 mx-auto "
+            >
+              <div className="h-[50%] border-b border-[#E9E9E9] flex flex-col items-center py-5 ">
+                <p className="font-bold font-raleway text-[23px] text-[#00A397]">
+                  Ready to Start?
+                </p>
+                <p className="font-medium font-raleway text-[11.48px] text-[#46505E]">
+                  Join thousands of sellers already using our platform.
+                </p>
+              </div>
+              <div className="h-[50%] flex justify-around ">
+                <div className=" flex flex-col items-center ">
+                  <p className="font-bold font-raleway text-[22px] text-[#00A397]">
+                    1000+
+                  </p>
+                  <p className="font-medium font-raleway text-[16px] text-[#46505E]">
+                    Active Sellers
+                  </p>
+                </div>
+                <div className=" flex flex-col items-center ">
+                  <p className="font-bold font-raleway text-[22px] text-[#00A397]">
+                    50K+
+                  </p>
+                  <p className="font-medium font-raleway text-[16px] text-[#46505E]">
+                    Item Listed
+                  </p>
+                </div>
+                <div className=" flex flex-col items-center ">
+                  <p className="font-bold font-raleway text-[22px] text-[#00A397]">
+                    95%
+                  </p>
+                  <p className="font-medium font-raleway text-[16px] text-[#46505E]">
+                    Satisfication
+                  </p>
+                </div>
+              </div>
+            </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col items-center gap-3 mt-5">
               <div className="flex gap-5 font-semibold font-montserrat">
-                <div className="rounded-[6px]  bg-[#00A397] text-white xl:px-5 xl:py-2 cursor-pointer">
+                <div className="rounded-[6px]  bg-[#00A397] text-white px-5 py-2 cursor-pointer">
                   <p>Register Now-It's Free!</p>
                 </div>
-                <div className="border bg-white border-[#00A397] rounded-[6px] text-[#00A397] flex items-center xl:px-2 cursor-pointer ">
+                <div className="border bg-white border-[#00A397] rounded-[6px] text-[#00A397] flex items-center px-2 cursor-pointer ">
                   <p>Learn More</p>
                 </div>
               </div>
