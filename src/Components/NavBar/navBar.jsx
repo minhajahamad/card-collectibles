@@ -36,11 +36,11 @@ const NavBar = ({ onLoginClick }) => {
       </div> */}
 
         <div
-        onClick={onLoginClick}
-        className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
-      >
-        <p>SignUp</p>
-      </div>
+          onClick={onLoginClick}
+          className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
+        >
+          <p>SignUp</p>
+        </div>
       </nav>
       <MobileSidebar
         isOpen={sidebarOpen}
