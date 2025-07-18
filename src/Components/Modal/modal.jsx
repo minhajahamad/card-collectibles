@@ -7,11 +7,31 @@ import 'ldrs/react/Spiral.css';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../services/axios';
+import { API_URL } from '../../services/api_url';
 
 const Modal = ({ onClose }) => {
+  const navigate = useNavigate();
   const [showOtp, setShowOtp] = useState(false);
   const [loader, setLoader] = useState(false);
   const [verifyOtpLoader, setVerifyOtpLoader] = useState(false);
+  // Add formData state
+  const [formData, setFormData] = useState({
+    full_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    reenter_password: '',
+    phone_number: '',
+  });
+  const [errors, setErrors] = useState({});
+
+  // Common handleChange function
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: '' }));
+  };
 
   const handleSendOtp = () => {
     setLoader(true);
@@ -40,7 +60,44 @@ const Modal = ({ onClose }) => {
     }
   };
 
-  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Validation
+    const { full_name, last_name, email, password, reenter_password, phone_number } = formData;
+    const newErrors = {};
+    if (!full_name) newErrors.full_name = 'First name is required.';
+    if (!last_name) newErrors.last_name = 'Last name is required.';
+    if (!email) newErrors.email = 'Email is required.';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && !emailRegex.test(email)) newErrors.email = 'Please enter a valid email address.';
+    if (!password) newErrors.password = 'Password is required.';
+    if (!reenter_password) newErrors.reenter_password = 'Confirm password is required.';
+    if (password && reenter_password && password !== reenter_password) newErrors.reenter_password = 'Passwords do not match.';
+    if (!phone_number) newErrors.phone_number = 'Phone number is required.';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+    // Use formData for post API here
+    console.log(formData);
+    try {
+      const response = await axiosInstance.post(API_URL.REGISTER.REGISTER, formData);
+      console.log(response);
+      // Save uuid to localStorage
+      if (response?.data?.data?.uuid) {
+        localStorage.setItem('uuid', response.data.data.uuid);
+      }
+      setFormData({
+        full_name: '',
+        last_name: '',
+        email: '',
+        password: '',
+        reenter_password: '',
+        phone_number: '',
+      })
+      navigate('/user/personal-details')
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -63,7 +120,7 @@ const Modal = ({ onClose }) => {
             </div>
 
             <div className="flex flex-col gap-5">
-              <form className="font-montserrat flex flex-col gap-4">
+              <form className="font-montserrat flex flex-col gap-4" onSubmit={handleSubmit}>
                 {/* Full Name */}
                 <div className="flex flex-col">
                   <label className="font-medium text-[14px] text-[#111111]">
@@ -75,13 +132,21 @@ const Modal = ({ onClose }) => {
                       onKeyDown={e => handleFormKeyDown(e, 0)}
                       className="w-[50%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                       placeholder="First Name"
+                      name="full_name"
+                      value={formData.full_name}
+                      onChange={handleChange}
                     />
+                    {errors.full_name && <span className="text-red-500 text-xs mt-1">{errors.full_name}</span>}
                     <input
                       ref={el => (inputRefs.current[1] = el)}
                       onKeyDown={e => handleFormKeyDown(e, 1)}
                       className="w-[50%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                       placeholder="Last Name"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleChange}
                     />
+                    {errors.last_name && <span className="text-red-500 text-xs mt-1">{errors.last_name}</span>}
                   </div>
                 </div>
 
@@ -95,7 +160,11 @@ const Modal = ({ onClose }) => {
                     onKeyDown={e => handleFormKeyDown(e, 2)}
                     className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                     placeholder="Enter your email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                   />
+                  {errors.email && <span className="text-red-500 text-xs mt-1">{errors.email}</span>}
                 </div>
 
                 {/* Password */}
@@ -109,13 +178,21 @@ const Modal = ({ onClose }) => {
                       onKeyDown={e => handleFormKeyDown(e, 3)}
                       className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                       placeholder="Enter your password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
                     />
+                    {errors.password && <span className="text-red-500 text-xs mt-1">{errors.password}</span>}
                     <input
                       ref={el => (inputRefs.current[4] = el)}
                       onKeyDown={e => handleFormKeyDown(e, 4)}
                       className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                       placeholder="Confirm password"
+                      name="reenter_password"
+                      value={formData.reenter_password}
+                      onChange={handleChange}
                     />
+                    {errors.reenter_password && <span className="text-red-500 text-xs mt-1">{errors.reenter_password}</span>}
                   </div>
                 </div>
 
@@ -129,13 +206,22 @@ const Modal = ({ onClose }) => {
                       ref={el => (inputRefs.current[5] = el)}
                       onKeyDown={e => handleFormKeyDown(e, 5)}
                       className="w-[20%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+
+
+
                     />
                     <input
                       ref={el => (inputRefs.current[6] = el)}
                       onKeyDown={e => handleFormKeyDown(e, 6)}
                       className="w-[50%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                       placeholder="00000 0000"
+                      name="phone_number"
+                      value={formData.phone_number}
+                      onChange={handleChange}
+                    // Optionally, you can use this for phone_number as well, but as per field names, using one field
                     />
+                    {errors.phone_number && <span className="text-red-500 text-xs mt-1">{errors.phone_number}</span>}
+
                     <div
                       onClick={handleSendOtp}
                       className="bg-[#467EF8] w-[30%] rounded-[14px] flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-200"
@@ -151,6 +237,7 @@ const Modal = ({ onClose }) => {
                       )}
                     </div>
                   </div>
+                  <button className='border rounded mt-3' type='submit'>Submit</button>
                 </div>
               </form>
 
