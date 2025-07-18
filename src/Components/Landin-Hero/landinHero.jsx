@@ -5,6 +5,7 @@ import Modal from '../../Components/Modal/modal';
 import { CiStar } from 'react-icons/ci';
 import { BsLightningCharge } from 'react-icons/bs';
 import { MdOutlineSecurity } from 'react-icons/md';
+import { TiArrowRight } from 'react-icons/ti';
 
 const LandinHero = () => {
   const LandinImages = [
@@ -21,7 +22,7 @@ const LandinHero = () => {
     <div className="relative overflow-hidden">
       <NavBar onLoginClick={() => setIsmodalOpen(true)} />
       {isModalOpen && <Modal onClose={() => setIsmodalOpen(false)} />}
-      <div className="flex flex-col  xl:h-screen relative">
+      <div className="flex flex-col   xl:h-screen relative">
         <div className="bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] xl:h-[70%] xl:pl-[100px] xl:py-10">
           <div className="flex flex-col gap-5 items-center xl:items-start py-10 xl:py-0  xl:gap-4 w-fit  ">
             <div className="flex items-center gap-1 bg-white px-5 w-fit py-3 rounded-[76px] shadow-md shadow-[#0000001C] hover:shadow-none cursor-pointer transition-all duration-400 ease-in-out ">
@@ -31,16 +32,16 @@ const LandinHero = () => {
               </p>
             </div>
             <div className="text-center xl:text-left leading-tight xl:leading-normal ">
-              <p className="font-raleway text-[32px] xl:text-[70px] font-extrabold">
+              <p className="font-raleway text-[32px] md:text-[40px] xl:text-[60px] font-extrabold">
                 Start Selling your
               </p>
-              <p className="font-raleway text-[32px]  xl:text-[70px] font-extrabold">
-                <span className="text-[#00A397] text-[38px] xl:text-[74px]">
+              <p className="font-raleway text-[32px] md:text-[40px]  xl:text-[60px] font-extrabold">
+                <span className="text-[#00A397] text-[38px] md:text-[45px] xl:text-[70px]">
                   Collectible
                 </span>{' '}
                 Today!
               </p>
-              <p className=" xl:w-[600px] mt-5 xl:mt-0 font-raleway text-[#46505E] font-medium text-[12px] xl:text-[14px]  ">
+              <p className="  xl:w-[600px] mt-5 xl:mt-0 font-raleway text-[#46505E] font-medium text-[12px] xl:text-[14px]  ">
                 Join the premier platform for trading cards, comics, and
                 collectibles. <br /> Connect with serious collectors and grow
                 your business with <br /> powerful tools designed specifically
@@ -102,10 +103,11 @@ const LandinHero = () => {
 
             <div className="flex flex-col items-center gap-3 mt-5">
               <div className="flex gap-5 font-semibold font-montserrat">
-                <div className="rounded-[6px]  bg-[#00A397] text-white px-5 py-2 cursor-pointer">
+                <div className="rounded-[6px]  bg-[#00A397] text-white w-[250px] xl:w-[240px] py-2 pl-3 cursor-pointer flex items-center  gap-2 group ">
                   <p>Register Now-It's Free!</p>
+                  <TiArrowRight className="text-[24px] font-light group-hover:ml-1 transition-all duration-300 ease-in-out group-active:ml-1 group-lg:active:ml-0" />
                 </div>
-                <div className="border bg-white border-[#00A397] rounded-[6px] text-[#00A397] flex items-center px-2 cursor-pointer ">
+                <div className="border bg-white border-[#00A397] rounded-[6px] text-[#00A397] flex items-center px-2 cursor-pointer  ">
                   <p>Learn More</p>
                 </div>
               </div>
