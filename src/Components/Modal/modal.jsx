@@ -81,6 +81,10 @@ const Modal = ({ onClose }) => {
     try {
       const response = await axiosInstance.post(API_URL.REGISTER.REGISTER, formData);
       console.log(response);
+      // Save uuid to localStorage
+      if (response?.data?.data?.uuid) {
+        localStorage.setItem('uuid', response.data.data.uuid);
+      }
       setFormData({
         full_name: '',
         last_name: '',
