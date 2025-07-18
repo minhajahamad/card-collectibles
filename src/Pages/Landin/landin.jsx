@@ -167,8 +167,8 @@ const Landin = () => {
   return (
     <div>
       <LandinHero />
-      {/* <LandinJoin />
-      <Footer /> */}
+      <LandinJoin />
+      <Footer />
     </div>
   );
 };
