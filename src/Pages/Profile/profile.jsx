@@ -117,7 +117,6 @@ import React, { useState } from 'react';
 import NavBar from '../../Components/NavBar/navBar';
 import SideBar from '../../Components/Sidebar/sideBar';
 import { Tabs, Tab, Box } from '@mui/material';
-import { MdEdit } from 'react-icons/md';
 
 const Profile = () => {
   const [tabIndex, setTabIndex] = useState(0);
