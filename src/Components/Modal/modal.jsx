@@ -7,14 +7,24 @@ import 'ldrs/react/Spiral.css';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../services/axios';
 import { API_URL } from '../../services/api_url';
 
 // Import Firebase OTP functions
-import { sendOTP, verifyOTP, initializeRecaptcha, resetRecaptcha } from '../../services/firebase/firebas'; // Update this path
+import {
+  sendOTP,
+  verifyOTP,
+  initializeRecaptcha,
+  resetRecaptcha,
+} from '../../services/firebase/firebase'; // Update this path
 
 const Modal = ({ onClose }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('refferal-code');
+  console.log(referralCode);
+  
   const [showOtp, setShowOtp] = useState(false);
   const [loader, setLoader] = useState(false);
   const [verifyOtpLoader, setVerifyOtpLoader] = useState(false);
@@ -56,16 +66,19 @@ const Modal = ({ onClose }) => {
   }, []);
 
   // Common handleChange function
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: '' }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleSendOtp = async () => {
     // Validate phone number first
     if (!formData.phone_number) {
-      setErrors(prev => ({ ...prev, phone_number: 'Phone number is required.' }));
+      setErrors(prev => ({
+        ...prev,
+        phone_number: 'Phone number is required.',
+      }));
       return;
     }
 
@@ -89,12 +102,18 @@ const Modal = ({ onClose }) => {
         setErrors(prev => ({ ...prev, phone_number: '' }));
       } else {
         setOtpError(result.error || 'Failed to send OTP');
-        setErrors(prev => ({ ...prev, phone_number: result.error || 'Failed to send OTP' }));
+        setErrors(prev => ({
+          ...prev,
+          phone_number: result.error || 'Failed to send OTP',
+        }));
       }
     } catch (error) {
       console.error('Error sending OTP:', error);
       setOtpError('Failed to send OTP. Please try again.');
-      setErrors(prev => ({ ...prev, phone_number: 'Failed to send OTP. Please try again.' }));
+      setErrors(prev => ({
+        ...prev,
+        phone_number: 'Failed to send OTP. Please try again.',
+      }));
     } finally {
       setLoader(false);
     }
@@ -103,7 +122,8 @@ const Modal = ({ onClose }) => {
   const handleVerifyOtp = async () => {
     const otpCode = otpValues.join('');
 
-    if (otpCode.length !== 6) {  // Changed from 4 to 6
+    if (otpCode.length !== 6) {
+      // Changed from 4 to 6
       setOtpError('Please enter complete OTP');
       return;
     }
@@ -127,7 +147,6 @@ const Modal = ({ onClose }) => {
       setVerifyOtpLoader(false);
     }
   };
-
 
   const handleResendOtp = async () => {
     setOtpError('');
@@ -181,16 +200,26 @@ const Modal = ({ onClose }) => {
     // If OTP is not verified yet, just send OTP
     if (!otpVerified) {
       // Validation
-      const { full_name, last_name, email, password, reenter_password, phone_number } = formData;
+      const {
+        full_name,
+        last_name,
+        email,
+        password,
+        reenter_password,
+        phone_number,
+      } = formData;
       const newErrors = {};
       if (!full_name) newErrors.full_name = 'First name is required.';
       if (!last_name) newErrors.last_name = 'Last name is required.';
       if (!email) newErrors.email = 'Email is required.';
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (email && !emailRegex.test(email)) newErrors.email = 'Please enter a valid email address.';
+      if (email && !emailRegex.test(email))
+        newErrors.email = 'Please enter a valid email address.';
       if (!password) newErrors.password = 'Password is required.';
-      if (!reenter_password) newErrors.reenter_password = 'Confirm password is required.';
-      if (password && reenter_password && password !== reenter_password) newErrors.reenter_password = 'Passwords do not match.';
+      if (!reenter_password)
+        newErrors.reenter_password = 'Confirm password is required.';
+      if (password && reenter_password && password !== reenter_password)
+        newErrors.reenter_password = 'Passwords do not match.';
       if (!phone_number) newErrors.phone_number = 'Phone number is required.';
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) return;
@@ -202,7 +231,21 @@ const Modal = ({ onClose }) => {
 
     // If OTP is verified, proceed with registration
     try {
-      const response = await axiosInstance.post(API_URL.REGISTER.REGISTER, formData);
+      let response;
+      if (referralCode) {
+        response = await axiosInstance.post(
+          API_URL.REGISTER.REFFERAL_REGISTER(referralCode),
+          formData
+        );
+        console.log("refferal");
+      } else {
+        response = await axiosInstance.post(
+          API_URL.REGISTER.REGISTER,
+          formData
+        );
+        console.log("normal");
+        
+      }
       console.log(response);
 
       // Save data to localStorage
@@ -212,7 +255,7 @@ const Modal = ({ onClose }) => {
         last_name: formData.last_name,
         email: formData.email,
         phone_number: formData.phone_number,
-        login: true
+        login: true,
       };
 
       // Save individual items to localStorage
@@ -236,8 +279,6 @@ const Modal = ({ onClose }) => {
     }
   };
 
-
-
   return (
     <AnimatePresence>
       <motion.div
@@ -247,19 +288,22 @@ const Modal = ({ onClose }) => {
         exit={{ opacity: 0, y: 50 }}
         transition={{ duration: 0.4, ease: 'easeInOut' }}
       >
-        <div className="flex p-5 w-[90%] h-[90vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014]">
-          <div className="w-[70%]">
+        <div className="flex p-5 w-[110vh] h-[80vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014] ">
+          <div className="w-[50%]">
             <img src="/Images/Modal-img.png" className="w-full h-full" />
           </div>
 
-          <div className="w-[30%] flex flex-col justify-center gap-3 pl-10">
-            <div className="font-poppins text-[36px]">
+          <div className="w-[50%] flex flex-col justify-center gap-2 pl-10">
+            <div className="font-poppins text-[36px] leading-tight">
               <p className="font-semibold text-[#111111]">Lets Get</p>
               <p className="font-medium text-[#00A397]">Started!</p>
             </div>
 
             <div className="flex flex-col gap-5">
-              <form className="font-montserrat flex flex-col gap-4" onSubmit={handleSubmit}>
+              <form
+                className="font-montserrat flex flex-col gap-2"
+                onSubmit={handleSubmit}
+              >
                 {/* Full Name */}
                 <div className="flex flex-col">
                   <label className="font-medium text-[14px] text-[#111111]">
@@ -276,7 +320,11 @@ const Modal = ({ onClose }) => {
                         value={formData.full_name}
                         onChange={handleChange}
                       />
-                      {errors.full_name && <span className="text-red-500 text-xs mt-1">{errors.full_name}</span>}
+                      {errors.full_name && (
+                        <span className="text-red-500 text-xs mt-1">
+                          {errors.full_name}
+                        </span>
+                      )}
                     </div>
                     <div className="w-[50%]">
                       <input
@@ -288,7 +336,11 @@ const Modal = ({ onClose }) => {
                         value={formData.last_name}
                         onChange={handleChange}
                       />
-                      {errors.last_name && <span className="text-red-500 text-xs mt-1">{errors.last_name}</span>}
+                      {errors.last_name && (
+                        <span className="text-red-500 text-xs mt-1">
+                          {errors.last_name}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -307,7 +359,11 @@ const Modal = ({ onClose }) => {
                     value={formData.email}
                     onChange={handleChange}
                   />
-                  {errors.email && <span className="text-red-500 text-xs mt-1">{errors.email}</span>}
+                  {errors.email && (
+                    <span className="text-red-500 text-xs mt-1">
+                      {errors.email}
+                    </span>
+                  )}
                 </div>
 
                 {/* Password */}
@@ -326,7 +382,11 @@ const Modal = ({ onClose }) => {
                       value={formData.password}
                       onChange={handleChange}
                     />
-                    {errors.password && <span className="text-red-500 text-xs mt-1">{errors.password}</span>}
+                    {errors.password && (
+                      <span className="text-red-500 text-xs mt-1">
+                        {errors.password}
+                      </span>
+                    )}
                     <input
                       ref={el => (inputRefs.current[4] = el)}
                       onKeyDown={e => handleFormKeyDown(e, 4)}
@@ -337,7 +397,11 @@ const Modal = ({ onClose }) => {
                       value={formData.reenter_password}
                       onChange={handleChange}
                     />
-                    {errors.reenter_password && <span className="text-red-500 text-xs mt-1">{errors.reenter_password}</span>}
+                    {errors.reenter_password && (
+                      <span className="text-red-500 text-xs mt-1">
+                        {errors.reenter_password}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -381,7 +445,11 @@ const Modal = ({ onClose }) => {
                       )}
                     </div>
                   </div>
-                  {errors.phone_number && <span className="text-red-500 text-xs mt-1">{errors.phone_number}</span>}
+                  {errors.phone_number && (
+                    <span className="text-red-500 text-xs mt-1">
+                      {errors.phone_number}
+                    </span>
+                  )}
                 </div>
               </form>
 
@@ -401,22 +469,24 @@ const Modal = ({ onClose }) => {
                     </p>
 
                     {otpError && (
-                      <p className="text-red-500 text-xs text-center">{otpError}</p>
+                      <p className="text-red-500 text-xs text-center">
+                        {otpError}
+                      </p>
                     )}
 
-                    <div className="flex items-center justify-around gap-3">
-                      {Array(6)  // Changed from 4 to 6
+                    <div className="flex items-center justify-center gap-2">
+                      {Array(6) // Changed from 4 to 6
                         .fill(0)
                         .map((_, i) => (
                           <input
                             key={i}
                             ref={el => (otpRef.current[i] = el)}
-                            className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-5 placeholder:text-center focus:outline-none focus:border-[#424242] text-center"  // Changed width from 15% to 12%
+                            className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
                             placeholder="-"
                             onKeyDown={e => handleKeyDown(e, i)}
                             onChange={e => handleOtpChange(e, i)}
                             maxLength={1}
-                            type="number"
+                            type="text"
                             value={otpValues[i]}
                           />
                         ))}
