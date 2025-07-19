@@ -18,11 +18,14 @@ const LandinHero = ({ onLearnMoreClick }) => {
 
   const [isModalOpen, setIsmodalOpen] = useState(false);
 
+  // State for Tracking Index of Hover Image
+  const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
+
   return (
     <div className="relative overflow-hidden">
       <NavBar onLoginClick={() => setIsmodalOpen(true)} />
       {isModalOpen && <Modal onClose={() => setIsmodalOpen(false)} />}
-      <div className="flex flex-col   xl:h-screen relative">
+      <div className="flex flex-col   xl:h-[110vh] relative">
         <div className="bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] xl:h-[70%] xl:pl-[100px] xl:py-10">
           <div className="flex flex-col gap-5 items-center xl:items-start py-10 xl:py-0  xl:gap-4 w-fit  ">
             <div className="flex items-center gap-1 bg-white px-5 w-fit py-3 rounded-[76px] shadow-md shadow-[#0000001C] hover:shadow-none cursor-pointer transition-all duration-400 ease-in-out ">
@@ -52,7 +55,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
               <div className="marquee-track">
                 {[...LandinImages, ...LandinImages].map((image, index) => (
                   <div key={index} className="marquee-image">
-                    <img src={image} alt="" />
+                    <img src={image} />
                   </div>
                 ))}
               </div>
@@ -103,7 +106,10 @@ const LandinHero = ({ onLearnMoreClick }) => {
 
             <div className="flex flex-col items-center gap-3 mt-5">
               <div className="flex gap-5 font-semibold font-montserrat">
-                <div className="rounded-[6px]  bg-[#00A397] text-white w-[250px] xl:w-[240px] py-2 pl-3 cursor-pointer flex items-center  gap-2 group ">
+                <div
+                  onClick={() => setIsmodalOpen(true)}
+                  className="rounded-[6px]  bg-[#00A397] text-white w-[250px] xl:w-[240px] py-2 pl-3 cursor-pointer flex items-center  gap-2 group "
+                >
                   <p>Register Now-It's Free!</p>
                   <TiArrowRight className="text-[24px] font-light group-hover:ml-1 transition-all duration-300 ease-in-out group-active:ml-1 group-lg:active:ml-0" />
                 </div>
@@ -141,8 +147,22 @@ const LandinHero = ({ onLearnMoreClick }) => {
           <div className="xl:w-[750px] overflow-hidden relative fade-effect">
             <div className="marquee-track">
               {[...LandinImages, ...LandinImages].map((image, index) => (
-                <div key={index} className="marquee-image">
-                  <img src={image} alt="" />
+                <div
+                  key={index}
+                  onMouseEnter={() => setHoveredImageIndex(index)}
+                  onMouseLeave={() => setHoveredImageIndex(null)}
+                  className="marquee-image"
+                >
+                  <img
+                    src={image}
+                    className={`cursor-pointer transition-all duration-400 ease-in-out ${
+                      hoveredImageIndex === null
+                        ? 'opacity-100'
+                        : hoveredImageIndex === index
+                        ? 'scale-105 opacity-100 z-10 shadow-lg'
+                        : 'opacity-30'
+                    }`}
+                  />
                 </div>
               ))}
             </div>
@@ -200,17 +220,30 @@ const LandinHero = ({ onLearnMoreClick }) => {
             src="/Images/Falcon.png"
             className="absolute top-[-75px] right-[38px] z-10 h-30"
           />
-          <img
-            src="/Images/Charizard.png"
-            className="absolute bottom-[-53px] right-[-40px] z-10 h-70"
-          />
-          <img
-            src="/Images/Dark-magician.png"
-            className="absolute top-[104px] right-[-27px] z-10 h-60"
-          />
+
+          <div className="absolute bottom-[-53px] right-[-40px]">
+            <div className="relative z-10 h-[280px] w-[200px] rotate-[3.66deg] shadow-3d-card">
+              <div className="absolute inset-0 z-20 shine-effect pointer-events-none rounded-[9px]" />
+
+              <img
+                src="/Images/Charizard.png"
+                className="w-full h-full object-contain z-10 relative"
+              />
+            </div>
+          </div>
+          <div className="absolute top-[104px] right-[-27px]">
+            <div className="relative z-10 h-59 w-[160px] rotate-[-3.66deg] shadow-3d-card overflow-hidden rounded-[9px]">
+              <div className="absolute inset-0 z-20 shine-effect-delayed pointer-events-none rounded-[9px]" />
+
+              <img
+                src="/Images/Dark-magician.png"
+                className="h-full w-full object-contain z-10 relative"
+              />
+            </div>
+          </div>
           <img
             src="/Images/Eating-chrctr.png"
-            className="absolute top-[-100px] left-[36px] z-10 h-30"
+            className="absolute top-[-100px] left-[36px] z-10 h-30 "
           />
         </div>
       </div>
