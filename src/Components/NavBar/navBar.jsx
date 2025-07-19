@@ -1,9 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RxHamburgerMenu } from 'react-icons/rx';
 import MobileSidebar from '../Mobile-Sidebar/mobileSidebar';
+import { useNavigate } from 'react-router-dom';
 
 const NavBar = ({ onLoginClick }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate()
+  const [user,setUser] = useState({})
+  const uuid = localStorage.getItem("uuid")
+  console.log(uuid);
+  
+  const fetchUser = async()=>{
+    try{
+      const response = await axiosInstance.get(API_URL.USER.GET_USER_UUID(uuid));
+      console.log(response);
+      setUser(response.data.data)
+    }catch(err){
+      console.log(err);
+    }
+  }
+
+  useEffect(()=>{
+    fetchUser();
+  },[])
+  
   return (
     <>
       <nav className="w-full h-[70px] lg:h-[85px]   flex items-center bg-[#09778E]  justify-between px-4 md:px-15 lg:px-20  ">
