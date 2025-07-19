@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { RxHamburgerMenu } from 'react-icons/rx';
 import MobileSidebar from '../Mobile-Sidebar/mobileSidebar';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../services/axios';
+import { API_URL } from '../../services/api_url';
 
 const NavBar = ({ onLoginClick }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,11 +35,18 @@ const NavBar = ({ onLoginClick }) => {
             className="  object-cover w-[115px] h-[50px] lg:w-[158px] lg:h-[70px] "
           />
         </div>
+        
         <div
-          className="xl:hidden text-white text-[24px] lg:text-[30px] cursor-pointer"
+          className=" flex gap-3 items-center justifu-center text-white text-[24px] lg:text-[30px] cursor-pointer"
           onClick={() => setSidebarOpen(true)}
         >
-          <RxHamburgerMenu />
+            <div
+          onClick={onLoginClick}
+          className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
+        >
+          <p>SignUp</p>
+        </div>
+          <RxHamburgerMenu className='xl:hidden'/>
         </div>
 
         {/* <div className=" lg:w-[105px] xl:w-[115px] h-full xl:flex items-center justify-between hidden ">
@@ -54,13 +63,6 @@ const NavBar = ({ onLoginClick }) => {
           <p className=" text-[14px] xl:text-[16px] font-username">{user.full_name}</p>
         </div>
       </div> */}
-
-        <div
-          onClick={onLoginClick}
-          className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
-        >
-          <p>SignUp</p>
-        </div>
       </nav>
       <MobileSidebar
         isOpen={sidebarOpen}
