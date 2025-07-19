@@ -5,31 +5,35 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../services/axios';
 import { API_URL } from '../../services/api_url';
 
-const PersonalDetailForm = ({ onNext }) => {
+const PersonalDetailForm = ({ onNext, addressData, setAddressData, imagePreview, setImagePreview }) => {
   const [user, setUser] = useState({});
-  const [addressData, setAddressData] = useState({
-    house_name: '',
-    street_name: '',
-    country: '',
-    state: '',
-    pin: '',
-    city: '',
-    image: null,
-  });
-  const [imagePreview, setImagePreview] = useState('/Images/image-placeholder.png');
   const uuid = localStorage.getItem('uuid');
 
   const fetchUser = async () => {
     try {
       const response = await axiosInstance.get(API_URL.USER.GET_USER_UUID(uuid));
+      console.log(response);
+      
       setUser(response.data.data);
     } catch (err) {
       console.log(err);
     }
   };
 
+  const fetchAddress = ()=>{
+    try{
+      const response = axiosInstance.get(API_URL.ADDRESS.GET_ADDRESS);
+      console.log(response);
+      
+    } catch(err){
+      console.log(err);
+      
+    }   
+  }
+
   useEffect(() => {
     fetchUser();
+    fetchAddress();
   }, []);
 
   const handleChange = (e) => {
@@ -46,37 +50,17 @@ const PersonalDetailForm = ({ onNext }) => {
     }
   };
 
-  const handleAddressSubmit = async (e) => {
+  const handleNext = (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('user_uuid', uuid);
-    formData.append('house_name', addressData.house_name);
-    formData.append('street_name', addressData.street_name);
-    formData.append('country', addressData.country);
-    formData.append('state', addressData.state);
-    formData.append('pin', addressData.pin);
-    formData.append('city', addressData.city);
-    if (addressData.image) {
-      formData.append('image', addressData.image);
-    }
-    try {
-      const response = await axiosInstance.post(API_URL.ADDRESS.POST_ADDRESS, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      console.log(response);
-      
-      // Optionally handle response
-      onNext();
-    } catch (err) {
-      console.log(err);
-    }
+    // Just move to next step without submitting
+    onNext();
   };
 
   return (
     <div className="h-[80%] flex py-5">
       {/* Left Side */}
       <div className="border-r border-[#DEDEDE] w-[50%] px-10 flex flex-col gap-5">
-        <form className="flex flex-col gap-8" onSubmit={handleAddressSubmit}>
+        <form className="flex flex-col gap-8" onSubmit={handleNext}>
           <div className="bg-[#C2C2C233] w-fit rounded-sm flex flex-col items-center">
             {/* File input for image upload, show preview or placeholder */}
             <label htmlFor="profile-image-upload" className="cursor-pointer">
@@ -146,7 +130,7 @@ const PersonalDetailForm = ({ onNext }) => {
 
       {/* Right Side */}
       <div className="w-[50%] px-10 relative">
-        <form className="flex flex-col gap-1" onSubmit={handleAddressSubmit}>
+        <form className="flex flex-col gap-1" onSubmit={handleNext}>
           <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
             Addresses
           </label>
@@ -208,12 +192,47 @@ const PersonalDetailForm = ({ onNext }) => {
   );
 };
 
-const SellingDetailForm = () => {
+const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState({});
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axiosInstance.get(API_URL.SELLERS.CATEGORY);
+      console.log(response);
+      setCategories(response.data.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    if (type === 'checkbox') {
+      setSellerData((prev) => ({
+        ...prev,
+        categories: checked
+          ? [...(prev.categories || []), value]
+          : (prev.categories || []).filter(cat => cat !== value)
+      }));
+    } else {
+      setSellerData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmitAll();
+  };
+
   return (
     <div className="h-[80%] flex py-5">
       <div className="border-r border-[#DEDEDE] w-[50%] px-10 flex flex-col gap-5">
-        <form className="flex flex-col gap-8">
+        <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-1">
             <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
               Store Name
@@ -221,6 +240,9 @@ const SellingDetailForm = () => {
             <input
               className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
               placeholder="Store"
+              name="store_name"
+              value={sellerData.store_name || ''}
+              onChange={handleChange}
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -229,15 +251,33 @@ const SellingDetailForm = () => {
             </label>
             <div className="flex gap-5">
               <label className="flex gap-1 items-center font-regular text-[#464646]">
-                <input type="checkbox" className="cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  className="cursor-pointer" 
+                  value="TCG"
+                  checked={sellerData.categories?.includes('TCG') || false}
+                  onChange={handleChange}
+                />
                 TCG
               </label>
               <label className="flex gap-1 items-center font-regular text-[#464646]">
-                <input type="checkbox" className="cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  className="cursor-pointer" 
+                  value="Comics"
+                  checked={sellerData.categories?.includes('Comics') || false}
+                  onChange={handleChange}
+                />
                 Comics
               </label>
               <label className="flex gap-1 items-center font-regular text-[#464646]">
-                <input type="checkbox" className="cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  className="cursor-pointer" 
+                  value="Collectibles"
+                  checked={sellerData.categories?.includes('Collectibles') || false}
+                  onChange={handleChange}
+                />
                 Collectibles
               </label>
             </div>
@@ -249,12 +289,20 @@ const SellingDetailForm = () => {
             <select
               className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
               placeholder="Enter Your Number"
-            />
+              name="inventory_estimate"
+              value={sellerData.inventory_estimate || ''}
+              onChange={handleChange}
+            >
+              <option value="">Select estimate</option>
+              <option value="<1000">Less than 1000</option>
+              <option value="1000-5000">1000 - 5000</option>
+              <option value="5000+">5000+</option>
+            </select>
           </div>
         </form>
       </div>
       <div className="w-[50%] px-10 relative ">
-        <form className="flex flex-col gap-1">
+        <form className="flex flex-col gap-1" onSubmit={handleSubmit}>
           <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
             Specialization
           </label>
@@ -262,18 +310,17 @@ const SellingDetailForm = () => {
             style={{ overflowY: 'scroll', scrollbarWidth: 'none' }}
             className="w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto "
             placeholder="Eg: Welcome to Itachi Stores, your destination for rare and collectible comics. We specialize in curating vintage issues, limited editions, and must-have graphic novels for dedicated fans and serious collectors alike. Discover the stories that shaped generations."
+            name="specialization"
+            value={sellerData.specialization || ''}
+            onChange={handleChange}
           ></textarea>
         </form>
-        <div
-          onClick={() => {
-            setTimeout(() => {
-              navigate('/user/profile');
-            }, 200);
-          }}
+        <button
+          onClick={handleSubmit}
           className="w-[120px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[16px] flex items-center justify-center absolute bottom-[20px] right-[20px] active:scale-95 transition-all duration-300 ease-in-out cursor-pointer"
         >
-          <p>Continue</p>
-        </div>
+          <p>Submit</p>
+        </button>
       </div>
     </div>
   );
@@ -332,24 +379,89 @@ const Stepper = ({ step, setStep }) => (
 
 const MultiStepForm = () => {
   const [step, setStep] = useState(1);
-  const [user, setUser] = useState({})
-  const uuid = localStorage.getItem("uuid")
-  console.log(uuid);
-
+  const [user, setUser] = useState({});
+  const uuid = localStorage.getItem("uuid");
+  
+  // State for both forms
+  const [addressData, setAddressData] = useState({
+    house_name: '',
+    street_name: '',
+    country: '',
+    state: '',
+    pin: '',
+    city: '',
+    image: null,
+  });
+  
+  const [sellerData, setSellerData] = useState({
+    store_name: '',
+    categories: [],
+    inventory_estimate: '',
+    specialization: '',
+  });
+  
+  const [imagePreview, setImagePreview] = useState('/Images/image-placeholder.png');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchUser = async () => {
     try {
       const response = await axiosInstance.get(API_URL.USER.GET_USER_UUID(uuid));
       console.log(response);
-      setUser(response.data.data)
+      setUser(response.data.data);
     } catch (err) {
       console.log(err);
     }
-  }
+  };
 
   useEffect(() => {
     fetchUser();
-  }, [])
+  }, []);
+
+  const handleSubmitAll = async () => {
+    setIsSubmitting(true);
+    try {
+      // Submit address data
+      const addressFormData = new FormData();
+      addressFormData.append('user_uuid', uuid);
+      addressFormData.append('house_name', addressData.house_name);
+      addressFormData.append('street_name', addressData.street_name);
+      addressFormData.append('country', addressData.country);
+      addressFormData.append('state', addressData.state);
+      addressFormData.append('pin', addressData.pin);
+      addressFormData.append('city', addressData.city);
+      if (addressData.image) {
+        addressFormData.append('image', addressData.image);
+      }
+
+      const addressResponse = await axiosInstance.post(API_URL.ADDRESS.POST_ADDRESS, addressFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log('Address submitted:', addressResponse);
+
+      // Submit seller data
+      const sellerPayload = {
+        user_uuid: uuid,
+        store_name: sellerData.store_name,
+        categories: sellerData.categories,
+        inventory_estimate: sellerData.inventory_estimate,
+        specialization: sellerData.specialization,
+      };
+
+      const sellerResponse = await axiosInstance.post(API_URL.SELLERS.POST_SELLERS, sellerPayload);
+      console.log('Seller data submitted:', sellerResponse);
+
+      // Navigate to profile page after successful submission
+      setTimeout(() => {
+        window.location.href = '/user/profile';
+      }, 200);
+
+    } catch (err) {
+      console.log('Error submitting forms:', err);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="w-full h-screen overflow-hidden bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] flex items-center justify-center">
@@ -363,9 +475,20 @@ const MultiStepForm = () => {
           <Stepper step={step} setStep={setStep} />
         </div>
         {step === 1 ? (
-          <PersonalDetailForm user={user} onNext={() => setStep(2)} />
+          <PersonalDetailForm 
+            user={user} 
+            onNext={() => setStep(2)} 
+            addressData={addressData}
+            setAddressData={setAddressData}
+            imagePreview={imagePreview}
+            setImagePreview={setImagePreview}
+          />
         ) : (
-          <SellingDetailForm />
+          <SellingDetailForm 
+            sellerData={sellerData}
+            setSellerData={setSellerData}
+            onSubmitAll={handleSubmitAll}
+          />
         )}
       </div>
     </div>
