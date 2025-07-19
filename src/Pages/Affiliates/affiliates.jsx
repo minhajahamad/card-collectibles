@@ -111,9 +111,11 @@ const Affiliates = () => {
           <div className="flex flex-col gap-5 xl:gap-15 relative ">
             <div className="flex flex-col   ">
               <div>
-                <p className="text-[25px] xl:text-[32px] text-[#464646] font-bold ">Name</p>
+                <p className="text-[28px] xl:text-[32px] text-[#464646] font-bold  ">
+                  Name
+                </p>
                 <div className="flex flex-col gap-1 xl:flex-row xl:items-center">
-                  <p className="font-bold text-[16px] text-[#464646] flex  gap-1">
+                  <p className="font-bold text-[14px] xl:text-[16px] text-[#464646] flex  gap-1">
                     Affiliate id:
                     <span className="font-normal ">
                       <u> 12345678_abi</u>
@@ -179,49 +181,22 @@ const Affiliates = () => {
             scroll={{ y: 300, x: '100%' }}
             className="custom-table w-[1000px]  rounded-md hidden xl:block "
           />
-          <div className=" border-t py-5 px-2 h-[50vh] flex flex-col gap-5  xl:hidden overflow-y-scroll [&::-webkit-scrollbar]:hidden  [scrollbar-width:none]  ">
-            <div className="w-full flex-col py-5 px-5 border rounded-[14px] ">
+          <div className=" border-t border-[#BDBDBD] py-5 px-2 h-[50vh] flex flex-col gap-5  xl:hidden overflow-y-scroll [&::-webkit-scrollbar]:hidden  [scrollbar-width:none]  ">
+            <div className="w-full flex flex-col gap-3  py-5 px-5  shadow-md rounded-[14px] ">
               <div className="flex items-center justify-between">
-                <p>Minhaj</p>
-                <p>5$</p>
+                <p className="font-semibold text-[18px] md:text-[22px] ">
+                  Minhaj
+                </p>
+                <p className="text-[#04BA2C] cursor-pointer  text-[18px] md:text-[22px] ">
+                  5$
+                </p>
               </div>
-              <p>email@gmail.com</p>
-              <div className="flex items-center justify-between">
-                <p>DOJ : ekdnekjd</p>
-                <p>+91 989009898098</p>
-              </div>
-            </div>
-            <div className="w-full flex-col py-5 px-5 border rounded-[14px] ">
-              <div className="flex items-center justify-between">
-                <p>Minhaj</p>
-                <p>5$</p>
-              </div>
-              <p>email@gmail.com</p>
-              <div className="flex items-center justify-between">
-                <p>DOJ : ekdnekjd</p>
-                <p>+91 989009898098</p>
-              </div>
-            </div>
-            <div className="w-full flex-col py-5 px-5 border rounded-[14px] ">
-              <div className="flex items-center justify-between">
-                <p>Minhaj</p>
-                <p>5$</p>
-              </div>
-              <p>email@gmail.com</p>
-              <div className="flex items-center justify-between">
-                <p>DOJ : ekdnekjd</p>
-                <p>+91 989009898098</p>
-              </div>
-            </div>
-            <div className="w-full flex-col py-5 px-5 border rounded-[14px] ">
-              <div className="flex items-center justify-between">
-                <p>Minhaj</p>
-                <p>5$</p>
-              </div>
-              <p>email@gmail.com</p>
-              <div className="flex items-center justify-between">
-                <p>DOJ : ekdnekjd</p>
-                <p>+91 989009898098</p>
+              <p className="md:text-[18px]">email@gmail.com</p>
+              <div className="flex items-center justify-between ">
+                <p>
+                  DOJ : <span className="text-[#107D91]">18/08/2023</span>
+                </p>
+                <p className="text-[#107D91]">+91 989009898098</p>
               </div>
             </div>
           </div>

@@ -7,7 +7,7 @@ import { BsLightningCharge } from 'react-icons/bs';
 import { MdOutlineSecurity } from 'react-icons/md';
 import { TiArrowRight } from 'react-icons/ti';
 
-const LandinHero = () => {
+const LandinHero = ({ onLearnMoreClick }) => {
   const LandinImages = [
     '/Images/Landin-img-1.png',
     '/Images/Landin-img-2.png',
@@ -107,7 +107,10 @@ const LandinHero = () => {
                   <p>Register Now-It's Free!</p>
                   <TiArrowRight className="text-[24px] font-light group-hover:ml-1 transition-all duration-300 ease-in-out group-active:ml-1 group-lg:active:ml-0" />
                 </div>
-                <div className="border bg-white border-[#00A397] rounded-[6px] text-[#00A397] flex items-center px-2 cursor-pointer  ">
+                <div
+                  onClick={onLearnMoreClick}
+                  className="border bg-white border-[#00A397] rounded-[6px] text-[#00A397] flex items-center px-2 cursor-pointer  "
+                >
                   <p>Learn More</p>
                 </div>
               </div>
