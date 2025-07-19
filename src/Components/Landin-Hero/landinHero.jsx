@@ -14,6 +14,11 @@ const LandinHero = ({ onLearnMoreClick }) => {
     '/Images/Landin-img-3.png',
     '/Images/Landin-img-4.png',
     '/Images/Landin-img-5.png',
+    '/Images/Landin-img-6.png',
+    '/Images/Landin-img-7.png',
+    '/Images/Landin-img-8.png',
+    '/Images/Landin-img-9.png',
+    '/Images/Landin-img-10.png',
   ];
 
   const [isModalOpen, setIsmodalOpen] = useState(false);
@@ -55,7 +60,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
               <div className="marquee-track">
                 {[...LandinImages, ...LandinImages].map((image, index) => (
                   <div key={index} className="marquee-image">
-                    <img src={image} />
+                    <img src={image} alt="" />
                   </div>
                 ))}
               </div>
@@ -171,7 +176,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
         <div className="absolute xl:top-20 xl:right-15 hidden xl:block  ">
           <img
             src="/Images/Konami.png"
-            className="absolute top-[-2px] left-[-121px] z-0 h-60"
+            className="absolute top-[-2%] left-[-20%] z-0 h-60"
           />
           <div
             style={{
@@ -179,7 +184,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                     0px 4px 15.7px 0px rgba(0, 163, 151, 0.14),
                     0px 4px 106px 0px rgba(16, 125, 145, 0.14)`,
             }}
-            className="bg-white rounded-[35px] xl:w-[500px] xl:h-[600px] xl:pt-13      flex flex-col gap-5 z-10 relative "
+            className="bg-white rounded-[35px] xl:w-[500px]  xl:pt-13      flex flex-col gap-5 z-10 relative "
           >
             <div className="xl:pl-10">
               <p className="font-bold font-raleway text-[36px] text-[#00A397]">
@@ -218,10 +223,9 @@ const LandinHero = ({ onLearnMoreClick }) => {
           </div>
           <img
             src="/Images/Falcon.png"
-            className="absolute top-[-75px] right-[38px] z-10 h-30"
+            className="absolute top-[-12%] right-[12%] z-10 h-30"
           />
-
-          <div className="absolute bottom-[-53px] right-[-40px]">
+          <div className="absolute bottom-[-12%] right-[-5%]">
             <div className="relative z-10 h-[280px] w-[200px] rotate-[3.66deg] shadow-3d-card">
               <div className="absolute inset-0 z-20 shine-effect pointer-events-none rounded-[9px]" />
 
@@ -231,7 +235,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
               />
             </div>
           </div>
-          <div className="absolute top-[104px] right-[-27px]">
+          <div className="absolute top-[18%] right-[-5%]">
             <div className="relative z-10 h-59 w-[160px] rotate-[-3.66deg] shadow-3d-card overflow-hidden rounded-[9px]">
               <div className="absolute inset-0 z-20 shine-effect-delayed pointer-events-none rounded-[9px]" />
 
@@ -243,7 +247,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
           </div>
           <img
             src="/Images/Eating-chrctr.png"
-            className="absolute top-[-100px] left-[36px] z-10 h-30 "
+            className="absolute top-[-15%] left-[6%] z-10 h-30"
           />
         </div>
       </div>
