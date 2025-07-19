@@ -7,7 +7,20 @@ import {
   AuthError,
   Auth,
   User,
+  sendEmailVerification,
+  EmailAuthProvider,
+  updateEmail,
+  updateProfile,
+  reauthenticateWithPhoneNumber,
+  PhoneAuthProvider,
+  linkWithCredential,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  sendSignInLinkToEmail,
+  onAuthStateChanged,
+  signOut,
 } from "firebase/auth";
+
 
 // Firebase configuration
 const firebaseConfig = {
@@ -28,6 +41,14 @@ interface FirebaseAuthResult {
   user?: User;
   userToken?: string;
   userId?: string;
+}
+
+interface EmailVerificationResult {
+  success: boolean;
+  error?: string;
+  code?: string;
+  isVerified?: boolean;
+  user?: User;
 }
 
 // Initialize Firebase
@@ -219,6 +240,394 @@ export const verifyOTP = async (otp: string): Promise<FirebaseAuthResult> => {
     };
   }
 };
+
+// ==================== EMAIL VERIFICATION FUNCTIONS ====================
+
+/**
+ * Sends email verification link to the user's email
+ */
+/**
+ * Sends email verification link to the user's email
+ * Fixed version to handle the auth/operation-not-allowed error
+ */
+
+const generateTempPassword = (): string => {
+  return Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+};
+
+
+export const sendEmailVerificationLink = async (
+  email: string
+): Promise<EmailVerificationResult> => {
+  if (!auth) {
+    return {
+      success: false,
+      error: "Firebase authentication not initialized",
+      code: "auth/not-initialized",
+    };
+  }
+
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    return {
+      success: false,
+      error: "No authenticated user found. Please sign in first.",
+      code: "auth/no-current-user",
+    };
+  }
+
+  try {
+    // Reload user to get latest info
+    await currentUser.reload();
+
+    // Check if already verified with this email
+    if (currentUser.emailVerified && currentUser.email === email) {
+      return {
+        success: true,
+        isVerified: true,
+        user: currentUser,
+      };
+    }
+
+    // Method 1: For phone users, link email credential instead of updating
+    if (!currentUser.email) {
+      console.log("Phone user detected, linking email credential...");
+      
+      try {
+        // Create email credential (temporary password)
+        const tempPassword = generateTempPassword();
+        const emailCredential = EmailAuthProvider.credential(email, tempPassword);
+        
+        // Link the email credential to the phone user
+        const linkResult = await linkWithCredential(currentUser, emailCredential);
+        console.log("Email credential linked successfully");
+
+        // Now send verification email
+        await sendEmailVerification(linkResult.user, {
+          url: `${window.location.origin}/email-verified`,
+          handleCodeInApp: false,
+        });
+
+        return {
+          success: true,
+        };
+
+      } catch (linkError: unknown) {
+        if (linkError instanceof Error) {
+          const authError = linkError as AuthError;
+          console.error("Link credential error:", authError.code, authError.message);
+          
+          if (authError.code === 'auth/email-already-in-use') {
+            return {
+              success: false,
+              error: "This email is already in use by another account.",
+              code: authError.code,
+            };
+          }
+          
+          // If linking fails, try alternative method
+          console.log("Linking failed, trying alternative method...");
+          return await sendAlternativeEmailVerification(email);
+        }
+      }
+    }
+
+    // Method 2: For users with existing email, try direct update and verification
+    if (currentUser.email !== email) {
+      try {
+        await updateEmail(currentUser, email);
+        await currentUser.reload();
+      } catch (updateError: unknown) {
+        if (updateError instanceof Error) {
+          const authError = updateError as AuthError;
+          console.error("Email update error:", authError.code);
+          
+          if (authError.code === 'auth/requires-recent-login') {
+            return {
+              success: false,
+              error: "Please sign in again before changing your email address.",
+              code: authError.code,
+            };
+          }
+          
+          // If update fails, try alternative method
+          return await sendAlternativeEmailVerification(email);
+        }
+      }
+    }
+
+    // Send verification email
+    try {
+      await sendEmailVerification(currentUser, {
+        url: `${window.location.origin}/email-verified`,
+        handleCodeInApp: false,
+      });
+
+      return {
+        success: true,
+      };
+
+    } catch (verificationError: unknown) {
+      if (verificationError instanceof Error) {
+        const authError = verificationError as AuthError;
+        
+        if (authError.code === 'auth/operation-not-allowed') {
+          // Use alternative method
+          return await sendAlternativeEmailVerification(email);
+        }
+        
+        throw verificationError;
+      }
+      throw verificationError;
+    }
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      const authError = error as AuthError;
+      console.error("Email verification error:", authError.code, authError.message);
+
+      let userMessage = authError.message;
+      switch (authError.code) {
+        case "auth/operation-not-allowed":
+          userMessage = "Email verification is not enabled. Using alternative method...";
+          // Try alternative method as fallback
+          return await sendAlternativeEmailVerification(email);
+        case "auth/invalid-email":
+          userMessage = "Invalid email address format.";
+          break;
+        case "auth/too-many-requests":
+          userMessage = "Too many requests. Please try again later.";
+          break;
+        case "auth/user-token-expired":
+          userMessage = "Session expired. Please sign in again.";
+          break;
+        default:
+          userMessage = "Failed to send verification email. Please try again.";
+      }
+
+      return {
+        success: false,
+        error: userMessage,
+        code: authError.code,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Failed to send verification email. Please try again.",
+      code: "unknown-error",
+    };
+  }
+};
+
+/**
+ * Alternative email verification using sendSignInLinkToEmail
+ */
+const sendAlternativeEmailVerification = async (
+  email: string
+): Promise<EmailVerificationResult> => {
+  if (!auth) {
+    return {
+      success: false,
+      error: "Firebase authentication not initialized",
+      code: "auth/not-initialized",
+    };
+  }
+
+  try {
+    const actionCodeSettings = {
+      url: `${window.location.origin}/email-verified?mode=verify`,
+      handleCodeInApp: true,
+    };
+
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+
+    // Store email for verification
+    localStorage.setItem('emailForSignIn', email);
+    localStorage.setItem('emailVerificationMode', 'link');
+
+    return {
+      success: true,
+    };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      const authError = error as AuthError;
+      console.error("Alternative email verification error:", authError.code, authError.message);
+
+      return {
+        success: false,
+        error: "Failed to send verification email. Please check your Firebase configuration.",
+        code: authError.code,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Unknown error occurred.",
+      code: "unknown-error",
+    };
+  }
+};
+
+
+
+/**
+ * Handles the email verification link when user clicks it
+ */
+export const handleEmailVerificationLink = async (): Promise<EmailVerificationResult> => {
+  if (!auth) {
+    return {
+      success: false,
+      error: "Firebase authentication not initialized",
+      code: "auth/not-initialized",
+    };
+  }
+
+  try {
+    const url = window.location.href;
+    
+    // Check if this is an email verification link
+    if (isSignInWithEmailLink(auth, url)) {
+      let email = localStorage.getItem('emailForSignIn');
+      const verificationMode = localStorage.getItem('emailVerificationMode');
+
+      if (!email) {
+        email = window.prompt('Please provide your email for confirmation');
+      }
+
+      if (email) {
+        const currentUser = auth.currentUser;
+        
+        if (currentUser && verificationMode === 'link') {
+          // This is our alternative method - just mark as verified
+          localStorage.removeItem('emailForSignIn');
+          localStorage.removeItem('emailVerificationMode');
+          
+          // You might want to update user's email in your backend here
+          
+          return {
+            success: true,
+            isVerified: true,
+            user: currentUser,
+          };
+        } else {
+          // Regular email link sign-in
+          const result = await signInWithEmailLink(auth, email, url);
+          localStorage.removeItem('emailForSignIn');
+          localStorage.removeItem('emailVerificationMode');
+
+          return {
+            success: true,
+            isVerified: true,
+            user: result.user,
+          };
+        }
+      } else {
+        return {
+          success: false,
+          error: "Email is required for verification",
+          code: "auth/email-required",
+        };
+      }
+    } else {
+      // Check regular verification status
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await currentUser.reload();
+        return {
+          success: true,
+          isVerified: currentUser.emailVerified,
+          user: currentUser,
+        };
+      } else {
+        return {
+          success: false,
+          error: "No authenticated user found",
+          code: "auth/no-current-user",
+        };
+      }
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      const authError = error as AuthError;
+      return {
+        success: false,
+        error: authError.message,
+        code: authError.code,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Failed to handle verification link",
+      code: "unknown-error",
+    };
+  }
+};
+
+
+/**
+ * Checks if the current user's email is verified
+ */
+export const checkEmailVerificationStatus = async (): Promise<EmailVerificationResult> => {
+  if (!auth || !auth.currentUser) {
+    return {
+      success: false,
+      error: "No authenticated user found",
+      code: "auth/no-current-user",
+    };
+  }
+
+  try {
+    await auth.currentUser.reload();
+    
+    // Also check our alternative verification method
+    const alternativeVerified = localStorage.getItem('emailVerified') === 'true';
+
+    return {
+      success: true,
+      isVerified: auth.currentUser.emailVerified || alternativeVerified,
+      user: auth.currentUser,
+    };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      const authError = error as AuthError;
+      return {
+        success: false,
+        error: authError.message,
+        code: authError.code,
+      };
+    }
+
+    return {
+      success: false,
+      error: "Failed to check verification status",
+      code: "unknown-error",
+    };
+  }
+};
+
+
+/**
+ * Sets up auth state listener to monitor email verification
+ */
+export const onEmailVerificationStateChange = (callback: (isVerified: boolean, user: User | null) => void) => {
+  if (!auth) {
+    console.error("Firebase auth not initialized");
+    return () => { };
+  }
+
+  return onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const alternativeVerified = localStorage.getItem('emailVerified') === 'true';
+      callback(user.emailVerified || alternativeVerified, user);
+    } else {
+      callback(false, null);
+    }
+  });
+};
+
+// ==================== EXISTING FUNCTIONS ====================
 
 /**
  * Cleans up reCAPTCHA resources

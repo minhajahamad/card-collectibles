@@ -12,12 +12,7 @@ import axiosInstance from '../../services/axios';
 import { API_URL } from '../../services/api_url';
 
 // Import Firebase OTP functions
-import {
-  sendOTP,
-  verifyOTP,
-  initializeRecaptcha,
-  resetRecaptcha,
-} from '../../services/firebase/firebase'; // Update this path
+import { sendOTP, verifyOTP, initializeRecaptcha, resetRecaptcha } from '../../services/firebase/firebaseApp.ts'; // Update this path
 
 const Modal = ({ onClose }) => {
   const navigate = useNavigate();
