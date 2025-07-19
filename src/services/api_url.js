@@ -1,6 +1,7 @@
 export const API_URL = {
     REGISTER: {
-        REGISTER: "/api/register/"
+        REGISTER: "/api/register/",
+        REFFERAL_REGISTER:code=> `/api/refer/${code}/`
     },
     USER: {
         GET_USER: "/api/users/",
@@ -13,8 +14,10 @@ export const API_URL = {
     SELLERS: {
         GET__SELLERS: "/api/sellers/",
         POST_SELLERS: "/api/sellers/",
-        PATCH_SELLERS:id=> `/api/sellers/${id}/`,
+        PATCH_SELLERS:id => `/api/sellers/${id}/`,
         CATEGORY: "/api/categories/",
-
+    },
+    AFFILIATES: {
+        GET_AFFILIATES:uuid => `/api/dashboard/${uuid}`
     }
 }

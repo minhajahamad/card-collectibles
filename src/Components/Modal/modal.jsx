@@ -7,6 +7,7 @@ import 'ldrs/react/Spiral.css';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../services/axios';
 import { API_URL } from '../../services/api_url';
 
@@ -20,6 +21,10 @@ import {
 
 const Modal = ({ onClose }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('refferal-code');
+  console.log(referralCode);
+  
   const [showOtp, setShowOtp] = useState(false);
   const [loader, setLoader] = useState(false);
   const [verifyOtpLoader, setVerifyOtpLoader] = useState(false);
@@ -226,10 +231,21 @@ const Modal = ({ onClose }) => {
 
     // If OTP is verified, proceed with registration
     try {
-      const response = await axiosInstance.post(
-        API_URL.REGISTER.REGISTER,
-        formData
-      );
+      let response;
+      if (referralCode) {
+        response = await axiosInstance.post(
+          API_URL.REGISTER.REFFERAL_REGISTER(referralCode),
+          formData
+        );
+        console.log("refferal");
+      } else {
+        response = await axiosInstance.post(
+          API_URL.REGISTER.REGISTER,
+          formData
+        );
+        console.log("normal");
+        
+      }
       console.log(response);
 
       // Save data to localStorage
