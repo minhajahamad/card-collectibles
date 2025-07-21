@@ -50,7 +50,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
           {/* Close Button */}
           <div className="flex justify-end p-3">
             <IoIosClose
-              className="text-[38px] sm:text-[42px] md:text-[46px] cursor-pointer text-[#09778E]"
+              className="text-[38px] sm:text-[42px] md:text-[46px] cursor-pointer text-black"
               onClick={onClose}
             />
           </div>
@@ -128,9 +128,9 @@ const MobileSidebar = ({ isOpen, onClose }) => {
                 navigate('/');
               }, 250);
             }}
-            className="w-full border border-[#107D91] text-[#09778E] font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-full flex items-center gap-2 shadow-[0px_2px_16.4px_0px_#0000001C] hover:bg-[#09778E] hover:text-white transition text-[13px] sm:text-[14px] md:text-[15px] justify-center"
+            className="w-full border border-[#107D91] text-[#09778E] cursor-pointer font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-full flex items-center gap-2 shadow-[0px_2px_16.4px_0px_#0000001C]   text-[13px] sm:text-[14px] md:text-[15px] justify-center group"
           >
-            <CiPower className="text-lg text-[#C84047]" />
+            <CiPower className="text-lg text-[#C84047] group-active:scale-90 transition duration-150 ease-in-out" />
             Log Out
           </div>
         </div>
