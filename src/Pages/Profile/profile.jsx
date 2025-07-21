@@ -554,10 +554,9 @@ const handleSave = async () => {
                     <input
                       value={userData.email}
                       onChange={(e) => handleUserInputChange('email', e.target.value)}
-                      disabled={!isEditing}
+                      disabled={true}
                       placeholder="Email"
-                      className={`w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
-                        }`}
+                      className={`w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] bg-[#F4F4F4]`}
                     />
                   </div>
 
@@ -568,10 +567,9 @@ const handleSave = async () => {
                     <input
                       value={userData.phone_number}
                       onChange={(e) => handleUserInputChange('phone_number', e.target.value)}
-                      disabled={!isEditing}
+                      disabled={true}
                       placeholder="Phone Number"
-                      className={`w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
-                        }`}
+                      className={`w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] bg-[#F4F4F4]`}
                     />
                   </div>
                 </form>
