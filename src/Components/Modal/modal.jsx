@@ -37,6 +37,49 @@ const Modal = ({ onClose }) => {
   });
   const [errors, setErrors] = useState({});
 
+  // Add state for login form
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [loginError, setLoginError] = useState('');
+  const [loginLoader, setLoginLoader] = useState(false);
+
+  // Handle login input change
+  const handleLoginChange = e => {
+    const { name, value } = e.target;
+    setLoginData(prev => ({ ...prev, [name]: value }));
+    setLoginError('');
+  };
+
+  // Handle login submit
+  const handleLogin = async () => {
+    setLoginError('');
+    if (!loginData.email || !loginData.password) {
+      setLoginError('Please enter both email and password.');
+      return;
+    }
+    setLoginLoader(true);
+    try {
+      const response = await axiosInstance.post(API_URL.LOGIN.LOGIN, loginData);
+      console.log(response);
+      
+      // Save user data to localStorage (customize as needed)
+      const user = response?.data?.data;
+      if (user?.uuid) {
+        localStorage.setItem('uuid', user.uuid);
+        localStorage.setItem('userData', JSON.stringify(user));
+        localStorage.setItem('login', 'true');
+        navigate('/user/profile');
+      } else {
+        setLoginError('Login failed. Please try again.');
+      }
+    } catch (err) {
+      setLoginError(
+        err?.response?.data?.error || 'Invalid email or password. Please try again.'
+      );
+    } finally {
+      setLoginLoader(false);
+    }
+  };
+
   // Initialize reCAPTCHA on component mount
   useEffect(() => {
     // Create reCAPTCHA container if it doesn't exist
@@ -105,6 +148,7 @@ const Modal = ({ onClose }) => {
         setShowOtp(true);
         // Clear any previous errors
         setErrors(prev => ({ ...prev, phone_number: '' }));
+        setShowVerifyOtp(true)
       } else {
         setOtpError(result.error || 'Failed to send OTP');
         setErrors(prev => ({
@@ -284,7 +328,7 @@ const Modal = ({ onClose }) => {
   };
 
   // State for Login
-  const [showSigUp, setShowSignUp] = useState(true);
+  const [showSigUp, setShowSignUp] = useState(false);
 
   // Show Verify OTP
   const [showVerifyOtp, setShowVerifyOtp] = useState(false);
@@ -313,7 +357,76 @@ const Modal = ({ onClose }) => {
               </div>
 
               <div className="flex flex-col gap-5">
-                <form
+                
+
+                {/* OTP Section */}
+                {showVerifyOtp? (
+                  <AnimatePresence>
+                    {showOtp && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 30 }}
+                        transition={{ duration: 0.4, ease: 'easeInOut' }}
+                        className="flex flex-col gap-2 items-center font-inter"
+                      >
+                        <p className="text-[16px] font-semibold">Enter OTP</p>
+                        <p className="text-[12px] text-[#475467]">
+                          We have sent an OTP to your mobile number
+                        </p>
+
+                        {otpError && (
+                          <p className="text-red-500 text-xs text-center">
+                            {otpError}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-center gap-2">
+                          {Array(6) // Changed from 4 to 6
+                            .fill(0)
+                            .map((_, i) => (
+                              <input
+                                key={i}
+                                ref={el => (otpRef.current[i] = el)}
+                                className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
+                                placeholder="-"
+                                onKeyDown={e => handleKeyDown(e, i)}
+                                onChange={e => handleOtpChange(e, i)}
+                                maxLength={1}
+                                type="text"
+                                value={otpValues[i]}
+                              />
+                            ))}
+                        </div>
+                        <div
+                          onClick={handleVerifyOtp}
+                          className="bg-[#467EF8] rounded-[12px] w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+                        >
+                          {verifyOtpLoader ? (
+                            <Spiral size="20" color="white" speed={2} />
+                          ) : (
+                            <p className="font-montserrat font-semibold text-[14px]">
+                              Verify OTP
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-poppins text-[14px]">
+                            Don't receive code?{' '}
+                            <span
+                              className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
+                              onClick={handleResendOtp}
+                            >
+                              Resend OTP
+                            </span>
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                ):
+                (
+                  <form
                   className="font-montserrat flex flex-col gap-2"
                   onSubmit={handleSubmit}
                 >
@@ -449,7 +562,6 @@ const Modal = ({ onClose }) => {
                       >
                         {loader ? (
                           <div
-                            onClick={() => setShowVerifyOtp(true)}
                             className="flex items-center justify-center"
                           >
                             <LineSpinner size={20} color="white" stroke="1.5" />
@@ -480,71 +592,6 @@ const Modal = ({ onClose }) => {
                   </div>
                 </form>
 
-                {/* OTP Section */}
-                {showVerifyOtp && (
-                  <AnimatePresence>
-                    {showOtp && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 30 }}
-                        transition={{ duration: 0.4, ease: 'easeInOut' }}
-                        className="flex flex-col gap-2 items-center font-inter"
-                      >
-                        <p className="text-[16px] font-semibold">Enter OTP</p>
-                        <p className="text-[12px] text-[#475467]">
-                          We have sent an OTP to your mobile number
-                        </p>
-
-                        {otpError && (
-                          <p className="text-red-500 text-xs text-center">
-                            {otpError}
-                          </p>
-                        )}
-
-                        <div className="flex items-center justify-center gap-2">
-                          {Array(6) // Changed from 4 to 6
-                            .fill(0)
-                            .map((_, i) => (
-                              <input
-                                key={i}
-                                ref={el => (otpRef.current[i] = el)}
-                                className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
-                                placeholder="-"
-                                onKeyDown={e => handleKeyDown(e, i)}
-                                onChange={e => handleOtpChange(e, i)}
-                                maxLength={1}
-                                type="text"
-                                value={otpValues[i]}
-                              />
-                            ))}
-                        </div>
-                        <div
-                          onClick={handleVerifyOtp}
-                          className="bg-[#467EF8] rounded-[12px] w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
-                        >
-                          {verifyOtpLoader ? (
-                            <Spiral size="20" color="white" speed={2} />
-                          ) : (
-                            <p className="font-montserrat font-semibold text-[14px]">
-                              Verify OTP
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-poppins text-[14px]">
-                            Don't receive code?{' '}
-                            <span
-                              className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
-                              onClick={handleResendOtp}
-                            >
-                              Resend OTP
-                            </span>
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 )}
               </div>
             </div>
@@ -562,7 +609,7 @@ const Modal = ({ onClose }) => {
                 <p className="font-semibold text-[#111111]">With Us!</p>
               </div>
               <div className="flex flex-col ">
-                <form className="flex flex-col gap-5  ">
+                <form className="flex flex-col gap-5  " onSubmit={e => e.preventDefault()}>
                   <div className="flex flex-col ">
                     <label className="font-medium text-[14px] text-[#111111]">
                       Email
@@ -572,7 +619,8 @@ const Modal = ({ onClose }) => {
                       className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                       placeholder="Enter your email"
                       name="email"
-                      onChange={handleChange}
+                      value={loginData.email}
+                      onChange={handleLoginChange}
                     />
                   </div>
                   <div className="flex flex-col">
@@ -586,17 +634,28 @@ const Modal = ({ onClose }) => {
                         placeholder="Enter your password"
                         type="password"
                         name="password"
-                        onChange={handleChange}
+                        value={loginData.password}
+                        onChange={handleLoginChange}
                       />
                     </div>
                   </div>
                 </form>
+                {loginError && (
+                  <div className="text-red-500 text-xs mt-1 w-[90%]">{loginError}</div>
+                )}
                 <div className="text-[13px]  cursor-pointer text-[#00A397] text-right w-[90%] hover:text-[#3c8984] ">
                   <p>Forgot Password?</p>
                 </div>
 
-                <div className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-20 cursor-pointer mx-auto mt-5 ">
-                  <p>Sign In</p>
+                <div
+                  className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-20 cursor-pointer mx-auto mt-5 flex items-center justify-center gap-2"
+                  onClick={handleLogin}
+                >
+                  {loginLoader ? (
+                    <LineSpinner size={20} color="white" stroke="1.5" />
+                  ) : (
+                    <p>Sign In</p>
+                  )}
                 </div>
 
                 <div className="mt-10 text-center">
