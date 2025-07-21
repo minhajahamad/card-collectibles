@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
-import { IoCloseOutline } from "react-icons/io5";
-import { LineSpinner } from "ldrs/react";
+import React, { useState, useRef, useEffect } from 'react';
+import { IoCloseOutline } from 'react-icons/io5';
+import { LineSpinner } from 'ldrs/react';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 
-import "ldrs/react/LineSpinner.css";
-import { Spiral } from "ldrs/react";
-import "ldrs/react/Spiral.css";
+import 'ldrs/react/LineSpinner.css';
+import { Spiral } from 'ldrs/react';
+import 'ldrs/react/Spiral.css';
 import { countryCodes } from './country.js'; // Adjust path as needed
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,40 +20,40 @@ import {
   verifyOTP,
   initializeRecaptcha,
   resetRecaptcha,
-} from "../../services/firebase/firebaseApp.ts";
+} from '../../services/firebase/firebaseApp.ts';
 
-const Modal = ({ onClose }) => {
+const Modal = ({ onClose, initialView = 'login' }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // const referralCode = searchParams.get('refferal-code');
-  const referralCode = localStorage.getItem('referralCode')
+  const referralCode = localStorage.getItem('referralCode');
   console.log(referralCode);
 
   const [showOtp, setShowOtp] = useState(false);
   const [loader, setLoader] = useState(false);
   const [verifyOtpLoader, setVerifyOtpLoader] = useState(false);
-  const [otpError, setOtpError] = useState("");
-  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
+  const [otpError, setOtpError] = useState('');
+  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [showCountryModal, setShowCountryModal] = useState(false);
 
   // Add formData state
   const [formData, setFormData] = useState({
-    full_name: "",
-    last_name: "",
-    email: "",
-    password: "",
-    reenter_password: "",
-    phone_number: "",
+    full_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    reenter_password: '',
+    phone_number: '',
   });
   const [errors, setErrors] = useState({});
-  const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); // Default to India
+  const [selectedCountryCode, setSelectedCountryCode] = useState('+91'); // Default to India
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [countrySearchTerm, setCountrySearchTerm] = useState("");
+  const [countrySearchTerm, setCountrySearchTerm] = useState('');
   const [isOtpSending, setIsOtpSending] = useState(false); // Add this state
 
   // Add state for login form
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [loginError, setLoginError] = useState("");
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [loginError, setLoginError] = useState('');
   const [loginLoader, setLoginLoader] = useState(false);
 
   // State for Forgot Password
@@ -66,7 +66,7 @@ const Modal = ({ onClose }) => {
   const [forgotPasswordLoader, setForgotPasswordLoader] = useState(false);
 
   // Handle login input change
-  const handleLoginChange = (e) => {
+  const handleLoginChange = e => {
     const { name, value } = e.target;
     setLoginData(prev => ({ ...prev, [name]: value }));
     setLoginError('');
@@ -130,7 +130,7 @@ const Modal = ({ onClose }) => {
       console.error(err);
       setForgotPasswordError(
         err?.response?.data?.error ||
-        'Failed to reset password. Please try again.'
+          'Failed to reset password. Please try again.'
       );
       setForgotPasswordLoader(false);
     }
@@ -138,9 +138,9 @@ const Modal = ({ onClose }) => {
 
   // Handle login submit
   const handleLogin = async () => {
-    setLoginError("");
+    setLoginError('');
     if (!loginData.email || !loginData.password) {
-      setLoginError("Please enter both email and password.");
+      setLoginError('Please enter both email and password.');
       return;
     }
     setLoginLoader(true);
@@ -148,21 +148,20 @@ const Modal = ({ onClose }) => {
       const response = await axiosInstance.post(API_URL.LOGIN.LOGIN, loginData);
       console.log(response);
 
-
       // Save user data to localStorage (customize as needed)
       const user = response?.data?.data;
       if (user?.uuid) {
-        localStorage.setItem("uuid", user.uuid);
-        localStorage.setItem("userData", JSON.stringify(user));
-        localStorage.setItem("login", "true");
-        navigate("/user/profile");
+        localStorage.setItem('uuid', user.uuid);
+        localStorage.setItem('userData', JSON.stringify(user));
+        localStorage.setItem('login', 'true');
+        navigate('/user/profile');
       } else {
-        setLoginError("Login failed. Please try again.");
+        setLoginError('Login failed. Please try again.');
       }
     } catch (err) {
       setLoginError(
         err?.response?.data?.error ||
-        "Invalid email or password. Please try again."
+          'Invalid email or password. Please try again.'
       );
     } finally {
       setLoginLoader(false);
@@ -171,78 +170,78 @@ const Modal = ({ onClose }) => {
 
   // Initialize reCAPTCHA on component mount
   // Replace the existing reCAPTCHA useEffect with this
-// Replace the existing reCAPTCHA useEffect with this
-useEffect(() => {
-  let isComponentMounted = true;
+  // Replace the existing reCAPTCHA useEffect with this
+  useEffect(() => {
+    let isComponentMounted = true;
 
-  const initRecaptcha = async () => {
-    // Clean up any existing reCAPTCHA first
-    resetRecaptcha();
+    const initRecaptcha = async () => {
+      // Clean up any existing reCAPTCHA first
+      resetRecaptcha();
 
-    // Create reCAPTCHA container if it doesn't exist
-    let recaptchaDiv = document.getElementById("recaptcha-container");
-    if (!recaptchaDiv) {
-      recaptchaDiv = document.createElement("div");
-      recaptchaDiv.id = "recaptcha-container";
-      recaptchaDiv.style.display = "none";
-      recaptchaDiv.style.position = "fixed";
-      recaptchaDiv.style.top = "0";
-      recaptchaDiv.style.left = "0";
-      recaptchaDiv.style.zIndex = "9999";
-      document.body.appendChild(recaptchaDiv);
-    }
-
-    // Wait a bit before initializing to avoid conflicts
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Only initialize if component is still mounted
-    if (isComponentMounted) {
-      try {
-        await initializeRecaptcha("recaptcha-container");
-      } catch (error) {
-        console.log("Failed to initialize reCAPTCHA on mount:", error);
+      // Create reCAPTCHA container if it doesn't exist
+      let recaptchaDiv = document.getElementById('recaptcha-container');
+      if (!recaptchaDiv) {
+        recaptchaDiv = document.createElement('div');
+        recaptchaDiv.id = 'recaptcha-container';
+        recaptchaDiv.style.display = 'none';
+        recaptchaDiv.style.position = 'fixed';
+        recaptchaDiv.style.top = '0';
+        recaptchaDiv.style.left = '0';
+        recaptchaDiv.style.zIndex = '9999';
+        document.body.appendChild(recaptchaDiv);
       }
-    }
-  };
 
-  initRecaptcha();
+      // Wait a bit before initializing to avoid conflicts
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-  // Cleanup on unmount
-  return () => {
-    isComponentMounted = false;
-    
-    // Clean up reCAPTCHA
-    resetRecaptcha();
-    
-    // Remove container
-    setTimeout(() => {
-      const recaptchaDiv = document.getElementById("recaptcha-container");
-      if (recaptchaDiv) {
-        recaptchaDiv.remove();
+      // Only initialize if component is still mounted
+      if (isComponentMounted) {
+        try {
+          await initializeRecaptcha('recaptcha-container');
+        } catch (error) {
+          console.log('Failed to initialize reCAPTCHA on mount:', error);
+        }
       }
-    }, 100);
-  };
-}, []); // Empty dependency array
+    };
+
+    initRecaptcha();
+
+    // Cleanup on unmount
+    return () => {
+      isComponentMounted = false;
+
+      // Clean up reCAPTCHA
+      resetRecaptcha();
+
+      // Remove container
+      setTimeout(() => {
+        const recaptchaDiv = document.getElementById('recaptcha-container');
+        if (recaptchaDiv) {
+          recaptchaDiv.remove();
+        }
+      }, 100);
+    };
+  }, []); // Empty dependency array
 
   useEffect(() => {
     // Disable scroll on mount
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden';
 
     // Enable scroll on unmount
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = 'auto';
     };
   }, []);
 
   // Common handleChange function
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const filteredCountries = countryCodes.filter(
-    (country) =>
+    country =>
       country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
       country.code.includes(countrySearchTerm) ||
       country.country.toLowerCase().includes(countrySearchTerm.toLowerCase())
@@ -251,10 +250,10 @@ useEffect(() => {
   const handleSendOtp = async () => {
     // Prevent multiple simultaneous calls
     if (isOtpSending || loader) {
-      console.log("OTP send already in progress");
+      console.log('OTP send already in progress');
       return;
     }
-  
+
     // Validation (keep existing validation code)
     const {
       full_name,
@@ -264,7 +263,7 @@ useEffect(() => {
       reenter_password,
       phone_number,
     } = formData;
-  
+
     const newErrors = {};
     if (!full_name) newErrors.full_name = 'First name is required.';
     if (!last_name) newErrors.last_name = 'Last name is required.';
@@ -278,41 +277,41 @@ useEffect(() => {
     if (password && reenter_password && password !== reenter_password)
       newErrors.reenter_password = 'Passwords do not match.';
     if (!phone_number) newErrors.phone_number = 'Phone number is required.';
-  
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
-  
+
     setIsOtpSending(true);
     setLoader(true);
-    setOtpError("");
-  
+    setOtpError('');
+
     try {
       // Format phone number with selected country code
-      let phoneNumber = formData.phone_number.replace(/\D/g, "");
+      let phoneNumber = formData.phone_number.replace(/\D/g, '');
       const fullPhoneNumber = selectedCountryCode + phoneNumber;
-  
+
       // Add a small delay to ensure UI updates
       await new Promise(resolve => setTimeout(resolve, 100));
-  
+
       const result = await sendOTP(fullPhoneNumber);
-  
+
       if (result.success) {
         setShowOtp(true);
-        setErrors((prev) => ({ ...prev, phone_number: "" }));
+        setErrors(prev => ({ ...prev, phone_number: '' }));
         setShowVerifyOtp(true);
       } else {
-        const errorMessage = result.error || "Failed to send OTP";
+        const errorMessage = result.error || 'Failed to send OTP';
         setOtpError(errorMessage);
-        setErrors((prev) => ({
+        setErrors(prev => ({
           ...prev,
           phone_number: errorMessage,
         }));
       }
     } catch (error) {
-      console.error("Error sending OTP:", error);
-      const errorMessage = "Failed to send OTP. Please try again.";
+      console.error('Error sending OTP:', error);
+      const errorMessage = 'Failed to send OTP. Please try again.';
       setOtpError(errorMessage);
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         phone_number: errorMessage,
       }));
@@ -322,19 +321,17 @@ useEffect(() => {
     }
   };
 
-
-
   const handleVerifyOtp = async () => {
-    const otpCode = otpValues.join("");
+    const otpCode = otpValues.join('');
 
     if (otpCode.length !== 6) {
       // Changed from 4 to 6
-      setOtpError("Please enter complete OTP");
+      setOtpError('Please enter complete OTP');
       return;
     }
 
     setVerifyOtpLoader(true);
-    setOtpError("");
+    setOtpError('');
 
     try {
       const result = await verifyOTP(otpCode);
@@ -343,11 +340,11 @@ useEffect(() => {
         // OTP verified successfully, now register the user
         await handleSubmit(null, true); // Pass true to indicate OTP is verified
       } else {
-        setOtpError(result.error || "Invalid OTP");
+        setOtpError(result.error || 'Invalid OTP');
       }
     } catch (error) {
-      console.error("Error verifying OTP:", error);
-      setOtpError("Failed to verify OTP. Please try again.");
+      console.error('Error verifying OTP:', error);
+      setOtpError('Failed to verify OTP. Please try again.');
     } finally {
       setVerifyOtpLoader(false);
     }
@@ -357,12 +354,12 @@ useEffect(() => {
     // Reset confirmation result to allow new OTP
     resetRecaptcha(); // This will clear confirmationResult
 
-    setOtpError("");
-    setOtpValues(["", "", "", "", "", ""]);
+    setOtpError('');
+    setOtpValues(['', '', '', '', '', '']);
 
     // Clear OTP inputs
-    otpRef.current.forEach((input) => {
-      if (input) input.value = "";
+    otpRef.current.forEach(input => {
+      if (input) input.value = '';
     });
 
     // Wait a moment before resending
@@ -373,7 +370,7 @@ useEffect(() => {
 
   const otpRef = useRef([]);
   const handleKeyDown = (e, index) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       if (index < otpRef.current.length - 1) {
         otpRef.current[index + 1]?.focus();
@@ -397,7 +394,7 @@ useEffect(() => {
 
   const inputRefs = useRef([]);
   const handleFormKeyDown = (e, index) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       const next = inputRefs.current[index + 1];
       if (next) next.focus();
@@ -419,18 +416,18 @@ useEffect(() => {
         phone_number,
       } = formData;
       const newErrors = {};
-      if (!full_name) newErrors.full_name = "First name is required.";
-      if (!last_name) newErrors.last_name = "Last name is required.";
-      if (!email) newErrors.email = "Email is required.";
+      if (!full_name) newErrors.full_name = 'First name is required.';
+      if (!last_name) newErrors.last_name = 'Last name is required.';
+      if (!email) newErrors.email = 'Email is required.';
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (email && !emailRegex.test(email))
-        newErrors.email = "Please enter a valid email address.";
-      if (!password) newErrors.password = "Password is required.";
+        newErrors.email = 'Please enter a valid email address.';
+      if (!password) newErrors.password = 'Password is required.';
       if (!reenter_password)
-        newErrors.reenter_password = "Confirm password is required.";
+        newErrors.reenter_password = 'Confirm password is required.';
       if (password && reenter_password && password !== reenter_password)
-        newErrors.reenter_password = "Passwords do not match.";
-      if (!phone_number) newErrors.phone_number = "Phone number is required.";
+        newErrors.reenter_password = 'Passwords do not match.';
+      if (!phone_number) newErrors.phone_number = 'Phone number is required.';
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) return;
 
@@ -447,13 +444,13 @@ useEffect(() => {
           API_URL.REGISTER.REFFERAL_REGISTER(referralCode),
           formData
         );
-        console.log("refferal");
+        console.log('refferal');
       } else {
         response = await axiosInstance.post(
           API_URL.REGISTER.REGISTER,
           formData
         );
-        console.log("normal");
+        console.log('normal');
       }
       console.log(response);
 
@@ -468,42 +465,42 @@ useEffect(() => {
       };
 
       // Save individual items to localStorage
-      localStorage.setItem("uuid", response?.data?.data?.uuid || "");
-      localStorage.setItem("userData", JSON.stringify(userData));
-      localStorage.setItem("login", "true");
+      localStorage.setItem('uuid', response?.data?.data?.uuid || '');
+      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem('login', 'true');
 
       setFormData({
-        full_name: "",
-        last_name: "",
-        email: "",
-        password: "",
-        reenter_password: "",
-        phone_number: "",
+        full_name: '',
+        last_name: '',
+        email: '',
+        password: '',
+        reenter_password: '',
+        phone_number: '',
       });
 
-      navigate("/user/personal-details");
+      navigate('/user/personal-details');
     } catch (err) {
       console.log(err);
-      setOtpError("Registration failed. Please try again.");
+      setOtpError('Registration failed. Please try again.');
     }
   };
 
   // State for Login
-  const [showSigUp, setShowSignUp] = useState(false);
+  const [showSigUp, setShowSignUp] = useState(initialView === 'signup');
 
   // Show Verify OTP
   const [showVerifyOtp, setShowVerifyOtp] = useState(false);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".country-dropdown")) {
+    const handleClickOutside = event => {
+      if (!event.target.closest('.country-dropdown')) {
         setShowCountryDropdown(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -518,7 +515,7 @@ useEffect(() => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
+        transition={{ duration: 0.4, ease: 'easeInOut' }}
       >
         <div className="flex xl:p-5 w-[70vw] h-[60vh] md:h-[50vh] md:w-[60vw] lg:h-[40vh] lg:w-[50vw] xl:w-[60vw] xl:h-[80vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014] overflow-hidden ">
           <div className="w-[50%] hidden xl:block">
@@ -543,7 +540,7 @@ useEffect(() => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 30 }}
-                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        transition={{ duration: 0.4, ease: 'easeInOut' }}
                         className="flex flex-col gap-2 items-center font-inter"
                       >
                         <p className="text-[16px] font-semibold">Enter OTP</p>
@@ -563,11 +560,11 @@ useEffect(() => {
                             .map((_, i) => (
                               <input
                                 key={i}
-                                ref={(el) => (otpRef.current[i] = el)}
+                                ref={el => (otpRef.current[i] = el)}
                                 className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
                                 placeholder="-"
-                                onKeyDown={(e) => handleKeyDown(e, i)}
-                                onChange={(e) => handleOtpChange(e, i)}
+                                onKeyDown={e => handleKeyDown(e, i)}
+                                onChange={e => handleOtpChange(e, i)}
                                 maxLength={1}
                                 type="text"
                                 value={otpValues[i]}
@@ -588,7 +585,7 @@ useEffect(() => {
                         </div>
                         <div>
                           <p className="font-poppins text-[14px]">
-                            Don't receive code?{" "}
+                            Don't receive code?{' '}
                             <span
                               className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
                               onClick={handleResendOtp}
@@ -745,13 +742,15 @@ useEffect(() => {
                           className="w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
                           onClick={() => setShowCountryModal(true)}
                         >
-                          <span className="text-[#333] font-medium">{selectedCountryCode}</span>
+                          <span className="text-[#333] font-medium">
+                            {selectedCountryCode}
+                          </span>
                         </div>
 
                         {/* Phone Number Input */}
                         <input
-                          ref={(el) => (inputRefs.current[6] = el)}
-                          onKeyDown={(e) => handleFormKeyDown(e, 6)}
+                          ref={el => (inputRefs.current[6] = el)}
+                          onKeyDown={e => handleFormKeyDown(e, 6)}
                           className="flex-1 p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
                           placeholder="Phone number"
                           name="phone_number"
@@ -763,14 +762,19 @@ useEffect(() => {
                         {/* Send OTP Button */}
                         <div
                           onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
-                          className={`rounded-[9px] w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm ${isOtpSending
+                          className={`rounded-[9px] w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm ${
+                            isOtpSending
                               ? 'bg-[#a5a5a5] cursor-not-allowed'
                               : 'bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95'
-                            }`}
+                          }`}
                         >
                           {loader ? (
                             <div className="flex items-center justify-center py-2">
-                              <LineSpinner size={20} color="white" stroke="1.5" />
+                              <LineSpinner
+                                size={20}
+                                color="white"
+                                stroke="1.5"
+                              />
                             </div>
                           ) : (
                             <p className="font-semibold text-[11px] text-white py-2 px-2 text-center">
@@ -803,8 +807,8 @@ useEffect(() => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
-                            onClick={(e) => e.stopPropagation()}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            onClick={e => e.stopPropagation()}
                           >
                             {/* Modal Header */}
                             <div className="flex items-center justify-between p-4 border-b border-[#e5e7eb]">
@@ -826,7 +830,9 @@ useEffect(() => {
                                 placeholder="Search country or code..."
                                 className="w-full p-3 text-[14px] border border-[#d1d5db] rounded-[10px] focus:outline-none focus:border-[#467EF8] focus:ring-2 focus:ring-[#467EF8]/20 transition-all duration-200"
                                 value={countrySearchTerm}
-                                onChange={(e) => setCountrySearchTerm(e.target.value)}
+                                onChange={e =>
+                                  setCountrySearchTerm(e.target.value)
+                                }
                                 autoFocus
                               />
                             </div>
@@ -839,11 +845,13 @@ useEffect(() => {
                                     <motion.div
                                       key={index}
                                       className="p-3 hover:bg-[#f8fafc] cursor-pointer rounded-[8px] flex items-center justify-between transition-colors duration-150 mx-2"
-                                      whileHover={{ backgroundColor: "#f1f5f9" }}
+                                      whileHover={{
+                                        backgroundColor: '#f1f5f9',
+                                      }}
                                       onClick={() => {
                                         setSelectedCountryCode(country.code);
                                         setShowCountryModal(false);
-                                        setCountrySearchTerm("");
+                                        setCountrySearchTerm('');
                                       }}
                                     >
                                       <div className="flex-1">
@@ -865,8 +873,12 @@ useEffect(() => {
                               ) : (
                                 <div className="flex-1 flex items-center justify-center">
                                   <div className="text-center py-8">
-                                    <div className="text-[48px] text-[#e5e7eb] mb-2">🔍</div>
-                                    <p className="text-[#9ca3af] text-[14px]">No countries found</p>
+                                    <div className="text-[48px] text-[#e5e7eb] mb-2">
+                                      🔍
+                                    </div>
+                                    <p className="text-[#9ca3af] text-[14px]">
+                                      No countries found
+                                    </p>
                                     <p className="text-[#d1d5db] text-[12px] mt-1">
                                       Try searching with a different term
                                     </p>
@@ -881,7 +893,7 @@ useEffect(() => {
                                 <button
                                   onClick={() => {
                                     setShowCountryModal(false);
-                                    setCountrySearchTerm("");
+                                    setCountrySearchTerm('');
                                   }}
                                   className="flex-1 py-2 px-4 border border-[#d1d5db] rounded-[8px] text-[#374151] text-[14px] font-medium hover:bg-[#f9fafb] transition-colors duration-200"
                                 >
