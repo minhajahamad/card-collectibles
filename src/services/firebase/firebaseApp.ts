@@ -24,13 +24,13 @@ import {
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDFcenM7qvtmJ4n-o8TCIxLZIeKBDj_ums",
-  authDomain: "prepbackend.firebaseapp.com",
-  projectId: "prepbackend",
-  storageBucket: "prepbackend.firebasestorage.app",
-  messagingSenderId: "4963764479",
-  appId: "1:4963764479:web:71aa4fa65472f239f5a4ca",
-  measurementId: "G-BFLN37VND1",
+  apiKey: "AIzaSyDPZqb8R6qzSejUu0Om4bSk2zWlee9VUtY",
+  authDomain: "collected-company.firebaseapp.com",
+  projectId: "collected-company",
+  storageBucket: "collected-company.firebasestorage.app",
+  messagingSenderId: "482075688968",
+  appId: "1:482075688968:web:84a364de9464ee557051bd",
+  measurementId: "G-DTB77P2P9Z"
 };
 
 // Type definitions for better type safety

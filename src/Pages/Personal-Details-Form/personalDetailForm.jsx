@@ -179,6 +179,32 @@ const PersonalDetailForm = ({
     }
   }, [user.email]);
 
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && user.email) {
+        try {
+          const result = await checkEmailVerificationStatus();
+          if (result.success && result.isVerified) {
+            setEmailVerificationStatus({
+              isVerified: true,
+              isSending: false,
+              message: 'Email verified successfully!',
+              isError: false,
+            });
+          }
+        } catch (error) {
+          console.log('Error checking email verification status:', error);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user.email]);
+
   const handleChange = e => {
     const { name, value, files } = e.target;
     if (name === 'image') {

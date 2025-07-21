@@ -19,20 +19,20 @@ const SideBar = () => {
       try {
         const uuid = localStorage.getItem('uuid');
         if (!uuid) return;
-
-        // Use the same API call as PersonalDetailForm
+  
         const res = await axiosInstance.get(API_URL.ADDRESS.GET_ADDRESS_UUID(uuid));
-        const addresses = res?.data?.data?.addresses;
-
+        // Support both array and object response structures
+        const addresses = Array.isArray(res?.data?.data) ? res.data.data : res?.data?.data?.addresses;
+  
         if (addresses && addresses.length > 0) {
           const addr = addresses[0];
-          setAddressUuid(addr.uuid); // This is the address UUID we need for patching
+          setAddressUuid(addr.uuid || addr.id); // Fallback to id if uuid is not present
           if (addr.image) {
             setImageUrl(addr.image);
           }
         }
       } catch (err) {
-        console.log('Error fetching address:', err);
+        console.error('Error fetching address:', err);
         setImageUrl('/Images/image-placeholder.png');
       }
     };
@@ -46,32 +46,36 @@ const SideBar = () => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file || !addressUuid) return;
-
+  
     setIsUploading(true);
     setImageUrl(URL.createObjectURL(file)); // Preview
-
+  
     try {
       const formData = new FormData();
       formData.append('image', file);
-
-      // Use the same PATCH endpoint structure as PersonalDetailForm
+  
+      // PATCH the image field
       await axiosInstance.patch(
         API_URL.ADDRESS.PATCH_ADDRESS(addressUuid),
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
-
-      // Refetch to get the updated image URL from backend
+  
+      // Refetch to get the updated image URL
       const uuid = localStorage.getItem('uuid');
       const res = await axiosInstance.get(API_URL.ADDRESS.GET_ADDRESS_UUID(uuid));
-      const addresses = res?.data?.data?.addresses;
-
+      const addresses = Array.isArray(res?.data?.data) ? res.data.data : res?.data?.data?.addresses;
+  
       if (addresses && addresses.length > 0 && addresses[0].image) {
-        setImageUrl(addresses[0].image);
+        setImageUrl(addresses[0].image); // Update with backend URL
+        URL.revokeObjectURL(imageUrl); // Clean up preview URL
+      } else {
+        throw new Error('No image URL returned from backend');
       }
     } catch (err) {
-      console.log('Error uploading image:', err);
+      console.error('Error uploading image:', err);
       setImageUrl('/Images/image-placeholder.png');
+      alert('Failed to upload image. Please try again.');
     } finally {
       setIsUploading(false);
     }
