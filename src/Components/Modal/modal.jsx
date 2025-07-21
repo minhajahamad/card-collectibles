@@ -536,7 +536,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
         exit={{ opacity: 0, y: 50 }}
         transition={{ duration: 0.4, ease: 'easeInOut' }}
       >
-        <div className="flex xl:p-5 w-[70vw] h-[60vh] md:h-[50vh] md:w-[60vw] lg:h-[40vh] lg:w-[50vw] xl:w-[60vw] xl:h-[80vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014] overflow-hidden ">
+        <div className="flex xl:p-5 w-[95vw] h-[85vh] sm:w-[90vw] sm:h-[80vh] md:h-[70vh] md:w-[70vw] lg:h-[60vh] lg:w-[60vw] xl:w-[60vw] xl:h-[80vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014] overflow-hidden">
           <div className="w-[50%] hidden xl:block">
             <img src="/Images/Modal-img.png" className="w-full h-full " />
           </div>
@@ -544,8 +544,8 @@ const Modal = ({ onClose, initialView = 'login' }) => {
           {/* SignUp Form */}
 
           {showSigUp ? (
-            <div className="xl:w-[50%] px-5 xl:py-10 flex flex-col justify-center gap-2 pl-10 ">
-              <div className="font-poppins text-[42px] leading-tight">
+            <div className="w-full xl:w-[50%] px-4 py-6 sm:px-6 sm:py-8 xl:px-5 xl:py-10 flex flex-col justify-center gap-2 xl:pl-10">
+              <div className="font-poppins text-[28px] sm:text-[35px] xl:text-[42px] leading-tight">
                 <p className="font-semibold text-[#111111]">Lets Get</p>
                 <p className="font-medium text-[#00A397]">Started!</p>
               </div>
@@ -580,7 +580,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                               <input
                                 key={i}
                                 ref={el => (otpRef.current[i] = el)}
-                                className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
+                                className="w-[14%] sm:w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center"
                                 placeholder="-"
                                 onKeyDown={e => handleKeyDown(e, i)}
                                 onChange={e => handleOtpChange(e, i)}
@@ -592,7 +592,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                         </div>
                         <div
                           onClick={handleVerifyOtp}
-                          className="bg-[#467EF8] rounded-[12px] w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+                          className="bg-[#467EF8] rounded-[12px] w-[60%] sm:w-[50%] xl:w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
                         >
                           {verifyOtpLoader ? (
                             <Spiral size="20" color="white" speed={2} />
@@ -618,7 +618,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                   </AnimatePresence>
                 ) : (
                   <form
-                    className="font-montserrat flex flex-col gap-2"
+                    className="font-montserrat flex flex-col gap-2 "
                     onSubmit={handleSubmit}
                   >
                     {/* Full Name */}
@@ -626,8 +626,8 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                       <label className="font-medium text-[14px] text-[#111111]">
                         Full Name
                       </label>
-                      <div className="flex gap-3">
-                        <div className="w-[50%]">
+                      <div className="flex flex-col sm:flex-row xl:flex-row gap-3">
+                        <div className="w-full sm:w-[50%]">
                           <input
                             ref={(el) => (inputRefs.current[0] = el)}
                             onKeyDown={(e) => handleFormKeyDown(e, 0)}
@@ -643,7 +643,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                             </span>
                           )}
                         </div>
-                        <div className="w-[50%]">
+                        <div className="w-full sm:w-[50%]">
                           <input
                             ref={(el) => (inputRefs.current[1] = el)}
                             onKeyDown={(e) => handleFormKeyDown(e, 1)}
@@ -668,9 +668,9 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                         Email
                       </label>
                       <input
-                        ref={(el) => (inputRefs.current[2] = el)}
-                        onKeyDown={(e) => handleFormKeyDown(e, 2)}
-                        className="w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                        ref={el => (inputRefs.current[2] = el)}
+                        onKeyDown={e => handleFormKeyDown(e, 2)}
+                        className="w-full sm:w-[90%] xl:w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                         placeholder="Enter your email"
                         name="email"
                         value={formData.email}
@@ -691,9 +691,9 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                       <div className="flex flex-col gap-2">
                         <div className="relative">
                           <input
-                            ref={(el) => (inputRefs.current[3] = el)}
-                            onKeyDown={(e) => handleFormKeyDown(e, 3)}
-                            className="w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                            ref={el => (inputRefs.current[3] = el)}
+                            onKeyDown={e => handleFormKeyDown(e, 3)}
+                            className="w-full sm:w-[90%] xl:w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                             placeholder="Enter your password"
                             type={showPassword ? "text" : "password"}
                             name="password"
@@ -719,9 +719,9 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                         )}
                         <div className="relative">
                           <input
-                            ref={(el) => (inputRefs.current[4] = el)}
-                            onKeyDown={(e) => handleFormKeyDown(e, 4)}
-                            className="w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                            ref={el => (inputRefs.current[4] = el)}
+                            onKeyDown={e => handleFormKeyDown(e, 4)}
+                            className="w-full p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                             placeholder="Confirm password"
                             type={showConfirmPassword ? "text" : "password"}
                             name="reenter_password"
@@ -755,10 +755,10 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                       <label className="font-medium text-[14px] text-[#111111]">
                         Phone Number
                       </label>
-                      <div className="flex gap-3 items-start">
+                      <div className="flex flex-col sm:flex-row gap-3 items-start">
                         {/* Country Code Button */}
                         <div
-                          className="w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
+                          className="w-full sm:w-[25%] xl:w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
                           onClick={() => setShowCountryModal(true)}
                         >
                           <span className="text-[#333] font-medium">
@@ -781,7 +781,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                         {/* Send OTP Button */}
                         <div
                           onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
-                          className={`rounded-[9px] w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm ${
+                          className={`rounded-[9px] w-full sm:w-[35%] xl:w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm ${
                             isOtpSending
                               ? "bg-[#a5a5a5] cursor-not-allowed"
                               : "bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95"
@@ -822,7 +822,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                           onClick={() => setShowCountryModal(false)}
                         >
                           <motion.div
-                            className="bg-white rounded-[16px] shadow-2xl w-[90%] max-w-[400px] h-[70vh] max-h-[500px] flex flex-col overflow-hidden mx-4"
+                            className="bg-white rounded-[16px] shadow-2xl w-[95%] sm:w-[90%] max-w-[400px] h-[70vh] max-h-[500px] flex flex-col overflow-hidden mx-4"
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -941,10 +941,10 @@ const Modal = ({ onClose, initialView = 'login' }) => {
             </div>
           ) : (
             // Login Form
-            <div className=" w-full  xl:w-[50%] xl:py-10 flex flex-col justify-center  gap-5 px-10 xl:pl-10 ">
+            <div className="w-full xl:w-[50%] px-4 py-6 sm:px-6 sm:py-8 xl:py-10 flex flex-col justify-center gap-5 xl:px-10 xl:pl-10">
               {showForgotPassword ? (
                 <div className=" flex flex-col items-center justify-center">
-                  <div className="font-poppins text-[35px] xl:text-[42px] leading-tight">
+                  <div className="font-poppins text-[28px] sm:text-[35px] xl:text-[42px] leading-tight">
                     <p className="font-semibold text-[#111111]">
                       Reset Password
                     </p>
@@ -962,7 +962,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                           New Password
                         </label>
                         <input
-                          className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                          className="w-full sm:w-[95%] xl:w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                           placeholder="Enter your new password"
                           type="password"
                           name="newPassword"
@@ -975,7 +975,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                           Confirm New Password
                         </label>
                         <input
-                          className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                          className="w-full sm:w-[95%] xl:w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                           placeholder="Confirm your new password"
                           type="password"
                           name="confirmPassword"
@@ -1031,8 +1031,8 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                           Email
                         </label>
                         <input
-                          onKeyDown={(e) => handleFormKeyDown(e, 2)}
-                          className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                          onKeyDown={e => handleFormKeyDown(e, 2)}
+                          className="w-full sm:w-[95%] xl:w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                           placeholder="Enter your email"
                           name="email"
                           value={loginData.email}
@@ -1044,7 +1044,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                           Password
                         </label>
                         <div className="flex flex-col gap-2">
-                          <div className="relative w-[90%]">
+                          <div className="relative w-full sm:w-[95%] xl:w-[90%]">
                             <input
                               onKeyDown={e => handleFormKeyDown(e, 3)}
                               className="w-full p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
@@ -1082,7 +1082,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                     </div> */}
 
                     <div
-                      className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-20 cursor-pointer mx-auto mt-5 flex items-center justify-center gap-2"
+                      className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-12 sm:px-16 xl:px-20 cursor-pointer mx-auto mt-5 flex items-center justify-center gap-2"
                       onClick={handleLogin}
                     >
                       {loginLoader ? (
