@@ -49,6 +49,7 @@ const Modal = ({ onClose }) => {
   const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); // Default to India
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
+  const [isOtpSending, setIsOtpSending] = useState(false); // Add this state
 
   // Add state for login form
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -129,7 +130,7 @@ const Modal = ({ onClose }) => {
       console.error(err);
       setForgotPasswordError(
         err?.response?.data?.error ||
-          'Failed to reset password. Please try again.'
+        'Failed to reset password. Please try again.'
       );
       setForgotPasswordLoader(false);
     }
@@ -161,7 +162,7 @@ const Modal = ({ onClose }) => {
     } catch (err) {
       setLoginError(
         err?.response?.data?.error ||
-          "Invalid email or password. Please try again."
+        "Invalid email or password. Please try again."
       );
     } finally {
       setLoginLoader(false);
@@ -169,24 +170,37 @@ const Modal = ({ onClose }) => {
   };
 
   // Initialize reCAPTCHA on component mount
- // Replace the existing reCAPTCHA useEffect with this
+  // Replace the existing reCAPTCHA useEffect with this
+// Replace the existing reCAPTCHA useEffect with this
 useEffect(() => {
-  let isInitialized = false;
-  
+  let isComponentMounted = true;
+
   const initRecaptcha = async () => {
+    // Clean up any existing reCAPTCHA first
+    resetRecaptcha();
+
     // Create reCAPTCHA container if it doesn't exist
-    if (!document.getElementById("recaptcha-container")) {
-      const recaptchaDiv = document.createElement("div");
+    let recaptchaDiv = document.getElementById("recaptcha-container");
+    if (!recaptchaDiv) {
+      recaptchaDiv = document.createElement("div");
       recaptchaDiv.id = "recaptcha-container";
       recaptchaDiv.style.display = "none";
+      recaptchaDiv.style.position = "fixed";
+      recaptchaDiv.style.top = "0";
+      recaptchaDiv.style.left = "0";
+      recaptchaDiv.style.zIndex = "9999";
       document.body.appendChild(recaptchaDiv);
     }
 
-    // Only initialize if not already done
-    if (!isInitialized) {
-      const success = await initializeRecaptcha("recaptcha-container");
-      if (success) {
-        isInitialized = true;
+    // Wait a bit before initializing to avoid conflicts
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Only initialize if component is still mounted
+    if (isComponentMounted) {
+      try {
+        await initializeRecaptcha("recaptcha-container");
+      } catch (error) {
+        console.log("Failed to initialize reCAPTCHA on mount:", error);
       }
     }
   };
@@ -195,14 +209,20 @@ useEffect(() => {
 
   // Cleanup on unmount
   return () => {
+    isComponentMounted = false;
+    
+    // Clean up reCAPTCHA
     resetRecaptcha();
-    const recaptchaDiv = document.getElementById("recaptcha-container");
-    if (recaptchaDiv) {
-      recaptchaDiv.remove();
-    }
-    isInitialized = false;
+    
+    // Remove container
+    setTimeout(() => {
+      const recaptchaDiv = document.getElementById("recaptcha-container");
+      if (recaptchaDiv) {
+        recaptchaDiv.remove();
+      }
+    }, 100);
   };
-}, []); // Empty dependency array - only run once
+}, []); // Empty dependency array
 
   useEffect(() => {
     // Disable scroll on mount
@@ -228,64 +248,81 @@ useEffect(() => {
       country.country.toLowerCase().includes(countrySearchTerm.toLowerCase())
   );
 
-const handleSendOtp = async () => {
-  // Validation
-  const {
-    full_name,
-    last_name,
-    email,
-    password,
-    reenter_password,
-    phone_number,
-  } = formData;
-  const newErrors = {};
-  if (!full_name) newErrors.full_name = 'First name is required.';
-  if (!last_name) newErrors.last_name = 'Last name is required.';
-  if (!email) newErrors.email = 'Email is required.';
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (email && !emailRegex.test(email))
-    newErrors.email = 'Please enter a valid email address.';
-  if (!password) newErrors.password = 'Password is required.';
-  if (!reenter_password)
-    newErrors.reenter_password = 'Confirm password is required.';
-  if (password && reenter_password && password !== reenter_password)
-    newErrors.reenter_password = 'Passwords do not match.';
-  if (!phone_number) newErrors.phone_number = 'Phone number is required.';
-  setErrors(newErrors);
-  if (Object.keys(newErrors).length > 0) return;
-
-  setLoader(true);
-  setOtpError("");
-
-  try {
-    // Format phone number with selected country code
-    let phoneNumber = formData.phone_number.replace(/\D/g, "");
-    const fullPhoneNumber = selectedCountryCode + phoneNumber;
-
-    const result = await sendOTP(fullPhoneNumber);
-
-    if (result.success) {
-      setShowOtp(true);
-      setErrors((prev) => ({ ...prev, phone_number: "" }));
-      setShowVerifyOtp(true);
-    } else {
-      setOtpError(result.error || "Failed to send OTP");
+  const handleSendOtp = async () => {
+    // Prevent multiple simultaneous calls
+    if (isOtpSending || loader) {
+      console.log("OTP send already in progress");
+      return;
+    }
+  
+    // Validation (keep existing validation code)
+    const {
+      full_name,
+      last_name,
+      email,
+      password,
+      reenter_password,
+      phone_number,
+    } = formData;
+  
+    const newErrors = {};
+    if (!full_name) newErrors.full_name = 'First name is required.';
+    if (!last_name) newErrors.last_name = 'Last name is required.';
+    if (!email) newErrors.email = 'Email is required.';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && !emailRegex.test(email))
+      newErrors.email = 'Please enter a valid email address.';
+    if (!password) newErrors.password = 'Password is required.';
+    if (!reenter_password)
+      newErrors.reenter_password = 'Confirm password is required.';
+    if (password && reenter_password && password !== reenter_password)
+      newErrors.reenter_password = 'Passwords do not match.';
+    if (!phone_number) newErrors.phone_number = 'Phone number is required.';
+  
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+  
+    setIsOtpSending(true);
+    setLoader(true);
+    setOtpError("");
+  
+    try {
+      // Format phone number with selected country code
+      let phoneNumber = formData.phone_number.replace(/\D/g, "");
+      const fullPhoneNumber = selectedCountryCode + phoneNumber;
+  
+      // Add a small delay to ensure UI updates
+      await new Promise(resolve => setTimeout(resolve, 100));
+  
+      const result = await sendOTP(fullPhoneNumber);
+  
+      if (result.success) {
+        setShowOtp(true);
+        setErrors((prev) => ({ ...prev, phone_number: "" }));
+        setShowVerifyOtp(true);
+      } else {
+        const errorMessage = result.error || "Failed to send OTP";
+        setOtpError(errorMessage);
+        setErrors((prev) => ({
+          ...prev,
+          phone_number: errorMessage,
+        }));
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      const errorMessage = "Failed to send OTP. Please try again.";
+      setOtpError(errorMessage);
       setErrors((prev) => ({
         ...prev,
-        phone_number: result.error || "Failed to send OTP",
+        phone_number: errorMessage,
       }));
+    } finally {
+      setLoader(false);
+      setIsOtpSending(false);
     }
-  } catch (error) {
-    console.error("Error sending OTP:", error);
-    setOtpError("Failed to send OTP. Please try again.");
-    setErrors((prev) => ({
-      ...prev,
-      phone_number: "Failed to send OTP. Please try again.",
-    }));
-  } finally {
-    setLoader(false);
-  }
-};
+  };
+
+
 
   const handleVerifyOtp = async () => {
     const otpCode = otpValues.join("");
@@ -317,16 +354,21 @@ const handleSendOtp = async () => {
   };
 
   const handleResendOtp = async () => {
+    // Reset confirmation result to allow new OTP
+    resetRecaptcha(); // This will clear confirmationResult
+
     setOtpError("");
-    setOtpValues(["", "", "", "", "", ""]); // Changed to 6 empty strings
+    setOtpValues(["", "", "", "", "", ""]);
 
     // Clear OTP inputs
     otpRef.current.forEach((input) => {
       if (input) input.value = "";
     });
 
-    // Resend OTP
-    await handleSendOtp();
+    // Wait a moment before resending
+    setTimeout(() => {
+      handleSendOtp();
+    }, 1000);
   };
 
   const otpRef = useRef([]);
@@ -697,51 +739,160 @@ const handleSendOtp = async () => {
                       <label className="font-medium text-[14px] text-[#111111]">
                         Phone Number
                       </label>
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 items-start">
+                        {/* Country Code Button */}
+                        <div
+                          className="w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
+                          onClick={() => setShowCountryModal(true)}
+                        >
+                          <span className="text-[#333] font-medium">{selectedCountryCode}</span>
+                        </div>
+
+                        {/* Phone Number Input */}
                         <input
-                          ref={el => (inputRefs.current[5] = el)}
-                          onKeyDown={e => handleFormKeyDown(e, 5)}
-                          className="w-[20%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                          placeholder="+91"
-                          value="+91"
-                          readOnly
-                        />
-                        <input
-                          ref={el => (inputRefs.current[6] = el)}
-                          onKeyDown={e => handleFormKeyDown(e, 6)}
-                          className="w-[50%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                          placeholder="00000 0000"
+                          ref={(el) => (inputRefs.current[6] = el)}
+                          onKeyDown={(e) => handleFormKeyDown(e, 6)}
+                          className="flex-1 p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
+                          placeholder="Phone number"
                           name="phone_number"
                           value={formData.phone_number}
                           onChange={handleChange}
-                          maxLength="10"
+                          type="tel"
                         />
 
+                        {/* Send OTP Button */}
                         <div
-                          onClick={handleSendOtp}
-                          className="bg-[#467EF8] w-[30%] rounded-[9px] flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-200"
+                          onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
+                          className={`rounded-[9px] w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm ${isOtpSending
+                              ? 'bg-[#a5a5a5] cursor-not-allowed'
+                              : 'bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95'
+                            }`}
                         >
                           {loader ? (
-                            <div className="flex items-center justify-center">
-                              <LineSpinner
-                                size={20}
-                                color="white"
-                                stroke="1.5"
-                              />
+                            <div className="flex items-center justify-center py-2">
+                              <LineSpinner size={20} color="white" stroke="1.5" />
                             </div>
                           ) : (
-                            <p className="font-semibold text-[11px] text-white">
-                              Send OTP
+                            <p className="font-semibold text-[11px] text-white py-2 px-2 text-center">
+                              {isOtpSending ? 'Sending...' : 'Send OTP'}
                             </p>
                           )}
                         </div>
                       </div>
+
                       {errors.phone_number && (
                         <span className="text-red-500 text-xs mt-1">
                           {errors.phone_number}
                         </span>
                       )}
                     </div>
+
+                    {/* Country Code Selection Modal */}
+                    {showCountryModal && (
+                      <AnimatePresence>
+                        <motion.div
+                          className="fixed inset-0 z-[70] flex items-center justify-center backdrop-blur-sm bg-black/50"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          onClick={() => setShowCountryModal(false)}
+                        >
+                          <motion.div
+                            className="bg-white rounded-[16px] shadow-2xl w-[90%] max-w-[400px] h-[70vh] max-h-[500px] flex flex-col overflow-hidden mx-4"
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-[#e5e7eb]">
+                              <h3 className="text-[18px] font-semibold text-[#111111] font-poppins">
+                                Select Country Code
+                              </h3>
+                              <button
+                                onClick={() => setShowCountryModal(false)}
+                                className="text-[#666] hover:text-[#111] transition-colors p-1"
+                              >
+                                <IoCloseOutline size={24} />
+                              </button>
+                            </div>
+
+                            {/* Search Input */}
+                            <div className="p-4 border-b border-[#f1f3f4]">
+                              <input
+                                type="text"
+                                placeholder="Search country or code..."
+                                className="w-full p-3 text-[14px] border border-[#d1d5db] rounded-[10px] focus:outline-none focus:border-[#467EF8] focus:ring-2 focus:ring-[#467EF8]/20 transition-all duration-200"
+                                value={countrySearchTerm}
+                                onChange={(e) => setCountrySearchTerm(e.target.value)}
+                                autoFocus
+                              />
+                            </div>
+
+                            {/* Countries List */}
+                            <div className="flex-1 overflow-y-auto">
+                              {filteredCountries.length > 0 ? (
+                                <div className="p-2">
+                                  {filteredCountries.map((country, index) => (
+                                    <motion.div
+                                      key={index}
+                                      className="p-3 hover:bg-[#f8fafc] cursor-pointer rounded-[8px] flex items-center justify-between transition-colors duration-150 mx-2"
+                                      whileHover={{ backgroundColor: "#f1f5f9" }}
+                                      onClick={() => {
+                                        setSelectedCountryCode(country.code);
+                                        setShowCountryModal(false);
+                                        setCountrySearchTerm("");
+                                      }}
+                                    >
+                                      <div className="flex-1">
+                                        <div className="text-[14px] font-medium text-[#374151] mb-1">
+                                          {country.name}
+                                        </div>
+                                        <div className="text-[12px] text-[#6b7280]">
+                                          {country.country}
+                                        </div>
+                                      </div>
+                                      <div className="bg-[#f3f4f6] px-3 py-1 rounded-full">
+                                        <span className="text-[#467EF8] font-semibold text-[13px]">
+                                          {country.code}
+                                        </span>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="flex-1 flex items-center justify-center">
+                                  <div className="text-center py-8">
+                                    <div className="text-[48px] text-[#e5e7eb] mb-2">🔍</div>
+                                    <p className="text-[#9ca3af] text-[14px]">No countries found</p>
+                                    <p className="text-[#d1d5db] text-[12px] mt-1">
+                                      Try searching with a different term
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-4 border-t border-[#f1f3f4] bg-[#fafbfc]">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setShowCountryModal(false);
+                                    setCountrySearchTerm("");
+                                  }}
+                                  className="flex-1 py-2 px-4 border border-[#d1d5db] rounded-[8px] text-[#374151] text-[14px] font-medium hover:bg-[#f9fafb] transition-colors duration-200"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </motion.div>
+                      </AnimatePresence>
+                    )}
                     <div className="mt-1">
                       <p className="font-poppins text-[14px]">
                         Already have an account?{' '}
