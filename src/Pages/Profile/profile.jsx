@@ -20,15 +20,15 @@ const Profile = () => {
 
   // User data state
   const [userData, setUserData] = useState({
-    first_name: '',
-    last_name: '',
+    full_name: '',
+    last_name: '', // Keep last_name for now if needed elsewhere
     email: '',
     phone_number: ''
   });
 
   // Original user data for comparison
   const [originalUserData, setOriginalUserData] = useState({
-    first_name: '',
+    full_name: '',
     last_name: '',
     email: '',
     phone_number: ''
@@ -76,6 +76,9 @@ const Profile = () => {
     specialization: ''
   });
 
+  // Add state for categories list
+  const [categoriesList, setCategoriesList] = useState([]);
+
   const handleChange = (event, newValue) => {
     setTabIndex(newValue);
   };
@@ -90,15 +93,16 @@ const Profile = () => {
       const addressResponse = await axiosInstance.get(API_URL.ADDRESS.GET_ADDRESS_UUID(uuid));
       console.log(addressResponse);
 
+      // FIX: Use correct response structure (data is an array)
       if (
         addressResponse.data &&
         addressResponse.data.data &&
-        addressResponse.data.data.addresses &&
-        addressResponse.data.data.addresses.length > 0
+        Array.isArray(addressResponse.data.data) &&
+        addressResponse.data.data.length > 0
       ) {
-        const addressInfo = addressResponse.data.data.addresses[0]; // Get first address
+        const addressInfo = addressResponse.data.data[0]; // Get first address
         const addressData = {
-          uuid: addressInfo.uuid,
+          uuid: addressInfo.uuid || addressInfo.id || null, // fallback to id if uuid is not present
           street_address: addressInfo.street_name || '',
           apartment: addressInfo.house_name || '',
           city: addressInfo.city || '',
@@ -113,6 +117,19 @@ const Profile = () => {
     } catch (error) {
       console.error('Error fetching address data:', error);
       // Address might not exist yet, that's okay
+    }
+  };
+
+  // Fetch categories function
+  const fetchCategories = async () => {
+    try {
+      const response = await axiosInstance.get(API_URL.CATEGORY.GET_CATEGORY);
+      // Expecting response.data.data to be an array of { id, name }
+      if (response.data && Array.isArray(response.data.data)) {
+        setCategoriesList(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
     }
   };
 
@@ -132,22 +149,10 @@ const Profile = () => {
         console.log(userResponse);
 
         if (userResponse.data && userResponse.data.data) {
-          // Fixed: Better name handling logic
-          let firstName = userResponse.data.data.first_name || '';
-          let lastName = userResponse.data.data.last_name || '';
-
-          // Parse full_name only if both first_name and last_name are empty or null
-          if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '')) {
-            if (userResponse.data.data.full_name && userResponse.data.data.full_name.trim()) {
-              const nameParts = userResponse.data.data.full_name.trim().split(' ');
-              firstName = nameParts[0] || '';
-              lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-            }
-          }
-
+          // Use full_name directly
           const userInfo = {
-            first_name: firstName,
-            last_name: lastName,
+            full_name: userResponse.data.data.full_name || '',
+            last_name: userResponse.data.data.last_name || '',
             email: userResponse.data.data.email || '',
             phone_number: userResponse.data.data.phone_number || ''
           };
@@ -163,6 +168,7 @@ const Profile = () => {
     fetchAddressData();
     fetchUserData();
     fetchStoreData();
+    fetchCategories(); // Fetch categories on mount
   }, []);
 
   // Fetch store data function
@@ -180,11 +186,15 @@ const Profile = () => {
           store.user_uuid_display === uuid
         );
 
+        console.log(matchingStore);
+        
         if (matchingStore) {
           const storeDataObj = {
             id: matchingStore.id,
             store_name: matchingStore.store_name || '',
-            categories: matchingStore.categories || [],
+            categories: Array.isArray(matchingStore.categories)
+              ? matchingStore.categories.map(cat => typeof cat === 'object' && cat.id ? cat.id : cat)
+              : [],
             inventory_estimate: matchingStore.inventory_estimate || '',
             specialization: matchingStore.specialization || ''
           };
@@ -213,8 +223,6 @@ const Profile = () => {
         [field]: value
       };
       setUserData(newUserData);
-
-
       // Mark user section as modified if data has changed
       const hasChanged = hasDataChanged(originalUserData, newUserData);
       setModifiedSections(prev => ({
@@ -260,17 +268,17 @@ const Profile = () => {
     }
   };
 
-  // Handle category checkbox changes
-  const handleCategoryChange = (category) => {
+  // Update handleCategoryChange to work with IDs
+  const handleCategoryChange = (categoryId) => {
     if (isEditing) {
+      const newCategories = storeData.categories.includes(categoryId)
+        ? storeData.categories.filter(id => id !== categoryId)
+        : [...storeData.categories, categoryId];
       const newStoreData = {
         ...storeData,
-        categories: storeData.categories.includes(category)
-          ? storeData.categories.filter(cat => cat !== category)
-          : [...storeData.categories, category]
+        categories: newCategories
       };
       setStoreData(newStoreData);
-
       // Mark store section as modified if data has changed
       const hasChanged = hasDataChanged(originalStoreData, newStoreData);
       setModifiedSections(prev => ({
@@ -297,152 +305,141 @@ const Profile = () => {
   };
 
   // Save all changes
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const uuid = localStorage.getItem('uuid');
-      const promises = [];
+const handleSave = async () => {
+  setSaving(true);
+  try {
+    const uuid = localStorage.getItem('uuid');
+    const promises = [];
 
-      // Update user data only if modified
-      if (modifiedSections.user) {
-        // Prepare user data - only send fields that are not empty
-        const userDataToUpdate = {};
-        Object.keys(userData).forEach(key => {
-          if (userData[key] && userData[key].toString().trim() !== '') {
-            userDataToUpdate[key] = userData[key];
-          }
-        });
-
-        if (Object.keys(userDataToUpdate).length > 0) {
-          promises.push(
-            axiosInstance.patch(API_URL.USER.PATCH_USER_UUID(uuid), userDataToUpdate)
-              .then(() => {
-                console.log('User data updated successfully');
-                setOriginalUserData({ ...userData });
-              })
-          );
-        }
+    // Update user data only if modified
+    if (modifiedSections.user) {
+      // Prepare user data - use full_name directly
+      const userDataToUpdate = {};
+      if (userData.full_name && userData.full_name.toString().trim() !== '') {
+        userDataToUpdate.full_name = userData.full_name;
       }
-
-      // Update address data only if modified
-      if (modifiedSections.address) {
-        const addressDataToSend = {
-          house_name: addressData.apartment || '', // Map apartment to house_name
-          street_name: addressData.street_address || '',
-          city: addressData.city || '',
-          state: addressData.state || '',
-          pin: addressData.postal_code || '',
-          country: addressData.country || '',
-          address_type: addressData.address_type || 'Home',
-          user_uuid: uuid
-        };
-
-        if (addressData.uuid) {
-          // Update existing address using PATCH
-          promises.push(
-            axiosInstance.patch(API_URL.ADDRESS.PATCH_ADDRESS(addressData.uuid), addressDataToSend)
-              .then(() => {
-                console.log('Address updated successfully');
-                setOriginalAddressData({ ...addressData });
-              })
-              .catch((error) => {
-                console.error('Error updating address:', error);
-                throw error;
-              })
-          );
-        } else {
-          // Create new address using POST
-          promises.push(
-            axiosInstance.post(API_URL.ADDRESS.POST_ADDRESS, addressDataToSend)
-              .then((response) => {
-                console.log('New address created successfully');
-                const updatedAddressData = { ...addressData, uuid: response.data.uuid };
-                setAddressData(updatedAddressData);
-                setOriginalAddressData({ ...updatedAddressData });
-              })
-              .catch((error) => {
-                console.error('Error creating address:', error);
-                throw error;
-              })
-          );
-        }
+      if (userData.email && userData.email.toString().trim() !== '') {
+        userDataToUpdate.email = userData.email;
       }
-
-      // Update store data only if modified
-      if (modifiedSections.store) {
-        const storeId = storeData.id; // Use the ID from storeData state
-        const storeDataToSend = {
-          store_name: storeData.store_name,
-          categories: storeData.categories,
-          inventory_estimate: storeData.inventory_estimate,
-          specialization: storeData.specialization
-        };
-
-        if (storeId) {
-          // PATCH existing store using the correct store ID
-          promises.push(
-            axiosInstance.patch(API_URL.SELLERS.PATCH_SELLERS(storeId), storeDataToSend)
-              .then(() => {
-                console.log('Store data updated successfully');
-                setOriginalStoreData({ ...storeData });
-              })
-              .catch((error) => {
-                console.error('Error updating store:', error);
-                throw error;
-              })
-          );
-        } else {
-          // POST new store (optional, if you want to allow creating a new store)
-          promises.push(
-            axiosInstance.post(API_URL.SELLERS.POST_SELLERS, storeDataToSend)
-              .then((response) => {
-                console.log('New store created successfully');
-                const updatedStoreData = { ...storeData, id: response.data.id };
-                setStoreData(updatedStoreData);
-                setOriginalStoreData({ ...updatedStoreData });
-                localStorage.setItem('store_id', response.data.id); // Save new id
-              })
-              .catch((error) => {
-                console.error('Error creating store:', error);
-                throw error;
-              })
-          );
-        }
+      if (userData.phone_number && userData.phone_number.toString().trim() !== '') {
+        userDataToUpdate.phone_number = userData.phone_number;
       }
-
-      // Wait for all API calls to complete
-      if (promises.length > 0) {
-        await Promise.all(promises);
-        alert('Profile updated successfully!');
-      } else {
-        alert('No changes to save.');
+      if (Object.keys(userDataToUpdate).length > 0) {
+        promises.push(
+          axiosInstance.patch(API_URL.USER.PATCH_USER_UUID(uuid), userDataToUpdate)
+            .then(() => {
+              console.log('User data updated successfully',API_URL.USER.PATCH_USER_UUID);
+              setOriginalUserData({ ...userData });
+            })
+        );
       }
-
-      // Reset modification tracking
-      setModifiedSections({
-        user: false,
-        address: false,
-        store: false
-      });
-
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error saving profile:', error);
-
-      // More detailed error handling
-      if (error.response && error.response.data) {
-        console.error('Error details:', error.response.data);
-        const errorMessage = typeof error.response.data === 'string'
-          ? error.response.data
-          : JSON.stringify(error.response.data);
-        alert(`Error saving profile: ${errorMessage}`);
-      } else {
-        alert('Error saving profile. Please try again.');
-      }
-    } finally {
-      setSaving(false);
     }
-  };
+
+    // Update address data only if modified
+    if (modifiedSections.address) {
+      const addressDataToSend = {
+        house_name: addressData.apartment || '', // Map apartment to house_name
+        street_name: addressData.street_address || '',
+        city: addressData.city || '',
+        state: addressData.state || '',
+        pin: addressData.postal_code || '',
+        country: addressData.country || '',
+        address_type: addressData.address_type || 'Home',
+        user_uuid: uuid
+      };
+
+      if (addressData.uuid) {
+        // Update existing address using PATCH
+        promises.push(
+          axiosInstance.patch(API_URL.ADDRESS.PATCH_ADDRESS(addressData.uuid), addressDataToSend)
+            .then(() => {
+              console.log('Address updated successfully');
+              setOriginalAddressData({ ...addressData });
+            })
+            .catch((error) => {
+              console.error('Error updating address:', error);
+              throw error;
+            })
+        );
+      } else {
+        // Create new address using POST
+        promises.push(
+          axiosInstance.post(API_URL.ADDRESS.POST_ADDRESS, addressDataToSend)
+            .then((response) => {
+              console.log('New address created successfully');
+              const updatedAddressData = { ...addressData, uuid: response.data.uuid };
+              setAddressData(updatedAddressData);
+              setOriginalAddressData({ ...updatedAddressData });
+            })
+            .catch((error) => {
+              console.error('Error creating address:', error);
+              throw error;
+            })
+        );
+      }
+    }
+
+    // Update store data only if modified
+    if (modifiedSections.store) {
+      const uuid = localStorage.getItem('uuid'); // Use the user's UUID for PATCH
+      const storeDataToSend = {
+        store_name: storeData.store_name,
+        category_ids: storeData.categories, // Always send as array of numbers
+        inventory_estimate: storeData.inventory_estimate,
+        specialization: storeData.specialization
+      };
+
+      // Always PATCH using the user's UUID
+      promises.push(
+        axiosInstance.patch(
+          API_URL.SELLERS.PATCH_SELLERS(uuid),
+          storeDataToSend,
+          { headers: { 'Content-Type': 'application/json' } }
+        )
+          .then(() => {
+            console.log('Store data updated successfully');
+            setOriginalStoreData({ ...storeData });
+          })
+          .catch((error) => {
+            console.error('Error updating store:', error);
+            throw error;
+          })
+      );
+    }
+
+    // Wait for all API calls to complete
+    if (promises.length > 0) {
+      await Promise.all(promises);
+      alert('Profile updated successfully!');
+    } else {
+      alert('No changes to save.');
+    }
+
+    // Reset modification tracking
+    setModifiedSections({
+      user: false,
+      address: false,
+      store: false
+    });
+
+    setIsEditing(false);
+  } catch (error) {
+    console.error('Error saving profile:', error);
+
+    // More detailed error handling
+    if (error.response && error.response.data) {
+      console.error('Error details:', error.response.data);
+      const errorMessage = typeof error.response.data === 'string'
+        ? error.response.data
+        : JSON.stringify(error.response.data);
+      alert(`Error saving profile: ${errorMessage}`);
+    } else {
+      alert('Error saving profile. Please try again.');
+    }
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) {
     return (
@@ -540,18 +537,10 @@ const Profile = () => {
                     </label>
                     <div className="flex flex-col xl:flex-row gap-5">
                       <input
-                        value={userData.first_name}
-                        onChange={(e) => handleUserInputChange('first_name', e.target.value)}
+                        value={userData.full_name}
+                        onChange={(e) => handleUserInputChange('full_name', e.target.value)}
                         disabled={!isEditing}
-                        placeholder="First Name"
-                        className={`w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
-                          }`}
-                      />
-                      <input
-                        value={userData.last_name}
-                        onChange={(e) => handleUserInputChange('last_name', e.target.value)}
-                        disabled={!isEditing}
-                        placeholder="Last Name"
+                        placeholder="Full Name"
                         className={`w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                           }`}
                       />
@@ -644,14 +633,6 @@ const Profile = () => {
                       className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                         }`}
                     />
-                    <input
-                      value={addressData.address_type}
-                      onChange={(e) => handleAddressInputChange('address_type', e.target.value)}
-                      disabled={!isEditing}
-                      placeholder="Address Type (Home/Work)"
-                      className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
-                        }`}
-                    />
                   </div>
                 </form>
               </div>
@@ -673,50 +654,29 @@ const Profile = () => {
                         onChange={(e) => handleStoreInputChange('store_name', e.target.value)}
                         disabled={!isEditing}
                         placeholder="Store Name"
-                        className={`w-[90%] xl:w-[290px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
-                          }`}
+                        className={`w-[90%] xl:w-[290px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'}`}
                       />
                     </div>
                   </div>
-
                   <div className="flex flex-col gap-1">
                     <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
                       Category
                     </label>
-                    <div className="flex gap-5">
-                      <label className="flex gap-1 items-center font-regular text-[#464646]">
-                        <input
-                          type="checkbox"
-                          className="cursor-pointer"
-                          checked={storeData.categories.includes('TCG')}
-                          onChange={() => handleCategoryChange('TCG')}
-                          disabled={!isEditing}
-                        />
-                        TCG
-                      </label>
-                      <label className="flex gap-1 items-center font-regular text-[#464646]">
-                        <input
-                          type="checkbox"
-                          className="cursor-pointer"
-                          checked={storeData.categories.includes('Comics')}
-                          onChange={() => handleCategoryChange('Comics')}
-                          disabled={!isEditing}
-                        />
-                        Comics
-                      </label>
-                      <label className="flex gap-1 items-center font-regular text-[#464646]">
-                        <input
-                          type="checkbox"
-                          className="cursor-pointer"
-                          checked={storeData.categories.includes('Collectibles')}
-                          onChange={() => handleCategoryChange('Collectibles')}
-                          disabled={!isEditing}
-                        />
-                        Collectibles
-                      </label>
+                    <div className="flex gap-5 flex-wrap">
+                      {categoriesList.map((cat) => (
+                        <label key={cat.id} className="flex gap-1 items-center font-regular text-[#464646]">
+                          <input
+                            type="checkbox"
+                            className="cursor-pointer"
+                            checked={storeData.categories.includes(cat.id)}
+                            onChange={() => handleCategoryChange(cat.id)}
+                            disabled={!isEditing}
+                          />
+                          {cat.name}
+                        </label>
+                      ))}
                     </div>
                   </div>
-
                   <div className="flex flex-col xl:flex-row  xl:items-center gap-1">
                     <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
                       Inventory Estimate
@@ -732,11 +692,9 @@ const Profile = () => {
                       <option value="1000-5000">1000 - 5000</option>
                       <option value="5000+">5000+</option>
                     </select>
-
                   </div>
                 </form>
               </div>
-
               <div className="md:w-[50%] p-5 xl:px-10 ">
                 <form className="flex flex-col gap-1">
                   <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
@@ -748,8 +706,7 @@ const Profile = () => {
                     disabled={!isEditing}
                     placeholder="Describe your store's specialization..."
                     style={{ overflowY: 'scroll', scrollbarWidth: 'none' }}
-                    className={`w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
-                      }`}
+                    className={`w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'}`}
                   ></textarea>
                 </form>
               </div>
