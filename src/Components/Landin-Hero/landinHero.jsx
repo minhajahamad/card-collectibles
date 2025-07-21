@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NavBar from '../../Components/NavBar/navBar';
 import Modal from '../../Components/Modal/modal';
 
@@ -6,6 +6,7 @@ import { CiStar } from 'react-icons/ci';
 import { BsLightningCharge } from 'react-icons/bs';
 import { MdOutlineSecurity } from 'react-icons/md';
 import { TiArrowRight } from 'react-icons/ti';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const LandinHero = ({ onLearnMoreClick }) => {
   const LandinImages = [
@@ -26,8 +27,21 @@ const LandinHero = ({ onLearnMoreClick }) => {
   // State for Tracking Index of Hover Image
   const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const uuid = localStorage.getItem('uuid');
+
+    const urlParams = new URLSearchParams(location.search);
+    if (uuid && urlParams.has('refferal-code')) {
+      // Remove query params and redirect to base path
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
+
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden ">
       <NavBar onLoginClick={() => setIsmodalOpen(true)} />
       {isModalOpen && <Modal onClose={() => setIsmodalOpen(false)} />}
       <div className="flex flex-col   xl:h-[110vh] relative">
@@ -56,7 +70,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                 for sellers like you.
               </p>
             </div>
-            <div className="w-full mt-5 xl:w-[750px] overflow-hidden relative fade-effect xl:hidden">
+            <div className="w-[100vw] mt-5  relative fade-effect xl:hidden">
               <div className="marquee-track">
                 {[...LandinImages, ...LandinImages].map((image, index) => (
                   <div key={index} className="marquee-image">
@@ -184,7 +198,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                     0px 4px 15.7px 0px rgba(0, 163, 151, 0.14),
                     0px 4px 106px 0px rgba(16, 125, 145, 0.14)`,
             }}
-            className="bg-white rounded-[35px] xl:w-[500px]  xl:pt-13      flex flex-col gap-5 z-10 relative "
+            className="bg-white rounded-[35px] xl:w-[500px]  xl:pt-13 xl:h-[80vh]      flex flex-col gap-5 z-10 relative "
           >
             <div className="xl:pl-10">
               <p className="font-bold font-raleway text-[36px] text-[#00A397]">

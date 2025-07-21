@@ -122,7 +122,11 @@ const MobileSidebar = ({ isOpen, onClose }) => {
         <div className="p-4 sm:p-5">
           <div
             onClick={() => {
-              setTimeout(() => navigate('/'), 250);
+              localStorage.clear();
+              localStorage.setItem('login', 'false');
+              setTimeout(() => {
+                navigate('/');
+              }, 250);
             }}
             className="w-full border border-[#107D91] text-[#09778E] font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-full flex items-center gap-2 shadow-[0px_2px_16.4px_0px_#0000001C] hover:bg-[#09778E] hover:text-white transition text-[13px] sm:text-[14px] md:text-[15px] justify-center"
           >

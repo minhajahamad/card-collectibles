@@ -3,6 +3,9 @@ export const API_URL = {
         REGISTER: "/api/register/",
         REFFERAL_REGISTER:code=> `/api/refer/${code}/`
     },
+    LOGIN:{
+        LOGIN: "/api/login/"
+    },
     USER: {
         GET_USER: "/api/users/",
         GET_USER_UUID:uuid=> `/api/user/${uuid}/`,
