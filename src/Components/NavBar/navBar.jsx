@@ -34,7 +34,7 @@ const NavBar = ({ onLoginClick }) => {
   return (
     <>
       <nav className="w-full h-[70px] lg:h-[85px]   flex items-center bg-[#09778E]  justify-between px-4 md:px-15 lg:px-20  ">
-        <div className="  cursor-pointer ">
+        <div onClick={()=>navigate("/")} className="  cursor-pointer ">
           <img
             src="/Images/logo.png"
             className="  object-cover w-[115px] h-[50px] lg:w-[158px] lg:h-[70px] "
@@ -48,11 +48,12 @@ const NavBar = ({ onLoginClick }) => {
             onClick={onLoginClick}
             className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
           >
-            <p>SignUp</p>
+            <p>SignIn / SignUp</p>
           </div>
-          <RxHamburgerMenu  onClick={() => setSidebarOpen(true)} className='xl:hidden' />
+          <RxHamburgerMenu onClick={() => setSidebarOpen(true)} className='xl:hidden' />
         </div>
         ) : (
+          <>
           <div
             className=" lg:w-[105px] xl:w-[115px] h-full xl:flex items-center justify-between hidden hover:cursor-pointer"
             onClick={() => navigate('/user/profile')}
@@ -72,6 +73,8 @@ const NavBar = ({ onLoginClick }) => {
               </p>
             </div>
           </div>
+          <RxHamburgerMenu  onClick={() => setSidebarOpen(true)} className='xl:hidden' />
+          </>
         )}
       </nav>
       <MobileSidebar
