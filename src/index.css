@@ -157,3 +157,17 @@
     opacity: 1;
   }
 }
+
+
+
+/* Hide scrollbar globally */
+html {
+  overflow: -moz-scrollbars-none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* Chrome/Safari/Webkit */
+}
