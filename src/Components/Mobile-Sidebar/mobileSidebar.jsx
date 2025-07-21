@@ -7,6 +7,11 @@ const MobileSidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const userData = JSON.parse(localStorage.getItem("userData"))
+
+  console.log(userData);
+  
+
   const getActiveTab = () => {
     if (location.pathname.includes('/user/profile')) return 'profile';
     if (location.pathname.includes('/user/affiliates')) return 'affiliates';
@@ -66,11 +71,11 @@ const MobileSidebar = ({ isOpen, onClose }) => {
                   className="w-[60px] sm:w-[70px] md:w-[85px] h-[60px] sm:h-[70px] md:h-[85px] object-cover rounded-full object-top"
                 />
               </div>
-              <p className="text-[12px] sm:text-[13px] md:text-[14px] underline cursor-pointer text-gray-600">
+              {/* <p className="text-[12px] sm:text-[13px] md:text-[14px] underline cursor-pointer text-gray-600">
                 Edit Profile Image
-              </p>
+              </p> */}
               <p className="font-semibold text-[14px] sm:text-[15px] md:text-[16px]">
-                Username
+                {userData?.full_name} {userData?.last_name}
               </p>
             </div>
 

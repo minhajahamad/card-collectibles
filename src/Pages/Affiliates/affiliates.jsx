@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import SideBar from '../../Components/Sidebar/sideBar';
 import NavBar from '../../Components/NavBar/navBar';
 
@@ -14,64 +14,6 @@ import axiosInstance from '../../services/axios';
 import { API_URL } from '../../services/api_url';
 
 const Affiliates = () => {
-  const dataSource = [
-    {
-      key: '1',
-      name: 'Minhaj',
-      email: 'minhajahamadmk@gmail.com',
-      doj: '18/08/2003',
-      phonenumber: '+91 9072507579',
-      credits: '+2500$',
-    },
-    {
-      key: '2',
-      name: 'Minhaj',
-      email: 'minhajahamadmk@gmail.com',
-      doj: '18/08/2003',
-      phonenumber: '+91 9072507579',
-      credits: '+2500$',
-    },
-    {
-      key: '3',
-      name: 'Minhaj',
-      email: 'minhajahamadmk@gmail.com',
-      doj: '18/08/2003',
-      phonenumber: '+91 9072507579',
-      credits: '+2500$',
-    },
-    {
-      key: '4',
-      name: 'Minhaj',
-      email: 'minhajahamadmk@gmail.com',
-      doj: '18/08/2003',
-      phonenumber: '+91 9072507579',
-      credits: '+2500$',
-    },
-    {
-      key: '5',
-      name: 'Minhaj',
-      email: 'minhajahamadmk@gmail.com',
-      doj: '18/08/2003',
-      phonenumber: '+91 9072507579',
-      credits: '+2500$',
-    },
-    {
-      key: '6',
-      name: 'Minhaj',
-      email: 'minhajahamadmk@gmail.com',
-      doj: '18/08/2003',
-      phonenumber: '+91 9072507579',
-      credits: '+2500$',
-    },
-    {
-      key: '7',
-      name: 'Minhaj',
-      email: 'minhajahamadmk@gmail.com',
-      doj: '18/08/2003',
-      phonenumber: '+91 9072507579',
-      credits: '+2500$',
-    },
-  ];
 
   const columns = [
     {
@@ -113,10 +55,12 @@ const Affiliates = () => {
 
   const [user, setUser] = useState({});
   const [showToast, setShowToast] = useState(false);
-  const [refferalData, setRefferalData] = useState([])
+  const [refferalData, setRefferalData] = useState([]);
+  const qrCodeMobileRef = useRef(null);
+  const qrCodeDesktopRef = useRef(null);
 
   // const uuid = "2feba1ab-5451-40d4-b41d-b07b5ce19a26"
-  const uuid = localStorage.getItem("uuid")
+  const uuid = localStorage.getItem('uuid');
 
   console.log(user.referral);
   
@@ -170,6 +114,50 @@ const Affiliates = () => {
       message
     )}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleShare = async () => {
+    if (!user.referral?.referral_code) return;
+
+    const referralUrl = `${window.location.origin}/?refferal-code=${user.referral.referral_code}`;
+    let canvas = null;
+
+    if (qrCodeMobileRef.current && qrCodeMobileRef.current.offsetParent !== null) {
+      canvas = qrCodeMobileRef.current.querySelector('canvas');
+    } else if (
+      qrCodeDesktopRef.current &&
+      qrCodeDesktopRef.current.offsetParent !== null
+    ) {
+      canvas = qrCodeDesktopRef.current.querySelector('canvas');
+    } else {
+      canvas =
+        qrCodeMobileRef.current?.querySelector('canvas') ||
+        qrCodeDesktopRef.current?.querySelector('canvas');
+    }
+
+    if (!canvas) {
+      alert('Could not find QR code to share.');
+      return;
+    }
+
+    const image = canvas.toDataURL('image/png');
+    const blob = await (await fetch(image)).blob();
+    const file = new File([blob], 'qr-code.png', { type: 'image/png' });
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "You're invited!",
+          text: `Join me using this referral link: ${referralUrl}`,
+          files: [file],
+        });
+        console.log('Successful share');
+      } catch (error) {
+        console.log('Error sharing', error);
+      }
+    } else {
+      alert('Sharing is not supported on this browser.');
+    }
   };
 
   const handleShareViaEmail = () => {
@@ -236,11 +224,14 @@ const Affiliates = () => {
                 <div className=" w-[170px] h-[80px] border rounded-[14px] border-[#BDBDBD] flex flex-col items-center justify-center  ">
                   <p className="font-semibold text-[18px] ">Balance</p>
                   <p className="font-normal text-[22px] font-credits text-[#04BA2C] cursor-pointer hover:text-[#108628] transition-colors duration-150 ">
-                    {points}pts
+                  $ {points}
                   </p>
                 </div>
                 <div>
-                  <div className="w-[130px] h-[125px] border border-[#BDBDBD] rounded-[14px] flex justify-center items-center relative ">
+                  <div
+                    ref={qrCodeMobileRef}
+                    className="w-[130px] h-[125px] border border-[#BDBDBD] rounded-[14px] flex justify-center items-center relative "
+                  >
                     {user?.referral?.referral_code ? (
                       <QRCodeCanvas
                         value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
@@ -257,7 +248,10 @@ const Affiliates = () => {
                         level="H"
                       />
                     )}
-                    <div className="  w-[30px] h-[30px] rounded-full border border-[#BDBDBD] absolute bottom-[-10px] right-[-10px] flex justify-center items-center  bg-white  cursor-pointer">
+                    <div
+                      onClick={handleShare}
+                      className="  w-[30px] h-[30px] rounded-full border border-[#BDBDBD] absolute bottom-[-10px] right-[-10px] flex justify-center items-center  bg-white  cursor-pointer"
+                    >
                       <GrShareOption className="text-[19px] text-[#107D91]  " />
                     </div>
                   </div>
@@ -270,10 +264,13 @@ const Affiliates = () => {
             <div className="hidden xl:block w-fit h-[80px] border rounded-[14px] border-[#BDBDBD] absolute top-[13%] right-[15%]  pt-2 px-4">
               <p className="font-semibold text-[18px] ">Balance</p>
               <p className="font-normal text-[22px] font-credits text-[#04BA2C] cursor-pointer hover:text-[#108628] transition-colors duration-150 ">
-                {points}pts
+              $ {points}
               </p>
             </div>
-            <div className="  hidden  w-[130px] h-[125px] border border-[#BDBDBD] rounded-[14px] absolute  right-[1%] xl:flex justify-center items-center ">
+            <div
+              ref={qrCodeDesktopRef}
+              className="  hidden  w-[130px] h-[125px] border border-[#BDBDBD] rounded-[14px] absolute  right-[1%] xl:flex justify-center items-center "
+            >
               {user?.referral?.referral_code ? (
                 <QRCodeCanvas
                   value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
@@ -291,7 +288,10 @@ const Affiliates = () => {
                 />
               )}
             </div>
-            <div className="hidden  w-[30px] h-[30px] rounded-full border border-[#BDBDBD] xl:flex justify-center items-center absolute right-0 top-[70%] bg-white  cursor-pointer">
+            <div
+              onClick={handleShare}
+              className="hidden  w-[30px] h-[30px] rounded-full border border-[#BDBDBD] xl:flex justify-center items-center absolute right-0 top-[70%] bg-white  cursor-pointer"
+            >
               <GrShareOption className="text-[19px] text-[#107D91]  " />
             </div>
           </div>
@@ -299,29 +299,43 @@ const Affiliates = () => {
           <Table
             dataSource={displayedReferrals}
             columns={columns}
+            locale={{
+              emptyText: (
+                <div className="flex items-center justify-center h-[200px] text-[#46505E] font-medium text-[14px] text-center">
+                  Share with your friends, start getting your referral bonus.
+                </div>
+              ),
+            }}
             pagination={{ hideOnSinglePage: true }}
             scroll={{ y: 300, x: '100%' }}
             className="custom-table w-full  rounded-md hidden xl:block "
           />
-          <div className=" border-t border-[#BDBDBD] py-5 px-2 h-[50vh] flex flex-col gap-5  xl:hidden overflow-y-scroll [&::-webkit-scrollbar]:hidden  [scrollbar-width:none]  ">
+          {displayedReferrals?.length>0 ? (displayedReferrals.map((refferal)=>(
+            <div className=" border-t border-[#BDBDBD] py-5 px-2 h-[50vh] flex flex-col gap-5  xl:hidden overflow-y-scroll [&::-webkit-scrollbar]:hidden  [scrollbar-width:none]  ">
             <div className="w-full flex flex-col gap-3  py-5 px-5  shadow-md rounded-[14px] ">
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-[18px] md:text-[22px] ">
-                  Minhaj
+                  {refferal.full_name}
                 </p>
                 <p className="text-[#04BA2C] cursor-pointer  text-[18px] md:text-[22px] ">
                   5$
                 </p>
               </div>
-              <p className="md:text-[18px]">email@gmail.com</p>
+              <p className="md:text-[18px]">{refferal.email}</p>
               <div className="flex items-center justify-between ">
                 <p>
-                  DOJ : <span className="text-[#107D91]">18/08/2023</span>
+                  DOJ : <span className="text-[#107D91]">{refferal.referred_date ? item.referred_date.split('T')[0] : ''}</span>
                 </p>
-                <p className="text-[#107D91]">+91 989009898098</p>
+                <p className="text-[#107D91]">{refferal.phone_number}</p>
               </div>
             </div>
           </div>
+          ))
+        ):(
+          <p className='text-center mt-4 xl:hidden'>Share with your friends, start getting your referral bonus.</p>
+        )
+            
+          }
         </div>
       </div>
       {/* Toast Notification */}
