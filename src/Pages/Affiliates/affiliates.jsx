@@ -72,6 +72,7 @@ const Affiliates = () => {
       credits: '+2500$',
     },
   ];
+
   const columns = [
     {
       title: 'Id',
@@ -114,8 +115,8 @@ const Affiliates = () => {
   const [showToast, setShowToast] = useState(false);
   const [refferalData, setRefferalData] = useState([])
 
-  const uuid = "68d6dfcc-0ffd-4810-bd44-3e3492c5a742"
-  // const uuid = localStorage.getItem("uuid")
+  // const uuid = "2feba1ab-5451-40d4-b41d-b07b5ce19a26"
+  const uuid = localStorage.getItem("uuid")
 
   console.log(user.referral);
   
