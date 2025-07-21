@@ -7,16 +7,18 @@ import { API_URL } from '../../services/api_url';
 
 const NavBar = ({ onLoginClick }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate()
-  const [user, setUser] = useState({})
-  const uuid = localStorage.getItem("uuid")
+  const navigate = useNavigate();
+  const [user, setUser] = useState({});
+  const uuid = localStorage.getItem('uuid');
   console.log(uuid);
 
   const fetchUser = async () => {
     try {
-      const response = await axiosInstance.get(API_URL.USER.GET_USER_UUID(uuid));
+      const response = await axiosInstance.get(
+        API_URL.USER.GET_USER_UUID(uuid)
+      );
       console.log(response);
-      setUser(response.data.data)
+      setUser(response.data.data);
     } catch (err) {
       console.log(err);
     }
@@ -24,7 +26,7 @@ const NavBar = ({ onLoginClick }) => {
 
   useEffect(() => {
     fetchUser();
-  }, [])
+  }, []);
 
   return (
     <>
@@ -36,20 +38,24 @@ const NavBar = ({ onLoginClick }) => {
           />
         </div>
 
-        {!uuid ? (<div
-          className=" flex gap-3 items-center justifu-center text-white text-[24px] lg:text-[30px] cursor-pointer"
-          onClick={() => setSidebarOpen(true)}
-        >
+        {!uuid ? (
           <div
-            onClick={onLoginClick}
-            className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
+            className=" flex gap-3 items-center justifu-center text-white text-[24px] lg:text-[30px] cursor-pointer"
+            onClick={() => setSidebarOpen(true)}
           >
-            <p>SignUp</p>
+            <div
+              onClick={onLoginClick}
+              className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
+            >
+              <p>Login/SignUp</p>
+            </div>
+            <RxHamburgerMenu className="xl:hidden" />
           </div>
-          <RxHamburgerMenu className='xl:hidden' />
-        </div>
         ) : (
-          <div className=" lg:w-[105px] xl:w-[115px] h-full xl:flex items-center justify-between hidden hover:cursor-pointer"  onClick={()=>navigate('/user/profile')}>
+          <div
+            className=" lg:w-[105px] xl:w-[115px] h-full xl:flex items-center justify-between hidden hover:cursor-pointer"
+            onClick={() => navigate('/user/profile')}
+          >
             <div className=" rounded-full border-2 border-white">
               <img
                 src="/Images/username.png"
@@ -60,9 +66,12 @@ const NavBar = ({ onLoginClick }) => {
               <p>
                 <i> Hello !</i>
               </p>
-              <p className=" text-[14px] xl:text-[16px] font-username">{user.full_name}</p>
+              <p className=" text-[14px] xl:text-[16px] font-username">
+                {user.full_name}
+              </p>
             </div>
-          </div>)}
+          </div>
+        )}
       </nav>
       <MobileSidebar
         isOpen={sidebarOpen}
