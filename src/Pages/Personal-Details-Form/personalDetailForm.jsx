@@ -739,7 +739,7 @@ const MultiStepForm = () => {
       const sellerPayload = {
         user_uuid: uuid,
         store_name: sellerData.store_name,
-        categories: sellerData.categories,
+        category_ids: sellerData.categories, // <-- changed from 'categories' to 'category_ids'
         inventory_estimate: sellerData.inventory_estimate,
         specialization: sellerData.specialization,
       };
