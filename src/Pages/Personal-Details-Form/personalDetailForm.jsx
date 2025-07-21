@@ -26,6 +26,8 @@ const PersonalDetailForm = ({
     isError: false,
   });
   const uuid = localStorage.getItem('uuid');
+  const [localErrors, setLocalErrors] = useState({});
+  const [apiErrors, setApiErrors] = useState({});
 
   const fetchUser = async () => {
     try {
@@ -219,9 +221,24 @@ const PersonalDetailForm = ({
     }
   };
 
-  const handleNext = e => {
+  const validateAddress = () => {
+    const errors = {};
+    if (!addressData.house_name) errors.house_name = 'House name is required';
+    if (!addressData.street_name) errors.street_name = 'Street address is required';
+    if (!addressData.city) errors.city = 'City is required';
+    if (!addressData.state) errors.state = 'State is required';
+    if (!addressData.country) errors.country = 'Country is required';
+    if (!addressData.pin) errors.pin = 'Pin is required';
+    // image is optional
+    return errors;
+  };
+
+  const handleNext = async (e) => {
     e.preventDefault();
-    // Just move to next step without submitting
+    const errors = validateAddress();
+    setLocalErrors(errors);
+    setApiErrors({});
+    if (Object.keys(errors).length > 0) return;
     onNext();
   };
 
@@ -230,14 +247,27 @@ const PersonalDetailForm = ({
       {/* Left Side */}
       <div className="border-r-0 sm:border-r border-b sm:border-b-0 border-[#DEDEDE] w-full sm:w-[50%] px-5 sm:px-10 flex flex-col gap-5 pb-5 sm:pb-0">
         <form className="flex flex-col gap-8" onSubmit={handleNext}>
-          <div className="bg-[#C2C2C233] w-fit rounded-sm flex flex-col items-center">
+          <div className="bg-[#C2C2C233] w-fit rounded-sm flex flex-col items-center relative">
             {/* File input for image upload, show preview or placeholder */}
-            <label htmlFor="profile-image-upload" className="cursor-pointer">
+            <label htmlFor="profile-image-upload" className="cursor-pointer relative group">
               <img
                 src={imagePreview}
                 className="xl:w-[210px] xl:h-[150px] w-[180px] h-[130px] shadow object-cover"
                 alt="Profile Preview"
               />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 rounded-sm">
+                <button
+                  type="button"
+                  className="bg-white text-[#467EF8] px-3 py-1 rounded shadow text-xs font-semibold flex items-center gap-1"
+                  onClick={e => {
+                    e.preventDefault();
+                    document.getElementById('profile-image-upload').click();
+                  }}
+                >
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M5 20h14a2 2 0 0 0 2-2V8.83a2 2 0 0 0-.59-1.41l-3.83-3.83A2 2 0 0 0 15.17 3H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Zm7-3a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
+                  Edit
+                </button>
+              </div>
             </label>
             <input
               id="profile-image-upload"
@@ -336,51 +366,75 @@ const PersonalDetailForm = ({
             Addresses
           </label>
           <div className="flex flex-col gap-4">
-            <input
-              className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] focus:outline-none focus:border-[#8d8c8c] bg-[#F4F4F4] pl-1"
-              placeholder="House name, Flat no"
-              name="house_name"
-              value={addressData.house_name}
-              onChange={handleChange}
-            />
-            <input
-              className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
-              placeholder="Street address"
-              name="street_name"
-              value={addressData.street_name}
-              onChange={handleChange}
-            />
+            <div className="flex flex-col">
+              <input
+                className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] focus:outline-none focus:border-[#8d8c8c] bg-[#F4F4F4] pl-1"
+                placeholder="House name, Flat no"
+                name="house_name"
+                value={addressData.house_name}
+                onChange={handleChange}
+              />
+              {localErrors.house_name && <span className="text-red-500 text-xs mt-1">{localErrors.house_name}</span>}
+              {apiErrors.house_name && <span className="text-red-500 text-xs mt-1">{apiErrors.house_name}</span>}
+            </div>
+            <div className="flex flex-col">
+              <input
+                className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
+                placeholder="Street address"
+                name="street_name"
+                value={addressData.street_name}
+                onChange={handleChange}
+              />
+              {localErrors.street_name && <span className="text-red-500 text-xs mt-1">{localErrors.street_name}</span>}
+              {apiErrors.street_name && <span className="text-red-500 text-xs mt-1">{apiErrors.street_name}</span>}
+            </div>
             {/* No landmark field in API, so skipping */}
             <div className="flex flex-col xl:flex-row gap-[10px]">
-              <input
-                className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
-                placeholder="City"
-                name="city"
-                value={addressData.city}
-                onChange={handleChange}
-              />
-              <input
-                className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
-                placeholder="State"
-                name="state"
-                value={addressData.state}
-                onChange={handleChange}
-              />
+              <div className="flex flex-col w-full xl:w-auto">
+                <input
+                  className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
+                  placeholder="City"
+                  name="city"
+                  value={addressData.city}
+                  onChange={handleChange}
+                />
+                {localErrors.city && <span className="text-red-500 text-xs mt-1">{localErrors.city}</span>}
+                {apiErrors.city && <span className="text-red-500 text-xs mt-1">{apiErrors.city}</span>}
+              </div>
+              <div className="flex flex-col w-full xl:w-auto">
+                <input
+                  className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
+                  placeholder="State"
+                  name="state"
+                  value={addressData.state}
+                  onChange={handleChange}
+                />
+                {localErrors.state && <span className="text-red-500 text-xs mt-1">{localErrors.state}</span>}
+                {apiErrors.state && <span className="text-red-500 text-xs mt-1">{apiErrors.state}</span>}
+              </div>
             </div>
-            <input
-              className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
-              placeholder="Country"
-              name="country"
-              value={addressData.country}
-              onChange={handleChange}
-            />
-            <input
-              className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
-              placeholder="Pin"
-              name="pin"
-              value={addressData.pin}
-              onChange={handleChange}
-            />
+            <div className="flex flex-col">
+              <input
+                className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
+                placeholder="Country"
+                name="country"
+                value={addressData.country}
+                onChange={handleChange}
+              />
+              {localErrors.country && <span className="text-red-500 text-xs mt-1">{localErrors.country}</span>}
+              {apiErrors.country && <span className="text-red-500 text-xs mt-1">{apiErrors.country}</span>}
+            </div>
+            <div className="flex flex-col">
+              <input
+                className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
+                placeholder="Pin"
+                name="pin"
+                value={addressData.pin}
+                onChange={handleChange}
+              />
+              {localErrors.pin && <span className="text-red-500 text-xs mt-1">{localErrors.pin}</span>}
+              {apiErrors.pin && <span className="text-red-500 text-xs mt-1">{apiErrors.pin}</span>}
+            </div>
           </div>
           <button
             type="submit"
@@ -404,6 +458,8 @@ const PersonalDetailForm = ({
 const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]); // ensure array
+  const [localErrors, setLocalErrors] = useState({});
+  const [apiErrors, setApiErrors] = useState({});
 
   const fetchCategories = async () => {
     try {
@@ -435,9 +491,22 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
     }
   };
 
-  const handleSubmit = e => {
+  const validateSeller = () => {
+    const errors = {};
+    if (!sellerData.store_name) errors.store_name = 'Store name is required';
+    if (!sellerData.categories || sellerData.categories.length === 0) errors.categories = 'Select at least one category';
+    if (!sellerData.inventory_estimate) errors.inventory_estimate = 'Inventory estimate is required';
+    if (!sellerData.specialization) errors.specialization = 'Specialization is required';
+    return errors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmitAll();
+    const errors = validateSeller();
+    setLocalErrors(errors);
+    setApiErrors({});
+    if (Object.keys(errors).length > 0) return;
+    onSubmitAll(setApiErrors);
   };
 
   return (
@@ -455,6 +524,8 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
               value={sellerData.store_name || ''}
               onChange={handleChange}
             />
+            {localErrors.store_name && <span className="text-red-500 text-xs">{localErrors.store_name}</span>}
+            {apiErrors.store_name && <span className="text-red-500 text-xs">{apiErrors.store_name}</span>}
           </div>
           <div className="flex flex-col gap-1">
             <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
@@ -474,6 +545,8 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
                 </label>
               ))}
             </div>
+            {localErrors.categories && <span className="text-red-500 text-xs">{localErrors.categories}</span>}
+            {apiErrors.categories && <span className="text-red-500 text-xs">{apiErrors.categories}</span>}
           </div>
           <div className="flex flex-col xl:flex-row xl:items-center gap-1">
             <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
@@ -491,6 +564,8 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
               <option value="1000-5000">1000 - 5000</option>
               <option value="5000+">5000+</option>
             </select>
+            {localErrors.inventory_estimate && <span className="text-red-500 text-xs">{localErrors.inventory_estimate}</span>}
+            {apiErrors.inventory_estimate && <span className="text-red-500 text-xs">{apiErrors.inventory_estimate}</span>}
           </div>
         </form>
       </div>
@@ -507,6 +582,8 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
             value={sellerData.specialization || ''}
             onChange={handleChange}
           ></textarea>
+          {localErrors.specialization && <span className="text-red-500 text-xs">{localErrors.specialization}</span>}
+          {apiErrors.specialization && <span className="text-red-500 text-xs">{apiErrors.specialization}</span>}
           <button
             onClick={handleSubmit}
             className=" w-[120px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[16px] flex items-center justify-center self-end active:scale-95 transition-all duration-300 ease-in-out cursor-pointer"
@@ -622,7 +699,7 @@ const MultiStepForm = () => {
     fetchUser();
   }, []);
 
-  const handleSubmitAll = async () => {
+  const handleSubmitAll = async (setApiErrors) => {
     setIsSubmitting(true);
     try {
       // Submit address data
@@ -638,14 +715,25 @@ const MultiStepForm = () => {
         addressFormData.append('image', addressData.image);
       }
 
-      const addressResponse = await axiosInstance.post(
-        API_URL.ADDRESS.POST_ADDRESS,
-        addressFormData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
+      let addressResponse;
+      try {
+        addressResponse = await axiosInstance.post(
+          API_URL.ADDRESS.POST_ADDRESS,
+          addressFormData,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          }
+        );
+        console.log('Address submitted:', addressResponse);
+      } catch (err) {
+        if (err.response && err.response.data && err.response.data.errors) {
+          setApiErrors(err.response.data.errors);
+        } else {
+          setApiErrors({ general: 'Failed to submit address' });
         }
-      );
-      console.log('Address submitted:', addressResponse);
+        setIsSubmitting(false);
+        return;
+      }
 
       // Submit seller data
       const sellerPayload = {
@@ -656,19 +744,29 @@ const MultiStepForm = () => {
         specialization: sellerData.specialization,
       };
 
-      const sellerResponse = await axiosInstance.post(
-        API_URL.SELLERS.POST_SELLERS,
-        sellerPayload
-      );
-      console.log('Seller data submitted:', sellerResponse);
+      try {
+        const sellerResponse = await axiosInstance.post(
+          API_URL.SELLERS.POST_SELLERS,
+          sellerPayload
+        );
+        console.log('Seller data submitted:', sellerResponse);
+      } catch (err) {
+        if (err.response && err.response.data && err.response.data.errors) {
+          setApiErrors(err.response.data.errors);
+        } else {
+          setApiErrors({ general: 'Failed to submit seller data' });
+        }
+        setIsSubmitting(false);
+        return;
+      }
 
       // Navigate to profile page after successful submission
       setTimeout(() => {
         window.location.href = '/user/profile';
       }, 200);
     } catch (err) {
-      console.log('Error submitting forms:', err);
-      // You might want to show an error message to the user here
+      setApiErrors({ general: 'Unexpected error occurred' });
+      setIsSubmitting(false);
     } finally {
       setIsSubmitting(false);
     }
