@@ -69,6 +69,9 @@ try {
 /**
  * Initializes reCAPTCHA verifier
  */
+/**
+ * Initializes reCAPTCHA verifier
+ */
 export const initializeRecaptcha = async (
   containerId: string
 ): Promise<boolean> => {
@@ -77,6 +80,22 @@ export const initializeRecaptcha = async (
     return false;
   }
 
+  // Don't re-initialize if already exists and is valid
+  if (recaptchaVerifier) {
+    try {
+      // Try to access a property to check if the verifier is still valid
+      // If it throws an error, we know it's destroyed
+      const isValid = recaptchaVerifier.type === 'recaptcha';
+      if (isValid) {
+        return true;
+      }
+    } catch (error) {
+      // Verifier is destroyed or invalid, continue to create new one
+      console.log("Existing reCAPTCHA verifier is invalid, creating new one");
+    }
+  }
+
+  // Clean up any existing verifier first
   resetRecaptcha();
 
   try {
@@ -85,6 +104,9 @@ export const initializeRecaptcha = async (
       console.error(`Container with ID ${containerId} not found`);
       return false;
     }
+
+    // Clear container content
+    container.innerHTML = '';
 
     recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
       size: "invisible",
@@ -105,6 +127,12 @@ export const initializeRecaptcha = async (
     return false;
   }
 };
+
+/**
+ * Sends OTP to the provided phone number
+ */
+// Update the sendOTP function in your firebaseApp.ts file
+// Replace the existing sendOTP function with this updated version:
 
 /**
  * Sends OTP to the provided phone number
@@ -132,10 +160,21 @@ export const sendOTP = async (
   }
 
   try {
-    // Format phone number if not already formatted
+    // Use the phone number as provided (it should already include the country code)
     let formattedNumber = phoneNumber;
+    
+    // Only add + if it's missing
     if (!phoneNumber.startsWith("+")) {
-      formattedNumber = `+91${phoneNumber.replace(/^0+/, "")}`;
+      formattedNumber = `+${phoneNumber}`;
+    }
+
+    // Basic validation - ensure it starts with + and has reasonable length
+    if (!formattedNumber.match(/^\+[1-9]\d{1,14}$/)) {
+      return {
+        success: false,
+        error: "Invalid phone number format. Please enter a valid international number.",
+        code: "auth/invalid-phone-number",
+      };
     }
 
     confirmationResult = await signInWithPhoneNumber(
@@ -158,7 +197,7 @@ export const sendOTP = async (
       switch (authError.code) {
         case "auth/invalid-phone-number":
           userMessage =
-            "Invalid phone number format. Please enter a valid Indian mobile number.";
+            "Invalid phone number format. Please enter a valid phone number.";
           break;
         case "auth/quota-exceeded":
           userMessage = "SMS quota exceeded. Please try again later.";
@@ -635,21 +674,32 @@ export const onEmailVerificationStateChange = (callback: (isVerified: boolean, u
 export const resetRecaptcha = (): void => {
   try {
     if (recaptchaVerifier) {
-      recaptchaVerifier.clear();
+      try {
+        recaptchaVerifier.clear();
+      } catch (clearError) {
+        console.log("Error clearing reCAPTCHA:", clearError);
+      }
       recaptchaVerifier = null;
     }
     confirmationResult = null;
 
-    // Clean up DOM elements
+    // More thorough cleanup
     const badges = document.querySelectorAll(".grecaptcha-badge");
     badges.forEach((badge) => badge.remove());
 
-    const container = document.getElementById("recaptcha-container");
-    if (container) container.innerHTML = "";
+    // Clean up all reCAPTCHA related elements
+    const recaptchaElements = document.querySelectorAll('[id^="grecaptcha-"], [src*="recaptcha"], [src*="gstatic.com"]');
+    recaptchaElements.forEach((el) => el.remove());
 
-    document
-      .querySelectorAll('[id^="grecaptcha-"]')
-      .forEach((el) => el.remove());
+    const container = document.getElementById("recaptcha-container");
+    if (container) {
+      container.innerHTML = "";
+    }
+
+    // Remove any reCAPTCHA scripts that might be lingering
+    const scripts = document.querySelectorAll('script[src*="recaptcha"]');
+    scripts.forEach(script => script.remove());
+
   } catch (error) {
     console.log("Error resetting reCAPTCHA:", error);
   }
