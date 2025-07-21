@@ -118,6 +118,8 @@ const MobileSidebar = ({ isOpen, onClose }) => {
           </div>
         </div>
 
+
+
         {/* Logout Button (bottom fixed) */}
         <div className="p-4 sm:p-5">
           <div
