@@ -224,7 +224,8 @@ const PersonalDetailForm = ({
   const validateAddress = () => {
     const errors = {};
     if (!addressData.house_name) errors.house_name = 'House name is required';
-    if (!addressData.street_name) errors.street_name = 'Street address is required';
+    if (!addressData.street_name)
+      errors.street_name = 'Street address is required';
     if (!addressData.city) errors.city = 'City is required';
     if (!addressData.state) errors.state = 'State is required';
     if (!addressData.country) errors.country = 'Country is required';
@@ -233,7 +234,7 @@ const PersonalDetailForm = ({
     return errors;
   };
 
-  const handleNext = async (e) => {
+  const handleNext = async e => {
     e.preventDefault();
     const errors = validateAddress();
     setLocalErrors(errors);
@@ -249,7 +250,10 @@ const PersonalDetailForm = ({
         <form className="flex flex-col gap-8" onSubmit={handleNext}>
           <div className="bg-[#C2C2C233] w-fit rounded-sm flex flex-col items-center relative">
             {/* File input for image upload, show preview or placeholder */}
-            <label htmlFor="profile-image-upload" className="cursor-pointer relative group">
+            <label
+              htmlFor="profile-image-upload"
+              className="cursor-pointer relative group"
+            >
               <img
                 src={imagePreview}
                 className="xl:w-[210px] xl:h-[150px] w-[180px] h-[130px] shadow object-cover"
@@ -264,7 +268,12 @@ const PersonalDetailForm = ({
                     document.getElementById('profile-image-upload').click();
                   }}
                 >
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M5 20h14a2 2 0 0 0 2-2V8.83a2 2 0 0 0-.59-1.41l-3.83-3.83A2 2 0 0 0 15.17 3H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Zm7-3a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                    <path
+                      fill="currentColor"
+                      d="M5 20h14a2 2 0 0 0 2-2V8.83a2 2 0 0 0-.59-1.41l-3.83-3.83A2 2 0 0 0 15.17 3H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Zm7-3a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"
+                    />
+                  </svg>
                   Edit
                 </button>
               </div>
@@ -312,7 +321,7 @@ const PersonalDetailForm = ({
             <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
               Email
             </label>
-            <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+            <div className="flex flex-col sm:flex-row sm:gap-2  items-start sm:items-center">
               <input
                 className="xl:w-[310px] w-[90%] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-3 focus:outline-none focus:border-[#8d8c8c]"
                 placeholder={user.email}
@@ -326,7 +335,7 @@ const PersonalDetailForm = ({
                   emailVerificationStatus.isSending ||
                   emailVerificationStatus.isVerified
                 }
-                className={`text-[16px] font-bold font-sans px-4 py-2 rounded transition-all duration-200 ease-initial ${
+                className={`text-[14px] xl:text-[16px] font-bold font-sans  py-2 rounded transition-all duration-200 ease-initial ${
                   emailVerificationStatus.isVerified
                     ? 'text-[#16B338] cursor-default'
                     : emailVerificationStatus.isSending
@@ -361,7 +370,7 @@ const PersonalDetailForm = ({
 
       {/* Right Side */}
       <div className="w-full sm:w-[50%] px-5 sm:px-10 flex flex-col gap-5 ">
-        <form className="flex flex-col gap-5" onSubmit={handleNext}>
+        <form className="flex flex-col gap-5 py-5" onSubmit={handleNext}>
           <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
             Addresses
           </label>
@@ -374,8 +383,16 @@ const PersonalDetailForm = ({
                 value={addressData.house_name}
                 onChange={handleChange}
               />
-              {localErrors.house_name && <span className="text-red-500 text-xs mt-1">{localErrors.house_name}</span>}
-              {apiErrors.house_name && <span className="text-red-500 text-xs mt-1">{apiErrors.house_name}</span>}
+              {localErrors.house_name && (
+                <span className="text-red-500 text-xs mt-1">
+                  {localErrors.house_name}
+                </span>
+              )}
+              {apiErrors.house_name && (
+                <span className="text-red-500 text-xs mt-1">
+                  {apiErrors.house_name}
+                </span>
+              )}
             </div>
             <div className="flex flex-col">
               <input
@@ -385,8 +402,16 @@ const PersonalDetailForm = ({
                 value={addressData.street_name}
                 onChange={handleChange}
               />
-              {localErrors.street_name && <span className="text-red-500 text-xs mt-1">{localErrors.street_name}</span>}
-              {apiErrors.street_name && <span className="text-red-500 text-xs mt-1">{apiErrors.street_name}</span>}
+              {localErrors.street_name && (
+                <span className="text-red-500 text-xs mt-1">
+                  {localErrors.street_name}
+                </span>
+              )}
+              {apiErrors.street_name && (
+                <span className="text-red-500 text-xs mt-1">
+                  {apiErrors.street_name}
+                </span>
+              )}
             </div>
             {/* No landmark field in API, so skipping */}
             <div className="flex flex-col xl:flex-row gap-[10px]">
@@ -398,8 +423,16 @@ const PersonalDetailForm = ({
                   value={addressData.city}
                   onChange={handleChange}
                 />
-                {localErrors.city && <span className="text-red-500 text-xs mt-1">{localErrors.city}</span>}
-                {apiErrors.city && <span className="text-red-500 text-xs mt-1">{apiErrors.city}</span>}
+                {localErrors.city && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {localErrors.city}
+                  </span>
+                )}
+                {apiErrors.city && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {apiErrors.city}
+                  </span>
+                )}
               </div>
               <div className="flex flex-col w-full xl:w-auto">
                 <input
@@ -409,8 +442,16 @@ const PersonalDetailForm = ({
                   value={addressData.state}
                   onChange={handleChange}
                 />
-                {localErrors.state && <span className="text-red-500 text-xs mt-1">{localErrors.state}</span>}
-                {apiErrors.state && <span className="text-red-500 text-xs mt-1">{apiErrors.state}</span>}
+                {localErrors.state && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {localErrors.state}
+                  </span>
+                )}
+                {apiErrors.state && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {apiErrors.state}
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex flex-col">
@@ -421,8 +462,16 @@ const PersonalDetailForm = ({
                 value={addressData.country}
                 onChange={handleChange}
               />
-              {localErrors.country && <span className="text-red-500 text-xs mt-1">{localErrors.country}</span>}
-              {apiErrors.country && <span className="text-red-500 text-xs mt-1">{apiErrors.country}</span>}
+              {localErrors.country && (
+                <span className="text-red-500 text-xs mt-1">
+                  {localErrors.country}
+                </span>
+              )}
+              {apiErrors.country && (
+                <span className="text-red-500 text-xs mt-1">
+                  {apiErrors.country}
+                </span>
+              )}
             </div>
             <div className="flex flex-col">
               <input
@@ -432,8 +481,16 @@ const PersonalDetailForm = ({
                 value={addressData.pin}
                 onChange={handleChange}
               />
-              {localErrors.pin && <span className="text-red-500 text-xs mt-1">{localErrors.pin}</span>}
-              {apiErrors.pin && <span className="text-red-500 text-xs mt-1">{apiErrors.pin}</span>}
+              {localErrors.pin && (
+                <span className="text-red-500 text-xs mt-1">
+                  {localErrors.pin}
+                </span>
+              )}
+              {apiErrors.pin && (
+                <span className="text-red-500 text-xs mt-1">
+                  {apiErrors.pin}
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -466,7 +523,9 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
       const response = await axiosInstance.get(API_URL.SELLERS.CATEGORY);
       console.log(response);
       // Ensure categories is an array
-      setCategories(Array.isArray(response.data.data) ? response.data.data : []);
+      setCategories(
+        Array.isArray(response.data.data) ? response.data.data : []
+      );
     } catch (err) {
       console.log(err);
     }
@@ -480,11 +539,11 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
       const id = Number(value); // or value if IDs are strings
-      setSellerData((prev) => ({
+      setSellerData(prev => ({
         ...prev,
         categories: checked
           ? [...(prev.categories || []), id]
-          : (prev.categories || []).filter(catId => catId !== id)
+          : (prev.categories || []).filter(catId => catId !== id),
       }));
     } else {
       setSellerData(prev => ({ ...prev, [name]: value }));
@@ -494,13 +553,16 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
   const validateSeller = () => {
     const errors = {};
     if (!sellerData.store_name) errors.store_name = 'Store name is required';
-    if (!sellerData.categories || sellerData.categories.length === 0) errors.categories = 'Select at least one category';
-    if (!sellerData.inventory_estimate) errors.inventory_estimate = 'Inventory estimate is required';
-    if (!sellerData.specialization) errors.specialization = 'Specialization is required';
+    if (!sellerData.categories || sellerData.categories.length === 0)
+      errors.categories = 'Select at least one category';
+    if (!sellerData.inventory_estimate)
+      errors.inventory_estimate = 'Inventory estimate is required';
+    if (!sellerData.specialization)
+      errors.specialization = 'Specialization is required';
     return errors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const errors = validateSeller();
     setLocalErrors(errors);
@@ -524,29 +586,49 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
               value={sellerData.store_name || ''}
               onChange={handleChange}
             />
-            {localErrors.store_name && <span className="text-red-500 text-xs">{localErrors.store_name}</span>}
-            {apiErrors.store_name && <span className="text-red-500 text-xs">{apiErrors.store_name}</span>}
+            {localErrors.store_name && (
+              <span className="text-red-500 text-xs">
+                {localErrors.store_name}
+              </span>
+            )}
+            {apiErrors.store_name && (
+              <span className="text-red-500 text-xs">
+                {apiErrors.store_name}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
               Category
             </label>
             <div className="flex gap-5 flex-wrap">
-              {Array.isArray(categories) && categories.map((cat) => (
-                <label key={cat.id} className="flex gap-1 items-center font-regular text-[#464646]">
-                  <input
-                    type="checkbox"
-                    className="cursor-pointer"
-                    value={cat.id}
-                    checked={sellerData.categories.includes(cat.id)}
-                    onChange={handleChange}
-                  />
-                  {cat.name}
-                </label>
-              ))}
+              {Array.isArray(categories) &&
+                categories.map(cat => (
+                  <label
+                    key={cat.id}
+                    className="flex gap-1 items-center font-regular text-[#464646]"
+                  >
+                    <input
+                      type="checkbox"
+                      className="cursor-pointer"
+                      value={cat.id}
+                      checked={sellerData.categories.includes(cat.id)}
+                      onChange={handleChange}
+                    />
+                    {cat.name}
+                  </label>
+                ))}
             </div>
-            {localErrors.categories && <span className="text-red-500 text-xs">{localErrors.categories}</span>}
-            {apiErrors.categories && <span className="text-red-500 text-xs">{apiErrors.categories}</span>}
+            {localErrors.categories && (
+              <span className="text-red-500 text-xs">
+                {localErrors.categories}
+              </span>
+            )}
+            {apiErrors.categories && (
+              <span className="text-red-500 text-xs">
+                {apiErrors.categories}
+              </span>
+            )}
           </div>
           <div className="flex flex-col xl:flex-row xl:items-center gap-1">
             <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
@@ -564,13 +646,21 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
               <option value="1000-5000">1000 - 5000</option>
               <option value="5000+">5000+</option>
             </select>
-            {localErrors.inventory_estimate && <span className="text-red-500 text-xs">{localErrors.inventory_estimate}</span>}
-            {apiErrors.inventory_estimate && <span className="text-red-500 text-xs">{apiErrors.inventory_estimate}</span>}
+            {localErrors.inventory_estimate && (
+              <span className="text-red-500 text-xs">
+                {localErrors.inventory_estimate}
+              </span>
+            )}
+            {apiErrors.inventory_estimate && (
+              <span className="text-red-500 text-xs">
+                {apiErrors.inventory_estimate}
+              </span>
+            )}
           </div>
         </form>
       </div>
       <div className="w-full sm:w-[50%] px-5 sm:px-10 relative">
-        <form className="flex flex-col gap-10" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-5 py-5" onSubmit={handleSubmit}>
           <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
             Specialization
           </label>
@@ -582,8 +672,16 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
             value={sellerData.specialization || ''}
             onChange={handleChange}
           ></textarea>
-          {localErrors.specialization && <span className="text-red-500 text-xs">{localErrors.specialization}</span>}
-          {apiErrors.specialization && <span className="text-red-500 text-xs">{apiErrors.specialization}</span>}
+          {localErrors.specialization && (
+            <span className="text-red-500 text-xs">
+              {localErrors.specialization}
+            </span>
+          )}
+          {apiErrors.specialization && (
+            <span className="text-red-500 text-xs">
+              {apiErrors.specialization}
+            </span>
+          )}
           <button
             onClick={handleSubmit}
             className=" w-[120px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[16px] flex items-center justify-center self-end active:scale-95 transition-all duration-300 ease-in-out cursor-pointer"
@@ -676,7 +774,6 @@ const MultiStepForm = () => {
   });
 
   console.log(sellerData);
-  
 
   const [imagePreview, setImagePreview] = useState(
     '/Images/image-placeholder.png'
@@ -699,7 +796,7 @@ const MultiStepForm = () => {
     fetchUser();
   }, []);
 
-  const handleSubmitAll = async (setApiErrors) => {
+  const handleSubmitAll = async setApiErrors => {
     setIsSubmitting(true);
     try {
       // Submit address data

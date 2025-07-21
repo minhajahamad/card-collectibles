@@ -755,7 +755,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                       <label className="font-medium text-[14px] text-[#111111]">
                         Phone Number
                       </label>
-                      <div className="flex  sm:flex-row gap-3 items-start">
+                      <div className="flex  sm:flex-row gap-1 items-center">
                         {/* Country Code Button */}
                         <div
                           className="w-[20%] sm:w-[25%] xl:w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
@@ -781,7 +781,7 @@ const Modal = ({ onClose, initialView = 'login' }) => {
                         {/* Send OTP Button */}
                         <div
                           onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
-                          className={`rounded-[9px] w-full sm:w-[35%] xl:w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm ${
+                          className={`rounded-[9px] w-full sm:w-[35%] xl:w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm  ${
                             isOtpSending
                               ? 'bg-[#a5a5a5] cursor-not-allowed'
                               : 'bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95'

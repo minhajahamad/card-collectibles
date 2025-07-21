@@ -40,21 +40,27 @@
 }
 
 /* Marquee effect */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+}
+
 .marquee-track {
   display: flex;
   width: fit-content;
-  animation: marquee 10s linear infinite;
+  animation: marquee 20s linear infinite;
 }
 
 .marquee-image {
   flex-shrink: 0;
-  padding-right: 1.5rem;
-  /* Optional: Give fixed width to image for consistent loop */
+  padding-right: 1rem;
+  width: 150px;
+  height: 200px;
 }
 
 @keyframes marquee {
   0% {
-    transform: translateX(0%);
+    transform: translateX(0);
   }
   100% {
     transform: translateX(-50%);
@@ -157,8 +163,6 @@
     opacity: 1;
   }
 }
-
-
 
 /* Hide scrollbar globally */
 html {
