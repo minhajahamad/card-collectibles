@@ -3,10 +3,19 @@ export const API_URL = {
         REGISTER: "/api/register/",
         REFFERAL_REGISTER:code=> `/api/refer/${code}/`
     },
+    LOGIN:{
+        LOGIN: "/api/login/"
+    },
     USER: {
         GET_USER: "/api/users/",
         GET_USER_UUID:uuid=> `/api/user/${uuid}/`,
-        PATCH_USER_UUID:uuid=> `/api/user/${uuid}/`
+        PATCH_USER_UUID:uuid=> `/api/user/update/${uuid}/`
+
+    },
+
+    CATEGORY: {
+        GET_CATEGORY: "/api/categories/",
+      
 
     },
     ADDRESS: {
@@ -19,7 +28,7 @@ export const API_URL = {
     SELLERS: {
         GET__SELLERS: "/api/sellers/",
         POST_SELLERS: "/api/sellers/",
-        PATCH_SELLERS:id => `/api/sellers/${id}/`,
+        PATCH_SELLERS:uuid => `/api/seller/update/${uuid}/`,
         CATEGORY: "/api/categories/",
     },
     AFFILIATES: {

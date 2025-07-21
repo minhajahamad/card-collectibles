@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const API_BASE_URL = "https://card-collectibles-2.onrender.com/";
+const API_BASE_URL = "https://card-collectibles-2.onrender.com";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
