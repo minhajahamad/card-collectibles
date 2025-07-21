@@ -19,7 +19,7 @@ const Modal = ({ onClose }) => {
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('refferal-code');
   console.log(referralCode);
-  
+
   const [showOtp, setShowOtp] = useState(false);
   const [loader, setLoader] = useState(false);
   const [verifyOtpLoader, setVerifyOtpLoader] = useState(false);
@@ -57,6 +57,16 @@ const Modal = ({ onClose }) => {
       if (recaptchaDiv) {
         recaptchaDiv.remove();
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Disable scroll on mount
+    document.body.style.overflow = 'hidden';
+
+    // Enable scroll on unmount
+    return () => {
+      document.body.style.overflow = 'auto';
     };
   }, []);
 
@@ -232,14 +242,13 @@ const Modal = ({ onClose }) => {
           API_URL.REGISTER.REFFERAL_REGISTER(referralCode),
           formData
         );
-        console.log("refferal");
+        console.log('refferal');
       } else {
         response = await axiosInstance.post(
           API_URL.REGISTER.REGISTER,
           formData
         );
-        console.log("normal");
-        
+        console.log('normal');
       }
       console.log(response);
 
@@ -274,6 +283,12 @@ const Modal = ({ onClose }) => {
     }
   };
 
+  // State for Login
+  const [showSigUp, setShowSignUp] = useState(true);
+
+  // Show Verify OTP
+  const [showVerifyOtp, setShowVerifyOtp] = useState(false);
+
   return (
     <AnimatePresence>
       <motion.div
@@ -283,237 +298,327 @@ const Modal = ({ onClose }) => {
         exit={{ opacity: 0, y: 50 }}
         transition={{ duration: 0.4, ease: 'easeInOut' }}
       >
-        <div className="flex p-5 w-[110vh] h-[80vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014] ">
-          <div className="w-[50%]">
-            <img src="/Images/Modal-img.png" className="w-full h-full" />
+        <div className="flex xl:p-5 w-[70vw] h-[60vh] xl:w-[60vw] xl:h-[80vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014] overflow-hidden ">
+          <div className="w-[50%] hidden xl:block">
+            <img src="/Images/Modal-img.png" className="w-full h-full " />
           </div>
 
-          <div className="w-[50%] flex flex-col justify-center gap-2 pl-10">
-            <div className="font-poppins text-[36px] leading-tight">
-              <p className="font-semibold text-[#111111]">Lets Get</p>
-              <p className="font-medium text-[#00A397]">Started!</p>
-            </div>
+          {/* SignUp Form */}
 
-            <div className="flex flex-col gap-5">
-              <form
-                className="font-montserrat flex flex-col gap-2"
-                onSubmit={handleSubmit}
-              >
-                {/* Full Name */}
-                <div className="flex flex-col">
-                  <label className="font-medium text-[14px] text-[#111111]">
-                    Full Name
-                  </label>
-                  <div className="flex gap-3">
-                    <div className="w-[50%]">
-                      <input
-                        ref={el => (inputRefs.current[0] = el)}
-                        onKeyDown={e => handleFormKeyDown(e, 0)}
-                        className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                        placeholder="First Name"
-                        name="full_name"
-                        value={formData.full_name}
-                        onChange={handleChange}
-                      />
-                      {errors.full_name && (
-                        <span className="text-red-500 text-xs mt-1">
-                          {errors.full_name}
-                        </span>
-                      )}
-                    </div>
-                    <div className="w-[50%]">
-                      <input
-                        ref={el => (inputRefs.current[1] = el)}
-                        onKeyDown={e => handleFormKeyDown(e, 1)}
-                        className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                        placeholder="Last Name"
-                        name="last_name"
-                        value={formData.last_name}
-                        onChange={handleChange}
-                      />
-                      {errors.last_name && (
-                        <span className="text-red-500 text-xs mt-1">
-                          {errors.last_name}
-                        </span>
-                      )}
+          {showSigUp ? (
+            <div className="xl:w-[50%] xl:py-10 flex flex-col justify-center gap-2 pl-10 ">
+              <div className="font-poppins text-[42px] leading-tight">
+                <p className="font-semibold text-[#111111]">Lets Get</p>
+                <p className="font-medium text-[#00A397]">Started!</p>
+              </div>
+
+              <div className="flex flex-col gap-5">
+                <form
+                  className="font-montserrat flex flex-col gap-2"
+                  onSubmit={handleSubmit}
+                >
+                  {/* Full Name */}
+                  <div className="flex flex-col">
+                    <label className="font-medium text-[14px] text-[#111111]">
+                      Full Name
+                    </label>
+                    <div className="flex gap-3">
+                      <div className="w-[50%]">
+                        <input
+                          ref={el => (inputRefs.current[0] = el)}
+                          onKeyDown={e => handleFormKeyDown(e, 0)}
+                          className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                          placeholder="First Name"
+                          name="full_name"
+                          value={formData.full_name}
+                          onChange={handleChange}
+                        />
+                        {errors.full_name && (
+                          <span className="text-red-500 text-xs mt-1">
+                            {errors.full_name}
+                          </span>
+                        )}
+                      </div>
+                      <div className="w-[50%]">
+                        <input
+                          ref={el => (inputRefs.current[1] = el)}
+                          onKeyDown={e => handleFormKeyDown(e, 1)}
+                          className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                          placeholder="Last Name"
+                          name="last_name"
+                          value={formData.last_name}
+                          onChange={handleChange}
+                        />
+                        {errors.last_name && (
+                          <span className="text-red-500 text-xs mt-1">
+                            {errors.last_name}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Email */}
-                <div className="flex flex-col">
-                  <label className="font-medium text-[14px] text-[#111111]">
-                    Email
-                  </label>
-                  <input
-                    ref={el => (inputRefs.current[2] = el)}
-                    onKeyDown={e => handleFormKeyDown(e, 2)}
-                    className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                    placeholder="Enter your email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                  {errors.email && (
-                    <span className="text-red-500 text-xs mt-1">
-                      {errors.email}
-                    </span>
-                  )}
-                </div>
-
-                {/* Password */}
-                <div className="flex flex-col">
-                  <label className="font-medium text-[14px] text-[#111111]">
-                    Password
-                  </label>
-                  <div className="flex flex-col gap-2">
+                  {/* Email */}
+                  <div className="flex flex-col">
+                    <label className="font-medium text-[14px] text-[#111111]">
+                      Email
+                    </label>
                     <input
-                      ref={el => (inputRefs.current[3] = el)}
-                      onKeyDown={e => handleFormKeyDown(e, 3)}
-                      className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                      placeholder="Enter your password"
-                      type="password"
-                      name="password"
-                      value={formData.password}
+                      ref={el => (inputRefs.current[2] = el)}
+                      onKeyDown={e => handleFormKeyDown(e, 2)}
+                      className="w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                      placeholder="Enter your email"
+                      name="email"
+                      value={formData.email}
                       onChange={handleChange}
                     />
-                    {errors.password && (
+                    {errors.email && (
                       <span className="text-red-500 text-xs mt-1">
-                        {errors.password}
-                      </span>
-                    )}
-                    <input
-                      ref={el => (inputRefs.current[4] = el)}
-                      onKeyDown={e => handleFormKeyDown(e, 4)}
-                      className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                      placeholder="Confirm password"
-                      type="password"
-                      name="reenter_password"
-                      value={formData.reenter_password}
-                      onChange={handleChange}
-                    />
-                    {errors.reenter_password && (
-                      <span className="text-red-500 text-xs mt-1">
-                        {errors.reenter_password}
+                        {errors.email}
                       </span>
                     )}
                   </div>
-                </div>
 
-                {/* Phone Number */}
-                <div className="flex flex-col">
-                  <label className="font-medium text-[14px] text-[#111111]">
-                    Phone Number
-                  </label>
-                  <div className="flex gap-3">
-                    <input
-                      ref={el => (inputRefs.current[5] = el)}
-                      onKeyDown={e => handleFormKeyDown(e, 5)}
-                      className="w-[20%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                      placeholder="+91"
-                      value="+91"
-                      readOnly
-                    />
-                    <input
-                      ref={el => (inputRefs.current[6] = el)}
-                      onKeyDown={e => handleFormKeyDown(e, 6)}
-                      className="w-[50%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                      placeholder="00000 0000"
-                      name="phone_number"
-                      value={formData.phone_number}
-                      onChange={handleChange}
-                      maxLength="10"
-                    />
-
-                    <div
-                      onClick={handleSendOtp}
-                      className="bg-[#467EF8] w-[30%] rounded-[14px] flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-200"
-                    >
-                      {loader ? (
-                        <div className="flex items-center justify-center">
-                          <LineSpinner size={20} color="white" stroke="1.5" />
-                        </div>
-                      ) : (
-                        <p className="font-semibold text-[11px] text-white">
-                          Send OTP
-                        </p>
+                  {/* Password */}
+                  <div className="flex flex-col">
+                    <label className="font-medium text-[14px] text-[#111111]">
+                      Password
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      <input
+                        ref={el => (inputRefs.current[3] = el)}
+                        onKeyDown={e => handleFormKeyDown(e, 3)}
+                        className="w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                        placeholder="Enter your password"
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                      />
+                      {errors.password && (
+                        <span className="text-red-500 text-xs mt-1">
+                          {errors.password}
+                        </span>
+                      )}
+                      <input
+                        ref={el => (inputRefs.current[4] = el)}
+                        onKeyDown={e => handleFormKeyDown(e, 4)}
+                        className="w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                        placeholder="Confirm password"
+                        type="password"
+                        name="reenter_password"
+                        value={formData.reenter_password}
+                        onChange={handleChange}
+                      />
+                      {errors.reenter_password && (
+                        <span className="text-red-500 text-xs mt-1">
+                          {errors.reenter_password}
+                        </span>
                       )}
                     </div>
                   </div>
-                  {errors.phone_number && (
-                    <span className="text-red-500 text-xs mt-1">
-                      {errors.phone_number}
-                    </span>
-                  )}
-                </div>
-              </form>
 
-              {/* OTP Section */}
-              <AnimatePresence>
-                {showOtp && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 30 }}
-                    transition={{ duration: 0.4, ease: 'easeInOut' }}
-                    className="flex flex-col gap-2 items-center font-inter"
-                  >
-                    <p className="text-[16px] font-semibold">Enter OTP</p>
-                    <p className="text-[12px] text-gray-500">
-                      We have sent an OTP to your mobile number
+                  {/* Phone Number */}
+                  <div className="flex flex-col">
+                    <label className="font-medium text-[14px] text-[#111111]">
+                      Phone Number
+                    </label>
+                    <div className="flex gap-3">
+                      <input
+                        ref={el => (inputRefs.current[5] = el)}
+                        onKeyDown={e => handleFormKeyDown(e, 5)}
+                        className="w-[20%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                        placeholder="+91"
+                        value="+91"
+                        readOnly
+                      />
+                      <input
+                        ref={el => (inputRefs.current[6] = el)}
+                        onKeyDown={e => handleFormKeyDown(e, 6)}
+                        className="w-[50%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                        placeholder="00000 0000"
+                        name="phone_number"
+                        value={formData.phone_number}
+                        onChange={handleChange}
+                        maxLength="10"
+                      />
+
+                      <div
+                        onClick={handleSendOtp}
+                        className="bg-[#467EF8] w-[30%] rounded-[9px] flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-200"
+                      >
+                        {loader ? (
+                          <div
+                            onClick={() => setShowVerifyOtp(true)}
+                            className="flex items-center justify-center"
+                          >
+                            <LineSpinner size={20} color="white" stroke="1.5" />
+                          </div>
+                        ) : (
+                          <p className="font-semibold text-[11px] text-white">
+                            Send OTP
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {errors.phone_number && (
+                      <span className="text-red-500 text-xs mt-1">
+                        {errors.phone_number}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1">
+                    <p className="font-poppins text-[14px]">
+                      Already have an account?{' '}
+                      <span
+                        onClick={() => setShowSignUp(false)}
+                        className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
+                      >
+                        Login
+                      </span>
                     </p>
+                  </div>
+                </form>
 
-                    {otpError && (
-                      <p className="text-red-500 text-xs text-center">
-                        {otpError}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-center gap-2">
-                      {Array(6) // Changed from 4 to 6
-                        .fill(0)
-                        .map((_, i) => (
-                          <input
-                            key={i}
-                            ref={el => (otpRef.current[i] = el)}
-                            className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
-                            placeholder="-"
-                            onKeyDown={e => handleKeyDown(e, i)}
-                            onChange={e => handleOtpChange(e, i)}
-                            maxLength={1}
-                            type="text"
-                            value={otpValues[i]}
-                          />
-                        ))}
-                    </div>
-                    <div
-                      onClick={handleVerifyOtp}
-                      className="bg-[#467EF8] rounded-[12px] w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                      {verifyOtpLoader ? (
-                        <Spiral size="20" color="white" speed={2} />
-                      ) : (
-                        <p className="font-montserrat font-semibold text-[14px]">
-                          Verify OTP
+                {/* OTP Section */}
+                {showVerifyOtp && (
+                  <AnimatePresence>
+                    {showOtp && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 30 }}
+                        transition={{ duration: 0.4, ease: 'easeInOut' }}
+                        className="flex flex-col gap-2 items-center font-inter"
+                      >
+                        <p className="text-[16px] font-semibold">Enter OTP</p>
+                        <p className="text-[12px] text-[#475467]">
+                          We have sent an OTP to your mobile number
                         </p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-poppins text-[14px]">
-                        Don't receive code?{' '}
-                        <span
-                          className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
-                          onClick={handleResendOtp}
+
+                        {otpError && (
+                          <p className="text-red-500 text-xs text-center">
+                            {otpError}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-center gap-2">
+                          {Array(6) // Changed from 4 to 6
+                            .fill(0)
+                            .map((_, i) => (
+                              <input
+                                key={i}
+                                ref={el => (otpRef.current[i] = el)}
+                                className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
+                                placeholder="-"
+                                onKeyDown={e => handleKeyDown(e, i)}
+                                onChange={e => handleOtpChange(e, i)}
+                                maxLength={1}
+                                type="text"
+                                value={otpValues[i]}
+                              />
+                            ))}
+                        </div>
+                        <div
+                          onClick={handleVerifyOtp}
+                          className="bg-[#467EF8] rounded-[12px] w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
                         >
-                          Resend OTP
-                        </span>
-                      </p>
-                    </div>
-                  </motion.div>
+                          {verifyOtpLoader ? (
+                            <Spiral size="20" color="white" speed={2} />
+                          ) : (
+                            <p className="font-montserrat font-semibold text-[14px]">
+                              Verify OTP
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-poppins text-[14px]">
+                            Don't receive code?{' '}
+                            <span
+                              className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
+                              onClick={handleResendOtp}
+                            >
+                              Resend OTP
+                            </span>
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 )}
-              </AnimatePresence>
+              </div>
             </div>
-          </div>
+          ) : (
+            // Login Form
+            <div className="   xl:w-[50%] xl:py-10 flex flex-col justify-center gap-5 px-10 xl:pl-10 ">
+              <div className="font-poppins text-[35px] xl:text-[42px] leading-tight">
+                <p className="font-semibold text-[#111111]">
+                  Start
+                  <span className="font-medium text-[#00A397]">
+                    {' '}
+                    Collecting
+                  </span>
+                </p>
+                <p className="font-semibold text-[#111111]">With Us!</p>
+              </div>
+              <div className="flex flex-col ">
+                <form className="flex flex-col gap-5  ">
+                  <div className="flex flex-col ">
+                    <label className="font-medium text-[14px] text-[#111111]">
+                      Email
+                    </label>
+                    <input
+                      onKeyDown={e => handleFormKeyDown(e, 2)}
+                      className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                      placeholder="Enter your email"
+                      name="email"
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="font-medium text-[14px] text-[#111111]">
+                      Password
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      <input
+                        onKeyDown={e => handleFormKeyDown(e, 3)}
+                        className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                        placeholder="Enter your password"
+                        type="password"
+                        name="password"
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                </form>
+                <div className="text-[13px]  cursor-pointer text-[#00A397] text-right w-[90%] hover:text-[#3c8984] ">
+                  <p>Forgot Password?</p>
+                </div>
+
+                <div className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-20 cursor-pointer mx-auto mt-5 ">
+                  <p>Sign In</p>
+                </div>
+
+                <div className="mt-10 text-center">
+                  <p className="font-poppins text-[14px]">
+                    Don't have an account yet?{' '}
+                    <span
+                      onClick={() => setShowSignUp(true)}
+                      className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
+                    >
+                      SignUp
+                    </span>
+                  </p>
+                </div>
+                <div className="text-center mt-3 text-[12px] text-[#475467]">
+                  <p>
+                    By signing up, you agree to the <u>Terms of Service</u> and{' '}
+                    <u>Privacy Policy</u>, including <u>cookie use</u>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Close Button */}
           <button

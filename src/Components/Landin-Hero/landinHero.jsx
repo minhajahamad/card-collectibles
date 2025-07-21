@@ -27,7 +27,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
   const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden ">
       <NavBar onLoginClick={() => setIsmodalOpen(true)} />
       {isModalOpen && <Modal onClose={() => setIsmodalOpen(false)} />}
       <div className="flex flex-col   xl:h-[110vh] relative">
@@ -56,7 +56,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                 for sellers like you.
               </p>
             </div>
-            <div className="w-full mt-5 xl:w-[750px] overflow-hidden relative fade-effect xl:hidden">
+            <div className="w-[100vw] mt-5  relative fade-effect xl:hidden">
               <div className="marquee-track">
                 {[...LandinImages, ...LandinImages].map((image, index) => (
                   <div key={index} className="marquee-image">
@@ -184,7 +184,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                     0px 4px 15.7px 0px rgba(0, 163, 151, 0.14),
                     0px 4px 106px 0px rgba(16, 125, 145, 0.14)`,
             }}
-            className="bg-white rounded-[35px] xl:w-[500px]  xl:pt-13      flex flex-col gap-5 z-10 relative "
+            className="bg-white rounded-[35px] xl:w-[500px]  xl:pt-13 xl:h-[80vh]      flex flex-col gap-5 z-10 relative "
           >
             <div className="xl:pl-10">
               <p className="font-bold font-raleway text-[36px] text-[#00A397]">
