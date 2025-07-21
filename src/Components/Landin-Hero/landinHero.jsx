@@ -45,7 +45,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
       <NavBar onLoginClick={() => setIsmodalOpen(true)} />
       {isModalOpen && <Modal onClose={() => setIsmodalOpen(false)} />}
       <div className="flex flex-col   xl:h-[110vh] relative">
-        <div className="bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] xl:h-[60%] xl:px-[100px] xl:py-10 xl:flex xl:justify-around  xl:gap-5 ">
+        <div className="bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] xl:h-[60%] xl:px-10 xl:py-10 xl:flex xl:justify-around  xl:gap-10 ">
           <div className="flex flex-col gap-5 items-center xl:items-start py-10 xl:py-0  xl:gap-4 w-fit  ">
             <div className="flex items-center gap-1 bg-white px-5 w-fit py-3 rounded-[76px] shadow-md shadow-[#0000001C] hover:shadow-none cursor-pointer transition-all duration-400 ease-in-out ">
               <CiStar className="text-[#EEBB4E] text-[20px] " />
