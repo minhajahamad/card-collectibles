@@ -22,6 +22,9 @@ const NavBar = ({ onLoginClick }) => {
     }
   };
 
+  console.log(sidebarOpen);
+  
+
   useEffect(() => {
     fetchUser();
   }, [])
@@ -38,7 +41,6 @@ const NavBar = ({ onLoginClick }) => {
 
         {!uuid ? (<div
           className=" flex gap-3 items-center justifu-center text-white text-[24px] lg:text-[30px] cursor-pointer"
-          onClick={() => setSidebarOpen(true)}
         >
           <div
             onClick={onLoginClick}
@@ -46,7 +48,7 @@ const NavBar = ({ onLoginClick }) => {
           >
             <p>SignUp</p>
           </div>
-          <RxHamburgerMenu className='xl:hidden' />
+          <RxHamburgerMenu  onClick={() => setSidebarOpen(true)} className='xl:hidden' />
         </div>
         ) : (
           <div className=" lg:w-[105px] xl:w-[115px] h-full xl:flex items-center justify-between hidden hover:cursor-pointer"  onClick={()=>navigate('/user/profile')}>

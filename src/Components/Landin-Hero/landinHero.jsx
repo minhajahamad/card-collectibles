@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NavBar from '../../Components/NavBar/navBar';
 import Modal from '../../Components/Modal/modal';
 
@@ -6,6 +6,7 @@ import { CiStar } from 'react-icons/ci';
 import { BsLightningCharge } from 'react-icons/bs';
 import { MdOutlineSecurity } from 'react-icons/md';
 import { TiArrowRight } from 'react-icons/ti';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const LandinHero = ({ onLearnMoreClick }) => {
   const LandinImages = [
@@ -25,6 +26,19 @@ const LandinHero = ({ onLearnMoreClick }) => {
 
   // State for Tracking Index of Hover Image
   const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const uuid = localStorage.getItem('uuid');
+
+    const urlParams = new URLSearchParams(location.search);
+    if (uuid && urlParams.has('refferal-code')) {
+      // Remove query params and redirect to base path
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
 
   return (
     <div className="relative overflow-hidden ">
