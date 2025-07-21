@@ -35,8 +35,8 @@ const LandinJoin = () => {
   ];
 
   return (
-    <div className="xl:h-[150vh] flex flex-col ">
-      <div className="xl:h-[70%]  bg-gradient-to-br from-[#FFFEFA] to-[#DFF7F5] relative px-5 xl:px-20  ">
+    <div className="xl:h-[150vh] flex flex-col   ">
+      <div className="xl:h-[70%]  bg-gradient-to-br from-[#FFFEFA] to-[#DFF7F5] relative px-5 xl:px-20 pb-5 xl:pb-20  ">
         <img
           src="/Images/Hero-Join-img.png"
           className="h-[500px] w-full top-0 left-0 absolute z-0  "
@@ -47,7 +47,7 @@ const LandinJoin = () => {
                     0px 4px 15.7px 0px rgba(0, 163, 151, 0.14),
                     0px 4px 106px 0px rgba(16, 125, 145, 0.14)`,
           }}
-          className="xl:w-full xl:h-[850px] bg-white rounded-[24px] mx-auto  xl:mt-[-50px]   flex flex-col md:justify-start font-raleway relative z-10 md:py-[5%] xl:py-0  "
+          className=" bg-white rounded-[24px] mx-auto  xl:mt-[-70px]   flex flex-col md:justify-start font-raleway relative z-10 md:py-[5%] xl:py-5  "
         >
           <div className=" flex flex-col gap-5  items-center justify-center py-5 px-5 md:px-[10%] xl:py-10 ">
             <p className="text-[32px] xl:text-[52px] font-extrabold text-[#010816] text-center  ">

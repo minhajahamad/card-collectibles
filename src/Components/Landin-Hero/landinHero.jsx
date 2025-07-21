@@ -45,7 +45,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
       <NavBar onLoginClick={() => setIsmodalOpen(true)} />
       {isModalOpen && <Modal onClose={() => setIsmodalOpen(false)} />}
       <div className="flex flex-col   xl:h-[110vh] relative">
-        <div className="bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] xl:h-[70%] xl:pl-[100px] xl:py-10">
+        <div className="bg-gradient-to-bl from-[#DFF7F5] to-[#FFFEFA] xl:h-[60%] xl:px-[100px] xl:py-10 xl:flex xl:justify-around  xl:gap-5 ">
           <div className="flex flex-col gap-5 items-center xl:items-start py-10 xl:py-0  xl:gap-4 w-fit  ">
             <div className="flex items-center gap-1 bg-white px-5 w-fit py-3 rounded-[76px] shadow-md shadow-[#0000001C] hover:shadow-none cursor-pointer transition-all duration-400 ease-in-out ">
               <CiStar className="text-[#EEBB4E] text-[20px] " />
@@ -161,6 +161,84 @@ const LandinHero = ({ onLearnMoreClick }) => {
               </div>
             </div>
           </div>
+
+          <div className="  hidden xl:block mt-5 relative  ">
+            <img
+              src="/Images/Konami.png"
+              className="absolute top-[-20px] left-[-100px] z-0 h-60"
+            />
+            <div
+              style={{
+                boxShadow: `
+                    0px 4px 15.7px 0px rgba(0, 163, 151, 0.14),
+                    0px 4px 106px 0px rgba(16, 125, 145, 0.14)`,
+              }}
+              className="bg-white rounded-[35px] xl:w-[35vw]  xl:pt-13 flex flex-col gap-5 z-10 relative "
+            >
+              <div className="xl:pl-10">
+                <p className="font-bold font-raleway text-[36px] text-[#00A397]">
+                  Ready to Start?
+                </p>
+                <p className="font-medium font-raleway text-[18px] text-[#46505E]">
+                  Join thousands of sellers already <br /> using our platform.
+                </p>
+              </div>
+              <div className="xl:pl-5">
+                <div className="border-b border-[#E9E9E9] xl:py-5 flex flex-col items-center xl:w-[300px]">
+                  <p className="font-bold font-raleway text-[38px] text-[#00A397]">
+                    1000+
+                  </p>
+                  <p className="font-medium font-raleway text-[27px] text-[#46505E]">
+                    Active Sellers
+                  </p>
+                </div>
+                <div className="border-b border-[#E9E9E9] xl:py-5 flex flex-col items-center xl:w-[300px]">
+                  <p className="font-bold font-raleway text-[38px] text-[#00A397]">
+                    50k+
+                  </p>
+                  <p className="font-medium font-raleway text-[27px] text-[#46505E]">
+                    Items Listed
+                  </p>
+                </div>
+                <div className=" xl:py-5 flex flex-col items-center xl:w-[300px]">
+                  <p className="font-bold font-raleway text-[38px] text-[#00A397]">
+                    95%
+                  </p>
+                  <p className="font-medium font-raleway text-[27px] text-[#46505E]">
+                    Satisfication
+                  </p>
+                </div>
+              </div>
+              <img
+                src="/Images/Falcon.png"
+                className="absolute top-[-50px] right-[40px] z-10 h-30"
+              />
+              <div className="absolute bottom-[-50px] right-[-20px] ">
+                <div className="relative z-10  rotate-[3.66deg] shadow-3d-card">
+                  <div className="absolute inset-0 z-20 shine-effect pointer-events-none rounded-[9px]" />
+
+                  <img
+                    src="/Images/Charizard.png"
+                    className="w-full h-full object-contain z-10 relative"
+                  />
+                </div>
+              </div>
+              <div className="absolute top-[100px] right-[-20px]">
+                <div className="relative z-10 h-59 w-[160px] rotate-[-3.66deg] shadow-3d-card overflow-hidden rounded-[9px]">
+                  <div className="absolute inset-0 z-20 shine-effect-delayed pointer-events-none rounded-[9px]" />
+
+                  <img
+                    src="/Images/Dark-magician.png"
+                    className="h-full w-full object-contain z-10 relative"
+                  />
+                </div>
+              </div>
+              <img
+                src="/Images/Eating-chrctr.png"
+                className="absolute top-[-60px] left-[50px] z-10 h-30"
+              />
+            </div>
+          </div>
         </div>
         <div className="bg-[#09778E] h-[40%] xl:py-3 xl:pl-25 hidden xl:block">
           <div className="xl:w-[750px] overflow-hidden relative fade-effect">
@@ -186,83 +264,6 @@ const LandinHero = ({ onLearnMoreClick }) => {
               ))}
             </div>
           </div>
-        </div>
-        <div className="absolute xl:top-20 xl:right-15 hidden xl:block  ">
-          <img
-            src="/Images/Konami.png"
-            className="absolute top-[-2%] left-[-20%] z-0 h-60"
-          />
-          <div
-            style={{
-              boxShadow: `
-                    0px 4px 15.7px 0px rgba(0, 163, 151, 0.14),
-                    0px 4px 106px 0px rgba(16, 125, 145, 0.14)`,
-            }}
-            className="bg-white rounded-[35px] xl:w-[500px]  xl:pt-13 xl:h-[80vh]      flex flex-col gap-5 z-10 relative "
-          >
-            <div className="xl:pl-10">
-              <p className="font-bold font-raleway text-[36px] text-[#00A397]">
-                Ready to Start?
-              </p>
-              <p className="font-medium font-raleway text-[18px] text-[#46505E]">
-                Join thousands of sellers already <br /> using our platform.
-              </p>
-            </div>
-            <div className="xl:pl-5">
-              <div className="border-b border-[#E9E9E9] xl:py-5 flex flex-col items-center xl:w-[300px]">
-                <p className="font-bold font-raleway text-[38px] text-[#00A397]">
-                  1000+
-                </p>
-                <p className="font-medium font-raleway text-[27px] text-[#46505E]">
-                  Active Sellers
-                </p>
-              </div>
-              <div className="border-b border-[#E9E9E9] xl:py-5 flex flex-col items-center xl:w-[300px]">
-                <p className="font-bold font-raleway text-[38px] text-[#00A397]">
-                  50k+
-                </p>
-                <p className="font-medium font-raleway text-[27px] text-[#46505E]">
-                  Items Listed
-                </p>
-              </div>
-              <div className=" xl:py-5 flex flex-col items-center xl:w-[300px]">
-                <p className="font-bold font-raleway text-[38px] text-[#00A397]">
-                  95%
-                </p>
-                <p className="font-medium font-raleway text-[27px] text-[#46505E]">
-                  Satisfication
-                </p>
-              </div>
-            </div>
-          </div>
-          <img
-            src="/Images/Falcon.png"
-            className="absolute top-[-12%] right-[12%] z-10 h-30"
-          />
-          <div className="absolute bottom-[-12%] right-[-5%]">
-            <div className="relative z-10 h-[280px] w-[200px] rotate-[3.66deg] shadow-3d-card">
-              <div className="absolute inset-0 z-20 shine-effect pointer-events-none rounded-[9px]" />
-
-              <img
-                src="/Images/Charizard.png"
-                className="w-full h-full object-contain z-10 relative"
-              />
-            </div>
-          </div>
-          <div className="absolute top-[18%] right-[-5%]">
-            <div className="relative z-10 h-59 w-[160px] rotate-[-3.66deg] shadow-3d-card overflow-hidden rounded-[9px]">
-              <div className="absolute inset-0 z-20 shine-effect-delayed pointer-events-none rounded-[9px]" />
-
-              <img
-                src="/Images/Dark-magician.png"
-                className="h-full w-full object-contain z-10 relative"
-              />
-            </div>
-          </div>
-          <img
-            src="/Images/Eating-chrctr.png"
-            className="absolute top-[-15%] left-[6%] z-10 h-30"
-          />
         </div>
       </div>
     </div>
