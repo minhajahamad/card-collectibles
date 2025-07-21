@@ -114,12 +114,16 @@ const Affiliates = () => {
   const [showToast, setShowToast] = useState(false);
   const [refferalData, setRefferalData] = useState([])
 
-  const uuid = "4fb01a1a-3923-4d70-a8b1-7cc5fba371ab"
+  const uuid = "68d6dfcc-0ffd-4810-bd44-3e3492c5a742"
+  // const uuid = localStorage.getItem("uuid")
+
+  console.log(user.referral);
+  
 
   const fetchUser = async () => {
     try {
       const response = await axiosInstance.get(API_URL.USER.GET_USER_UUID(uuid))
-      console.log(response);
+      console.log(response.data.data);
       setUser(response.data.data)
     } catch (err) {
       console.log(err);
@@ -143,8 +147,8 @@ const Affiliates = () => {
   }, [])
 
   const handleCopyReferralLink = () => {
-    if (!user.referral_code) return;
-    const referralUrl = `${window.location.origin}/?refferal-code=${user.referral_code}`;
+    if (!user.referral?.referral_code) return;
+    const referralUrl = `${window.location.origin}/?refferal-code=${user.referral?.referral_code}`;
     console.log(referralUrl);
 
     navigator.clipboard.writeText(referralUrl)
@@ -182,7 +186,7 @@ const Affiliates = () => {
                   <p className="font-bold text-[14px] xl:text-[16px] text-[#464646] flex  gap-1">
                     Affiliate id:
                     <span className="font-normal ">
-                      <u>{user.referral_code}</u>
+                      <u>{user?.referral?.referral_code}</u>
                     </span>
                   </p>
 
@@ -206,19 +210,22 @@ const Affiliates = () => {
                 </div>
                 <div>
                   <div className="w-[130px] h-[125px] border border-[#BDBDBD] rounded-[14px] flex justify-center items-center relative ">
-                    {refferalData ?
-                      (
-                        <img src={refferalData.qr_code_url} alt="qr_code" />
-                      ) : (
-                        <QRCodeCanvas
-                          size={110}
-                          bgColor="#FFFFFF"
-                          fgColor="#000000"
-                          level="H"
-                        />
-                      )
-
-                    }
+                    {user?.referral?.referral_code ? (
+                      <QRCodeCanvas
+                        value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
+                        size={110}
+                        bgColor="#FFFFFF"
+                        fgColor="#000000"
+                        level="H"
+                      />
+                    ) : (
+                      <QRCodeCanvas
+                        size={110}
+                        bgColor="#FFFFFF"
+                        fgColor="#000000"
+                        level="H"
+                      />
+                    )}
                     <div className="  w-[30px] h-[30px] rounded-full border border-[#BDBDBD] absolute bottom-[-10px] right-[-10px] flex justify-center items-center  bg-white  cursor-pointer">
                       <GrShareOption className="text-[19px] text-[#107D91]  " />
                     </div>
@@ -227,7 +234,7 @@ const Affiliates = () => {
               </div>
             </div>
             <div>
-              <p className="font-bold text-[16px] ">Total references:{ }</p>
+              <p className="font-bold text-[16px] ">Total references: {displayedReferrals.length}</p>
             </div>
             <div className="hidden xl:block w-fit h-[80px] border rounded-[14px] border-[#BDBDBD] absolute top-[13%] right-[15%]  pt-2 px-4">
               <p className="font-semibold text-[18px] ">Balance</p>
@@ -236,19 +243,22 @@ const Affiliates = () => {
               </p>
             </div>
             <div className="  hidden  w-[130px] h-[125px] border border-[#BDBDBD] rounded-[14px] absolute  right-[1%] xl:flex justify-center items-center ">
-              {refferalData ?
-                (
-                  <img src={refferalData.qr_code_url} alt="qr_code" />
-                ) : (
-                  <QRCodeCanvas
-                    size={110}
-                    bgColor="#FFFFFF"
-                    fgColor="#000000"
-                    level="H"
-                  />
-                )
-
-              }
+              {user?.referral?.referral_code ? (
+                <QRCodeCanvas
+                  value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
+                  size={110}
+                  bgColor="#FFFFFF"
+                  fgColor="#000000"
+                  level="H"
+                />
+              ) : (
+                <QRCodeCanvas
+                  size={110}
+                  bgColor="#FFFFFF"
+                  fgColor="#000000"
+                  level="H"
+                />
+              )}
             </div>
             <div className="hidden  w-[30px] h-[30px] rounded-full border border-[#BDBDBD] xl:flex justify-center items-center absolute right-0 top-[70%] bg-white  cursor-pointer">
               <GrShareOption className="text-[19px] text-[#107D91]  " />

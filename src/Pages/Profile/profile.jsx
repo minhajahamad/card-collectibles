@@ -1,14 +1,464 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NavBar from '../../Components/NavBar/navBar';
 import SideBar from '../../Components/Sidebar/sideBar';
 import { Tabs, Tab, Box } from '@mui/material';
+import axiosInstance from '../../services/axios'; // Update the path as needed
+import { API_URL } from '../../services/api_url'; // Update the path as needed
 
 const Profile = () => {
   const [tabIndex, setTabIndex] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Track which sections have been modified
+  const [modifiedSections, setModifiedSections] = useState({
+    user: false,
+    address: false,
+    store: false
+  });
+
+  // User data state
+  const [userData, setUserData] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone_number: ''
+  });
+
+  // Original user data for comparison
+  const [originalUserData, setOriginalUserData] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone_number: ''
+  });
+
+  // Address data state with ID tracking
+  const [addressData, setAddressData] = useState({
+    uuid: null,
+    street_address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    country: '',
+    address_type: ''
+  });
+
+  // Original address data for comparison
+  const [originalAddressData, setOriginalAddressData] = useState({
+    uuid: null,
+    street_address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    country: '',
+    address_type: ''
+  });
+
+  // Store details state with ID tracking
+  const [storeData, setStoreData] = useState({
+    id: null,
+    store_name: '',
+    categories: [],
+    inventory_estimate: '',
+    specialization: ''
+  });
+
+  // Original store data for comparison
+  const [originalStoreData, setOriginalStoreData] = useState({
+    id: null,
+    store_name: '',
+    categories: [],
+    inventory_estimate: '',
+    specialization: ''
+  });
 
   const handleChange = (event, newValue) => {
     setTabIndex(newValue);
   };
+
+  // Fetch address data function (move to component scope)
+  const fetchAddressData = async () => {
+    try {
+      const uuid = localStorage.getItem('uuid');
+      if (!uuid) return;
+
+      // Fetch address data
+      const addressResponse = await axiosInstance.get(API_URL.ADDRESS.GET_ADDRESS_UUID(uuid));
+      console.log(addressResponse);
+
+      if (
+        addressResponse.data &&
+        addressResponse.data.data &&
+        addressResponse.data.data.addresses &&
+        addressResponse.data.data.addresses.length > 0
+      ) {
+        const addressInfo = addressResponse.data.data.addresses[0]; // Get first address
+        const addressData = {
+          uuid: addressInfo.uuid,
+          street_address: addressInfo.street_name || '',
+          apartment: addressInfo.house_name || '',
+          city: addressInfo.city || '',
+          state: addressInfo.state || '',
+          postal_code: addressInfo.pin || '',
+          country: addressInfo.country || '',
+          address_type: addressInfo.address_type || ''
+        };
+        setAddressData(addressData);
+        setOriginalAddressData({ ...addressData });
+      }
+    } catch (error) {
+      console.error('Error fetching address data:', error);
+      // Address might not exist yet, that's okay
+    }
+  };
+
+  // Fetch user data, address data, and store data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const uuid = localStorage.getItem('uuid');
+        if (!uuid) {
+          console.error('UUID not found in localStorage');
+          setLoading(false);
+          return;
+        }
+
+        // Fetch user data
+        const userResponse = await axiosInstance.get(API_URL.USER.GET_USER_UUID(uuid));
+        console.log(userResponse);
+
+        if (userResponse.data && userResponse.data.data) {
+          // Fixed: Better name handling logic
+          let firstName = userResponse.data.data.first_name || '';
+          let lastName = userResponse.data.data.last_name || '';
+
+          // Parse full_name only if both first_name and last_name are empty or null
+          if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '')) {
+            if (userResponse.data.data.full_name && userResponse.data.data.full_name.trim()) {
+              const nameParts = userResponse.data.data.full_name.trim().split(' ');
+              firstName = nameParts[0] || '';
+              lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+            }
+          }
+
+          const userInfo = {
+            first_name: firstName,
+            last_name: lastName,
+            email: userResponse.data.data.email || '',
+            phone_number: userResponse.data.data.phone_number || ''
+          };
+          setUserData(userInfo);
+          setOriginalUserData({ ...userInfo });
+        }
+        setLoading(false); // <-- Ensure loading is set to false after fetch
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setLoading(false);
+      }
+    };
+    fetchAddressData();
+    fetchUserData();
+    fetchStoreData();
+  }, []);
+
+  // Fetch store data function
+  const fetchStoreData = async () => {
+    try {
+      const uuid = localStorage.getItem('uuid');
+      if (!uuid) return;
+
+      const response = await axiosInstance.get(API_URL.SELLERS.GET__SELLERS);
+      console.log(response);
+
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        // Find store data that matches the current user's UUID
+        const matchingStore = response.data.data.find(store =>
+          store.user_uuid_display === uuid
+        );
+
+        if (matchingStore) {
+          const storeDataObj = {
+            id: matchingStore.id,
+            store_name: matchingStore.store_name || '',
+            categories: matchingStore.categories || [],
+            inventory_estimate: matchingStore.inventory_estimate || '',
+            specialization: matchingStore.specialization || ''
+          };
+          setStoreData(storeDataObj);
+          setOriginalStoreData({ ...storeDataObj });
+          localStorage.setItem('store_id', matchingStore.id); // Save the correct store ID
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching store data:', error);
+      // Store might not exist yet, that's okay
+    }
+  };
+
+
+  // Helper function to compare objects and detect changes
+  const hasDataChanged = (original, current) => {
+    return JSON.stringify(original) !== JSON.stringify(current);
+  };
+
+  // Handle input changes for user data
+  const handleUserInputChange = (field, value) => {
+    if (isEditing) {
+      const newUserData = {
+        ...userData,
+        [field]: value
+      };
+      setUserData(newUserData);
+
+
+      // Mark user section as modified if data has changed
+      const hasChanged = hasDataChanged(originalUserData, newUserData);
+      setModifiedSections(prev => ({
+        ...prev,
+        user: hasChanged
+      }));
+    }
+  };
+
+  // Handle input changes for address data
+  const handleAddressInputChange = (field, value) => {
+    if (isEditing) {
+      const newAddressData = {
+        ...addressData,
+        [field]: value
+      };
+      setAddressData(newAddressData);
+
+      // Mark address section as modified if data has changed
+      const hasChanged = hasDataChanged(originalAddressData, newAddressData);
+      setModifiedSections(prev => ({
+        ...prev,
+        address: hasChanged
+      }));
+    }
+  };
+
+  // Handle input changes for store data
+  const handleStoreInputChange = (field, value) => {
+    if (isEditing) {
+      const newStoreData = {
+        ...storeData,
+        [field]: value
+      };
+      setStoreData(newStoreData);
+
+      // Mark store section as modified if data has changed
+      const hasChanged = hasDataChanged(originalStoreData, newStoreData);
+      setModifiedSections(prev => ({
+        ...prev,
+        store: hasChanged
+      }));
+    }
+  };
+
+  // Handle category checkbox changes
+  const handleCategoryChange = (category) => {
+    if (isEditing) {
+      const newStoreData = {
+        ...storeData,
+        categories: storeData.categories.includes(category)
+          ? storeData.categories.filter(cat => cat !== category)
+          : [...storeData.categories, category]
+      };
+      setStoreData(newStoreData);
+
+      // Mark store section as modified if data has changed
+      const hasChanged = hasDataChanged(originalStoreData, newStoreData);
+      setModifiedSections(prev => ({
+        ...prev,
+        store: hasChanged
+      }));
+    }
+  };
+
+  // Toggle edit mode
+  const handleEditClick = () => {
+    if (isEditing) {
+      // Reset all data to original values when canceling edit
+      setUserData({ ...originalUserData });
+      setAddressData({ ...originalAddressData });
+      setStoreData({ ...originalStoreData });
+      setModifiedSections({
+        user: false,
+        address: false,
+        store: false
+      });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  // Save all changes
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const uuid = localStorage.getItem('uuid');
+      const promises = [];
+
+      // Update user data only if modified
+      if (modifiedSections.user) {
+        // Prepare user data - only send fields that are not empty
+        const userDataToUpdate = {};
+        Object.keys(userData).forEach(key => {
+          if (userData[key] && userData[key].toString().trim() !== '') {
+            userDataToUpdate[key] = userData[key];
+          }
+        });
+
+        if (Object.keys(userDataToUpdate).length > 0) {
+          promises.push(
+            axiosInstance.patch(API_URL.USER.PATCH_USER_UUID(uuid), userDataToUpdate)
+              .then(() => {
+                console.log('User data updated successfully');
+                setOriginalUserData({ ...userData });
+              })
+          );
+        }
+      }
+
+      // Update address data only if modified
+      if (modifiedSections.address) {
+        const addressDataToSend = {
+          house_name: addressData.apartment || '', // Map apartment to house_name
+          street_name: addressData.street_address || '',
+          city: addressData.city || '',
+          state: addressData.state || '',
+          pin: addressData.postal_code || '',
+          country: addressData.country || '',
+          address_type: addressData.address_type || 'Home',
+          user_uuid: uuid
+        };
+
+        if (addressData.uuid) {
+          // Update existing address using PATCH
+          promises.push(
+            axiosInstance.patch(API_URL.ADDRESS.PATCH_ADDRESS(addressData.uuid), addressDataToSend)
+              .then(() => {
+                console.log('Address updated successfully');
+                setOriginalAddressData({ ...addressData });
+              })
+              .catch((error) => {
+                console.error('Error updating address:', error);
+                throw error;
+              })
+          );
+        } else {
+          // Create new address using POST
+          promises.push(
+            axiosInstance.post(API_URL.ADDRESS.POST_ADDRESS, addressDataToSend)
+              .then((response) => {
+                console.log('New address created successfully');
+                const updatedAddressData = { ...addressData, uuid: response.data.uuid };
+                setAddressData(updatedAddressData);
+                setOriginalAddressData({ ...updatedAddressData });
+              })
+              .catch((error) => {
+                console.error('Error creating address:', error);
+                throw error;
+              })
+          );
+        }
+      }
+
+      // Update store data only if modified
+      if (modifiedSections.store) {
+        const storeId = storeData.id; // Use the ID from storeData state
+        const storeDataToSend = {
+          store_name: storeData.store_name,
+          categories: storeData.categories,
+          inventory_estimate: storeData.inventory_estimate,
+          specialization: storeData.specialization
+        };
+
+        if (storeId) {
+          // PATCH existing store using the correct store ID
+          promises.push(
+            axiosInstance.patch(API_URL.SELLERS.PATCH_SELLERS(storeId), storeDataToSend)
+              .then(() => {
+                console.log('Store data updated successfully');
+                setOriginalStoreData({ ...storeData });
+              })
+              .catch((error) => {
+                console.error('Error updating store:', error);
+                throw error;
+              })
+          );
+        } else {
+          // POST new store (optional, if you want to allow creating a new store)
+          promises.push(
+            axiosInstance.post(API_URL.SELLERS.POST_SELLERS, storeDataToSend)
+              .then((response) => {
+                console.log('New store created successfully');
+                const updatedStoreData = { ...storeData, id: response.data.id };
+                setStoreData(updatedStoreData);
+                setOriginalStoreData({ ...updatedStoreData });
+                localStorage.setItem('store_id', response.data.id); // Save new id
+              })
+              .catch((error) => {
+                console.error('Error creating store:', error);
+                throw error;
+              })
+          );
+        }
+      }
+
+      // Wait for all API calls to complete
+      if (promises.length > 0) {
+        await Promise.all(promises);
+        alert('Profile updated successfully!');
+      } else {
+        alert('No changes to save.');
+      }
+
+      // Reset modification tracking
+      setModifiedSections({
+        user: false,
+        address: false,
+        store: false
+      });
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+
+      // More detailed error handling
+      if (error.response && error.response.data) {
+        console.error('Error details:', error.response.data);
+        const errorMessage = typeof error.response.data === 'string'
+          ? error.response.data
+          : JSON.stringify(error.response.data);
+        alert(`Error saving profile: ${errorMessage}`);
+      } else {
+        alert('Error saving profile. Please try again.');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="overflow-hidden">
+        <NavBar />
+        <div className="flex py-5 px-5 md:px-15 md:py-15 xl:py-0 xl:px-0">
+          <SideBar />
+          <div className="w-full xl:w-[75%] md:h-[700px] xl:max-h-[600px] font-sans border border-[#DEDEDE] xl:mt-15 rounded-[14px] shadow-[0_0_17px_0_#00000014] xl:px-10 xl:pt-8 flex items-center justify-center">
+            <p className="text-[18px] text-[#464646]">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  console.log(userData);
 
   return (
     <div className="overflow-hidden">
@@ -24,7 +474,19 @@ const Profile = () => {
             <img
               src=" /Images/Edit.svg"
               className="absolute text-[#107d91] top-5 left-60 md:top-7 md:left-70 lg:top-8 lg:left-75 xl:top-2 xl:left-72 cursor-pointer "
+              onClick={handleEditClick}
             />
+
+            {/* Save Button - only show when editing */}
+            {isEditing && (
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="absolute top-5 right-5 xl:top-2 xl:right-2 bg-[#107d91] text-white px-4 py-2 rounded-lg hover:bg-[#0d6b7a] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            )}
 
             <Box sx={{ borderBottom: 1, borderColor: '#a3a3a3' }}>
               <Tabs
@@ -77,8 +539,22 @@ const Profile = () => {
                       Name
                     </label>
                     <div className="flex flex-col xl:flex-row gap-5">
-                      <input className="w-[90%]   xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
-                      <input className=" w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                      <input
+                        value={userData.first_name}
+                        onChange={(e) => handleUserInputChange('first_name', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="First Name"
+                        className={`w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                          }`}
+                      />
+                      <input
+                        value={userData.last_name}
+                        onChange={(e) => handleUserInputChange('last_name', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Last Name"
+                        className={`w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                          }`}
+                      />
                     </div>
                   </div>
 
@@ -86,14 +562,28 @@ const Profile = () => {
                     <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
                       Email
                     </label>
-                    <input className="w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                    <input
+                      value={userData.email}
+                      onChange={(e) => handleUserInputChange('email', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Email"
+                      className={`w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                        }`}
+                    />
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
                       Phone Number
                     </label>
-                    <input className="w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                    <input
+                      value={userData.phone_number}
+                      onChange={(e) => handleUserInputChange('phone_number', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Phone Number"
+                      className={`w-[90%] xl:w-[310px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                        }`}
+                    />
                   </div>
                 </form>
               </div>
@@ -104,15 +594,64 @@ const Profile = () => {
                     Addresses
                   </label>
                   <div className="flex flex-col gap-4">
-                    <input className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
-                    <input className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
-                    <input className="w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                    <input
+                      value={addressData.street_address}
+                      onChange={(e) => handleAddressInputChange('street_address', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Street Address"
+                      className={`w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                        }`}
+                    />
+                    <input
+                      value={addressData.apartment}
+                      onChange={(e) => handleAddressInputChange('apartment', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Apartment/Suite"
+                      className={`w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                        }`}
+                    />
+                    <input
+                      value={addressData.city}
+                      onChange={(e) => handleAddressInputChange('city', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="City"
+                      className={`w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                        }`}
+                    />
                     <div className="flex flex-col xl:flex-row gap-[10px]">
-                      <input className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
-                      <input className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                      <input
+                        value={addressData.state}
+                        onChange={(e) => handleAddressInputChange('state', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="State"
+                        className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                          }`}
+                      />
+                      <input
+                        value={addressData.postal_code}
+                        onChange={(e) => handleAddressInputChange('postal_code', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Postal Code"
+                        className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                          }`}
+                      />
                     </div>
-                    <input className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
-                    <input className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                    <input
+                      value={addressData.country}
+                      onChange={(e) => handleAddressInputChange('country', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Country"
+                      className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                        }`}
+                    />
+                    <input
+                      value={addressData.address_type}
+                      onChange={(e) => handleAddressInputChange('address_type', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Address Type (Home/Work)"
+                      className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                        }`}
+                    />
                   </div>
                 </form>
               </div>
@@ -120,7 +659,6 @@ const Profile = () => {
           )}
 
           {/* Store Details Tab */}
-
           {tabIndex === 1 && (
             <div className="py-5 h-[80%] flex flex-col md:flex-row ">
               <div className=" px-5 py-5  xl:px-0 xl:py-0 md:w-[50%]  h-full border-b md:border-b-transparent md:border-r border-[#E3E3E3]">
@@ -130,7 +668,14 @@ const Profile = () => {
                       Store Name
                     </label>
                     <div className="flex gap-5">
-                      <input className="w-[90%] xl:w-[290px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                      <input
+                        value={storeData.store_name}
+                        onChange={(e) => handleStoreInputChange('store_name', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Store Name"
+                        className={`w-[90%] xl:w-[290px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                          }`}
+                      />
                     </div>
                   </div>
 
@@ -140,15 +685,33 @@ const Profile = () => {
                     </label>
                     <div className="flex gap-5">
                       <label className="flex gap-1 items-center font-regular text-[#464646]">
-                        <input type="checkbox" className="cursor-pointer" />
+                        <input
+                          type="checkbox"
+                          className="cursor-pointer"
+                          checked={storeData.categories.includes('TCG')}
+                          onChange={() => handleCategoryChange('TCG')}
+                          disabled={!isEditing}
+                        />
                         TCG
                       </label>
                       <label className="flex gap-1 items-center font-regular text-[#464646]">
-                        <input type="checkbox" className="cursor-pointer" />
+                        <input
+                          type="checkbox"
+                          className="cursor-pointer"
+                          checked={storeData.categories.includes('Comics')}
+                          onChange={() => handleCategoryChange('Comics')}
+                          disabled={!isEditing}
+                        />
                         Comics
                       </label>
                       <label className="flex gap-1 items-center font-regular text-[#464646]">
-                        <input type="checkbox" className="cursor-pointer" />
+                        <input
+                          type="checkbox"
+                          className="cursor-pointer"
+                          checked={storeData.categories.includes('Collectibles')}
+                          onChange={() => handleCategoryChange('Collectibles')}
+                          disabled={!isEditing}
+                        />
                         Collectibles
                       </label>
                     </div>
@@ -158,7 +721,18 @@ const Profile = () => {
                     <label className="lg:text-[18px] xl:text-[15px] font-bold text-[#464646]">
                       Inventory Estimate
                     </label>
-                    <select className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]" />
+                    <select
+                      value={storeData.inventory_estimate}
+                      onChange={(e) => handleStoreInputChange('inventory_estimate', e.target.value)}
+                      disabled={!isEditing}
+                      className={`w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'}`}
+                    >
+                      <option value="">Select estimate</option>
+                      <option value="<1000">Less than 1000</option>
+                      <option value="1000-5000">1000 - 5000</option>
+                      <option value="5000+">5000+</option>
+                    </select>
+
                   </div>
                 </form>
               </div>
@@ -169,8 +743,13 @@ const Profile = () => {
                     Specialization
                   </label>
                   <textarea
+                    value={storeData.specialization}
+                    onChange={(e) => handleStoreInputChange('specialization', e.target.value)}
+                    disabled={!isEditing}
+                    placeholder="Describe your store's specialization..."
                     style={{ overflowY: 'scroll', scrollbarWidth: 'none' }}
-                    className="w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto "
+                    className={`w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
+                      }`}
                   ></textarea>
                 </form>
               </div>

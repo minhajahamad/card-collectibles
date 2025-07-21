@@ -5,11 +5,16 @@ export const API_URL = {
     },
     USER: {
         GET_USER: "/api/users/",
-        GET_USER_UUID:uuid=> `/api/user/${uuid}/`
+        GET_USER_UUID:uuid=> `/api/user/${uuid}/`,
+        PATCH_USER_UUID:uuid=> `/api/user/${uuid}/`
+
     },
     ADDRESS: {
         GET_ADDRESS: "/api/addresses/",
-        POST_ADDRESS: "/api/addresses/"
+        POST_ADDRESS: "/api/addresses/",
+        PATCH_ADDRESS:uuid=> `/api/addresses/${uuid}/`,
+         GET_ADDRESS_UUID:uuid=> `/api/address/${uuid}/`
+
     },
     SELLERS: {
         GET__SELLERS: "/api/sellers/",

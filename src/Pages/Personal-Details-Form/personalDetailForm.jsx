@@ -4,6 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../services/axios';
 import { API_URL } from '../../services/api_url';
+import {
+  sendEmailVerificationLink,
+  handleEmailVerificationLink,
+  checkEmailVerificationStatus,
+  onEmailVerificationStateChange
+} from '../../services/firebase/firebaseApp'; // Adjust path as needed
 
 const PersonalDetailForm = ({
   onNext,
@@ -13,6 +19,12 @@ const PersonalDetailForm = ({
   setImagePreview,
 }) => {
   const [user, setUser] = useState({});
+  const [emailVerificationStatus, setEmailVerificationStatus] = useState({
+    isVerified: false,
+    isSending: false,
+    message: '',
+    isError: false
+  });
   const uuid = localStorage.getItem('uuid');
 
   const fetchUser = async () => {
@@ -32,17 +44,141 @@ const PersonalDetailForm = ({
     try {
       const response = axiosInstance.get(API_URL.ADDRESS.GET_ADDRESS);
       console.log(response);
+
     } catch (err) {
       console.log(err);
-    }
-  };
 
+    }
+  }
+
+  // Check for email verification link on component mount
   useEffect(() => {
+    const checkForVerificationLink = async () => {
+      try {
+        const result = await handleEmailVerificationLink();
+        if (result.success && result.isVerified) {
+          setEmailVerificationStatus({
+            isVerified: true,
+            isSending: false,
+            message: 'Email verified successfully!',
+            isError: false
+          });
+
+          // Update user verification status in your backend if needed
+          // You can call your API here to update the user's email verification status
+
+        }
+      } catch (error) {
+        console.log('No verification link found or error:', error);
+      }
+    };
+
+    checkForVerificationLink();
     fetchUser();
     fetchAddress();
   }, []);
 
-  const handleChange = e => {
+  // Set up auth state listener to monitor email verification
+  useEffect(() => {
+    const unsubscribe = onEmailVerificationStateChange((isVerified, firebaseUser) => {
+      if (firebaseUser && isVerified) {
+        setEmailVerificationStatus(prev => ({
+          ...prev,
+          isVerified: true,
+          message: 'Email verified successfully!',
+          isError: false
+        }));
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup subscription
+  }, []);
+  const handleEmailVerification = async () => {
+    if (!user.email) {
+      setEmailVerificationStatus({
+        isVerified: false,
+        isSending: false,
+        message: 'No email address found',
+        isError: true
+      });
+      return;
+    }
+
+    setEmailVerificationStatus(prev => ({
+      ...prev,
+      isSending: true,
+      message: 'Sending verification email...',
+      isError: false
+    }));
+
+    try {
+      const result = await sendEmailVerificationLink(user.email);
+
+      if (result.success) {
+        if (result.isVerified) {
+          setEmailVerificationStatus({
+            isVerified: true,
+            isSending: false,
+            message: 'Email is already verified!',
+            isError: false
+          });
+        } else {
+          setEmailVerificationStatus({
+            isVerified: false,
+            isSending: false,
+            message: 'Verification email sent! Please check your inbox and click the link.',
+            isError: false
+          });
+        }
+      } else {
+        // Handle specific error codes
+        let errorMessage = result.error || 'Failed to send verification email';
+
+        if (result.code === 'auth/operation-not-allowed') {
+          errorMessage = 'Please enable Email/Password authentication in Firebase Console.';
+        }
+
+        setEmailVerificationStatus({
+          isVerified: false,
+          isSending: false,
+          message: errorMessage,
+          isError: true
+        });
+      }
+    } catch (error) {
+      console.error('Email verification error:', error);
+      setEmailVerificationStatus({
+        isVerified: false,
+        isSending: false,
+        message: 'Error sending verification email. Please try again.',
+        isError: true
+      });
+    }
+  };
+
+  useEffect(() => {
+    const checkEmailVerification = async () => {
+      try {
+        const result = await checkEmailVerificationStatus();
+        if (result.success && result.isVerified) {
+          setEmailVerificationStatus({
+            isVerified: true,
+            isSending: false,
+            message: 'Email verified successfully!',
+            isError: false
+          });
+        }
+      } catch (error) {
+        console.log('Error checking email verification status:', error);
+      }
+    };
+
+    if (user.email) {
+      checkEmailVerification();
+    }
+  }, [user.email]);
+
+  const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'image') {
       setAddressData(prev => ({ ...prev, image: files[0] }));
@@ -126,10 +262,35 @@ const PersonalDetailForm = ({
                 value={user.email || ''}
                 disabled
               />
-              <p className="text-[16px] font-bold font-sans text-[#467EF8] cursor-pointer hover:text-[#769beb] transition-all duration-200 ease-initial">
-                Verify Now
-              </p>
+              <button
+                type="button"
+                onClick={handleEmailVerification}
+                disabled={emailVerificationStatus.isSending || emailVerificationStatus.isVerified}
+                className={`text-[16px] font-bold font-sans px-4 py-2 rounded transition-all duration-200 ease-initial ${emailVerificationStatus.isVerified
+                    ? 'text-[#16B338] cursor-default'
+                    : emailVerificationStatus.isSending
+                      ? 'text-[#999] cursor-not-allowed'
+                      : 'text-[#467EF8] cursor-pointer hover:text-[#769beb]'
+                  }`}
+              >
+                {emailVerificationStatus.isVerified
+                  ? '✓ Verified'
+                  : emailVerificationStatus.isSending
+                    ? 'Sending...'
+                    : 'Verify Now'}
+              </button>
             </div>
+            {/* Email verification status message */}
+            {emailVerificationStatus.message && (
+              <div className={`text-sm mt-2 ${emailVerificationStatus.isError
+                  ? 'text-red-500'
+                  : emailVerificationStatus.isVerified
+                    ? 'text-green-600'
+                    : 'text-blue-600'
+                }`}>
+                {emailVerificationStatus.message}
+              </div>
+            )}
           </div>
         </form>
       </div>
@@ -350,13 +511,12 @@ const Stepper = ({ step, setStep }) => (
       onClick={() => setStep(1)}
     >
       <div
-        className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ${
-          step === 1
-            ? 'bg-[#464646] text-white'
-            : step > 1
+        className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ${step === 1
+          ? 'bg-[#464646] text-white'
+          : step > 1
             ? 'bg-[#16B338] text-white'
             : 'bg-[#E0E0E0] text-[#a0a0a0]'
-        }`}
+          }`}
       >
         1
       </div>
@@ -401,7 +561,7 @@ const Stepper = ({ step, setStep }) => (
 const MultiStepForm = () => {
   const [step, setStep] = useState(1);
   const [user, setUser] = useState({});
-  const uuid = localStorage.getItem('uuid');
+  const uuid = localStorage.getItem("uuid");
 
   // State for both forms
   const [addressData, setAddressData] = useState({
@@ -421,9 +581,7 @@ const MultiStepForm = () => {
     specialization: '',
   });
 
-  const [imagePreview, setImagePreview] = useState(
-    '/Images/image-placeholder.png'
-  );
+  const [imagePreview, setImagePreview] = useState('/Images/image-placeholder.png');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchUser = async () => {
@@ -441,6 +599,8 @@ const MultiStepForm = () => {
   useEffect(() => {
     fetchUser();
   }, []);
+
+
 
   const handleSubmitAll = async () => {
     setIsSubmitting(true);
@@ -507,24 +667,22 @@ const MultiStepForm = () => {
             <Stepper step={step} setStep={setStep} />
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          {step === 1 ? (
-            <PersonalDetailForm
-              user={user}
-              onNext={() => setStep(2)}
-              addressData={addressData}
-              setAddressData={setAddressData}
-              imagePreview={imagePreview}
-              setImagePreview={setImagePreview}
-            />
-          ) : (
-            <SellingDetailForm
-              sellerData={sellerData}
-              setSellerData={setSellerData}
-              onSubmitAll={handleSubmitAll}
-            />
-          )}
-        </div>
+        {step === 1 ? (
+          <PersonalDetailForm
+            user={user}
+            onNext={() => setStep(2)}
+            addressData={addressData}
+            setAddressData={setAddressData}
+            imagePreview={imagePreview}
+            setImagePreview={setImagePreview}
+          />
+        ) : (
+          <SellingDetailForm
+            sellerData={sellerData}
+            setSellerData={setSellerData}
+            onSubmitAll={handleSubmitAll}
+          />
+        )}
       </div>
     </div>
   );
