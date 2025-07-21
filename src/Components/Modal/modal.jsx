@@ -24,7 +24,8 @@ import {
 const Modal = ({ onClose }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const referralCode = searchParams.get('refferal-code');
+  // const referralCode = searchParams.get('refferal-code');
+  const referralCode = localStorage.getItem('referralCode')
   console.log(referralCode);
 
   const [showOtp, setShowOtp] = useState(false);
