@@ -802,15 +802,28 @@ const Modal = ({ onClose }) => {
                           Password
                         </label>
                         <div className="flex flex-col gap-2">
-                          <input
-                            onKeyDown={e => handleFormKeyDown(e, 3)}
-                            className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                            placeholder="Enter your password"
-                            type="password"
-                            name="password"
-                            value={loginData.password}
-                            onChange={handleLoginChange}
-                          />
+                          <div className="relative w-[90%]">
+                            <input
+                              onKeyDown={e => handleFormKeyDown(e, 3)}
+                              className="w-full p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                              placeholder="Enter your password"
+                              type={showLoginPassword ? 'text' : 'password'}
+                              name="password"
+                              onChange={handleChange}
+                            />
+                            <div
+                              className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                              onClick={() =>
+                                setShowLoginPassword(!showLoginPassword)
+                              }
+                            >
+                              {showLoginPassword ? (
+                                <IoEyeOffOutline />
+                              ) : (
+                                <IoEyeOutline />
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </form>
@@ -819,12 +832,12 @@ const Modal = ({ onClose }) => {
                         {loginError}
                       </div>
                     )}
-                    <div
+                    {/* <div
                       className="text-[13px]  cursor-pointer text-[#00A397] text-right w-[90%] hover:text-[#3c8984] "
                       onClick={handleForgotPasswordClick}
                     >
                       <p>Forgot Password?</p>
-                    </div>
+                    </div> */}
 
                     <div
                       className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-20 cursor-pointer mx-auto mt-5 flex items-center justify-center gap-2"
