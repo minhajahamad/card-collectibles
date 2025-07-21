@@ -84,8 +84,8 @@ export const initializeRecaptcha = async (
   resetRecaptcha();
 
   try {
-    // Wait a bit to ensure cleanup is complete
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait longer for cleanup to complete
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     const container = document.getElementById(containerId);
     if (!container) {
@@ -97,6 +97,12 @@ export const initializeRecaptcha = async (
     container.innerHTML = '';
     container.style.display = 'block';
 
+    // Check if reCAPTCHA is already initialized on this container
+    if (container.hasAttribute('data-recaptcha-initialized')) {
+      console.log("reCAPTCHA already initialized on this container");
+      return false;
+    }
+
     recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
       size: "invisible",
       callback: () => {
@@ -104,18 +110,23 @@ export const initializeRecaptcha = async (
       },
       "expired-callback": () => {
         console.log("reCAPTCHA expired, resetting...");
+        container.removeAttribute('data-recaptcha-initialized');
         resetRecaptcha();
       },
       "error-callback": (error: any) => {
         console.error("reCAPTCHA error:", error);
+        container.removeAttribute('data-recaptcha-initialized');
         resetRecaptcha();
       }
     });
 
+    // Mark container as initialized
+    container.setAttribute('data-recaptcha-initialized', 'true');
+
     // Add timeout for render
     const renderPromise = recaptchaVerifier.render();
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('reCAPTCHA render timeout')), 10000)
+      setTimeout(() => reject(new Error('reCAPTCHA render timeout')), 15000)
     );
 
     await Promise.race([renderPromise, timeoutPromise]);
@@ -153,8 +164,21 @@ export const sendOTP = async (
     // Reset everything first to avoid conflicts
     resetRecaptcha();
     
-    // Wait a bit for cleanup
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Wait longer for cleanup
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Check if container exists, if not create it
+    let container = document.getElementById("recaptcha-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "recaptcha-container";
+      container.style.display = "none";
+      container.style.position = "fixed";
+      container.style.top = "0";
+      container.style.left = "0";
+      container.style.zIndex = "9999";
+      document.body.appendChild(container);
+    }
 
     // Initialize reCAPTCHA fresh
     const recaptchaSuccess = await initializeRecaptcha("recaptcha-container");
@@ -183,10 +207,10 @@ export const sendOTP = async (
 
     console.log("Sending OTP to:", formattedNumber);
     
-    // Add timeout for signInWithPhoneNumber
+    // Add longer timeout for signInWithPhoneNumber
     const signInPromise = signInWithPhoneNumber(auth, formattedNumber, recaptchaVerifier!);
     const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error('OTP send timeout')), 30000)
+      setTimeout(() => reject(new Error('OTP send timeout')), 60000) // Increased timeout
     );
 
     confirmationResult = await Promise.race([signInPromise, timeoutPromise]);
@@ -217,9 +241,14 @@ export const sendOTP = async (
         case "auth/network-request-failed":
           userMessage = "Network error. Please check your connection and try again.";
           break;
+        case "recaptcha-not-available":
+          userMessage = "reCAPTCHA not available. Please refresh the page and try again.";
+          break;
         default:
           if (error.message.includes('timeout')) {
             userMessage = "Request timed out. Please try again.";
+          } else if (error.message.includes('already been rendered')) {
+            userMessage = "Please wait a moment and try again.";
           }
       }
 
@@ -683,6 +712,7 @@ export const onEmailVerificationStateChange = (callback: (isVerified: boolean, u
 /**
  * Cleans up reCAPTCHA resources
  */
+
 export const resetRecaptcha = (): void => {
   try {
     // Clear confirmation result first
@@ -703,6 +733,7 @@ export const resetRecaptcha = (): void => {
     if (container) {
       container.innerHTML = "";
       container.style.display = "none";
+      container.removeAttribute('data-recaptcha-initialized'); // Remove our custom attribute
     }
 
     // Remove all reCAPTCHA related elements from DOM
@@ -736,17 +767,25 @@ export const resetRecaptcha = (): void => {
           console.log("Error removing iframe:", e);
         }
       });
+
+      // Clean up any remaining reCAPTCHA containers
+      const allContainers = document.querySelectorAll('[data-recaptcha-initialized]');
+      allContainers.forEach((container) => {
+        container.removeAttribute('data-recaptcha-initialized');
+      });
     };
 
-    // Remove immediately and after a delay
+    // Remove immediately and after delays
     removeElements();
     setTimeout(removeElements, 100);
     setTimeout(removeElements, 500);
+    setTimeout(removeElements, 1000);
 
   } catch (error) {
     console.log("Error resetting reCAPTCHA:", error);
   }
 };
+
 
 /**
  * Utility function to get Firebase auth instance
