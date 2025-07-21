@@ -369,13 +369,14 @@ const PersonalDetailForm = ({
 
 const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState({});
+  const [categories, setCategories] = useState([]); // ensure array
 
   const fetchCategories = async () => {
     try {
       const response = await axiosInstance.get(API_URL.SELLERS.CATEGORY);
       console.log(response);
-      setCategories(response.data.data);
+      // Ensure categories is an array
+      setCategories(Array.isArray(response.data.data) ? response.data.data : []);
     } catch (err) {
       console.log(err);
     }
@@ -388,11 +389,12 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
-      setSellerData(prev => ({
+      const id = Number(value); // or value if IDs are strings
+      setSellerData((prev) => ({
         ...prev,
         categories: checked
-          ? [...(prev.categories || []), value]
-          : (prev.categories || []).filter(cat => cat !== value),
+          ? [...(prev.categories || []), id]
+          : (prev.categories || []).filter(catId => catId !== id)
       }));
     } else {
       setSellerData(prev => ({ ...prev, [name]: value }));
@@ -424,39 +426,19 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
             <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
               Category
             </label>
-            <div className="flex flex-col sm:flex-row gap-5">
-              <label className="flex gap-1 items-center font-regular text-[#464646]">
-                <input
-                  type="checkbox"
-                  className="cursor-pointer"
-                  value="TCG"
-                  checked={sellerData.categories?.includes('TCG') || false}
-                  onChange={handleChange}
-                />
-                TCG
-              </label>
-              <label className="flex gap-1 items-center font-regular text-[#464646]">
-                <input
-                  type="checkbox"
-                  className="cursor-pointer"
-                  value="Comics"
-                  checked={sellerData.categories?.includes('Comics') || false}
-                  onChange={handleChange}
-                />
-                Comics
-              </label>
-              <label className="flex gap-1 items-center font-regular text-[#464646]">
-                <input
-                  type="checkbox"
-                  className="cursor-pointer"
-                  value="Collectibles"
-                  checked={
-                    sellerData.categories?.includes('Collectibles') || false
-                  }
-                  onChange={handleChange}
-                />
-                Collectibles
-              </label>
+            <div className="flex gap-5 flex-wrap">
+              {Array.isArray(categories) && categories.map((cat) => (
+                <label key={cat.id} className="flex gap-1 items-center font-regular text-[#464646]">
+                  <input
+                    type="checkbox"
+                    className="cursor-pointer"
+                    value={cat.id}
+                    checked={sellerData.categories.includes(cat.id)}
+                    onChange={handleChange}
+                  />
+                  {cat.name}
+                </label>
+              ))}
             </div>
           </div>
           <div className="flex flex-col xl:flex-row xl:items-center gap-1">
@@ -580,6 +562,9 @@ const MultiStepForm = () => {
     inventory_estimate: '',
     specialization: '',
   });
+
+  console.log(sellerData);
+  
 
   const [imagePreview, setImagePreview] = useState('/Images/image-placeholder.png');
   const [isSubmitting, setIsSubmitting] = useState(false);
