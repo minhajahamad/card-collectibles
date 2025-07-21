@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { IoCloseOutline } from 'react-icons/io5';
-import { LineSpinner } from 'ldrs/react';
+import React, { useState, useRef, useEffect } from "react";
+import { IoCloseOutline } from "react-icons/io5";
+import { LineSpinner } from "ldrs/react";
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 
-import 'ldrs/react/LineSpinner.css';
-import { Spiral } from 'ldrs/react';
-import 'ldrs/react/Spiral.css';
+import "ldrs/react/LineSpinner.css";
+import { Spiral } from "ldrs/react";
+import "ldrs/react/Spiral.css";
+import { countryCodes } from './country.js'; // Adjust path as needed
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -19,34 +20,39 @@ import {
   verifyOTP,
   initializeRecaptcha,
   resetRecaptcha,
-} from '../../services/firebase/firebaseApp.ts'; // Update this path
+} from "../../services/firebase/firebaseApp.ts";
 
 const Modal = ({ onClose }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const referralCode = searchParams.get('refferal-code');
+  // const referralCode = searchParams.get('refferal-code');
+  const referralCode = localStorage.getItem('referralCode')
   console.log(referralCode);
 
   const [showOtp, setShowOtp] = useState(false);
   const [loader, setLoader] = useState(false);
   const [verifyOtpLoader, setVerifyOtpLoader] = useState(false);
-  const [otpError, setOtpError] = useState('');
-  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
+  const [otpError, setOtpError] = useState("");
+  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
+  const [showCountryModal, setShowCountryModal] = useState(false);
 
   // Add formData state
   const [formData, setFormData] = useState({
-    full_name: '',
-    last_name: '',
-    email: '',
-    password: '',
-    reenter_password: '',
-    phone_number: '',
+    full_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+    reenter_password: "",
+    phone_number: "",
   });
   const [errors, setErrors] = useState({});
+  const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); // Default to India
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [countrySearchTerm, setCountrySearchTerm] = useState("");
 
   // Add state for login form
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [loginError, setLoginError] = useState('');
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState("");
   const [loginLoader, setLoginLoader] = useState(false);
 
   // State for Forgot Password
@@ -59,7 +65,7 @@ const Modal = ({ onClose }) => {
   const [forgotPasswordLoader, setForgotPasswordLoader] = useState(false);
 
   // Handle login input change
-  const handleLoginChange = e => {
+  const handleLoginChange = (e) => {
     const { name, value } = e.target;
     setLoginData(prev => ({ ...prev, [name]: value }));
     setLoginError('');
@@ -131,9 +137,9 @@ const Modal = ({ onClose }) => {
 
   // Handle login submit
   const handleLogin = async () => {
-    setLoginError('');
+    setLoginError("");
     if (!loginData.email || !loginData.password) {
-      setLoginError('Please enter both email and password.');
+      setLoginError("Please enter both email and password.");
       return;
     }
     setLoginLoader(true);
@@ -141,20 +147,21 @@ const Modal = ({ onClose }) => {
       const response = await axiosInstance.post(API_URL.LOGIN.LOGIN, loginData);
       console.log(response);
 
+
       // Save user data to localStorage (customize as needed)
       const user = response?.data?.data;
       if (user?.uuid) {
-        localStorage.setItem('uuid', user.uuid);
-        localStorage.setItem('userData', JSON.stringify(user));
-        localStorage.setItem('login', 'true');
-        navigate('/user/profile');
+        localStorage.setItem("uuid", user.uuid);
+        localStorage.setItem("userData", JSON.stringify(user));
+        localStorage.setItem("login", "true");
+        navigate("/user/profile");
       } else {
-        setLoginError('Login failed. Please try again.');
+        setLoginError("Login failed. Please try again.");
       }
     } catch (err) {
       setLoginError(
         err?.response?.data?.error ||
-          'Invalid email or password. Please try again.'
+          "Invalid email or password. Please try again."
       );
     } finally {
       setLoginLoader(false);
@@ -162,120 +169,135 @@ const Modal = ({ onClose }) => {
   };
 
   // Initialize reCAPTCHA on component mount
-  useEffect(() => {
+ // Replace the existing reCAPTCHA useEffect with this
+useEffect(() => {
+  let isInitialized = false;
+  
+  const initRecaptcha = async () => {
     // Create reCAPTCHA container if it doesn't exist
-    if (!document.getElementById('recaptcha-container')) {
-      const recaptchaDiv = document.createElement('div');
-      recaptchaDiv.id = 'recaptcha-container';
-      recaptchaDiv.style.display = 'none'; // Hide the invisible reCAPTCHA
+    if (!document.getElementById("recaptcha-container")) {
+      const recaptchaDiv = document.createElement("div");
+      recaptchaDiv.id = "recaptcha-container";
+      recaptchaDiv.style.display = "none";
       document.body.appendChild(recaptchaDiv);
     }
 
-    // Initialize reCAPTCHA
-    initializeRecaptcha('recaptcha-container');
-
-    // Cleanup on unmount
-    return () => {
-      resetRecaptcha();
-      const recaptchaDiv = document.getElementById('recaptcha-container');
-      if (recaptchaDiv) {
-        recaptchaDiv.remove();
+    // Only initialize if not already done
+    if (!isInitialized) {
+      const success = await initializeRecaptcha("recaptcha-container");
+      if (success) {
+        isInitialized = true;
       }
-    };
-  }, []);
+    }
+  };
+
+  initRecaptcha();
+
+  // Cleanup on unmount
+  return () => {
+    resetRecaptcha();
+    const recaptchaDiv = document.getElementById("recaptcha-container");
+    if (recaptchaDiv) {
+      recaptchaDiv.remove();
+    }
+    isInitialized = false;
+  };
+}, []); // Empty dependency array - only run once
 
   useEffect(() => {
     // Disable scroll on mount
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
 
     // Enable scroll on unmount
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = "auto";
     };
   }, []);
 
   // Common handleChange function
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: '' }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleSendOtp = async () => {
-    // Validation
-    const {
-      full_name,
-      last_name,
-      email,
-      password,
-      reenter_password,
-      phone_number,
-    } = formData;
-    const newErrors = {};
-    if (!full_name) newErrors.full_name = 'First name is required.';
-    if (!last_name) newErrors.last_name = 'Last name is required.';
-    if (!email) newErrors.email = 'Email is required.';
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailRegex.test(email))
-      newErrors.email = 'Please enter a valid email address.';
-    if (!password) newErrors.password = 'Password is required.';
-    if (!reenter_password)
-      newErrors.reenter_password = 'Confirm password is required.';
-    if (password && reenter_password && password !== reenter_password)
-      newErrors.reenter_password = 'Passwords do not match.';
-    if (!phone_number) newErrors.phone_number = 'Phone number is required.';
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+  const filteredCountries = countryCodes.filter(
+    (country) =>
+      country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
+      country.code.includes(countrySearchTerm) ||
+      country.country.toLowerCase().includes(countrySearchTerm.toLowerCase())
+  );
 
-    setLoader(true);
-    setOtpError('');
+const handleSendOtp = async () => {
+  // Validation
+  const {
+    full_name,
+    last_name,
+    email,
+    password,
+    reenter_password,
+    phone_number,
+  } = formData;
+  const newErrors = {};
+  if (!full_name) newErrors.full_name = 'First name is required.';
+  if (!last_name) newErrors.last_name = 'Last name is required.';
+  if (!email) newErrors.email = 'Email is required.';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (email && !emailRegex.test(email))
+    newErrors.email = 'Please enter a valid email address.';
+  if (!password) newErrors.password = 'Password is required.';
+  if (!reenter_password)
+    newErrors.reenter_password = 'Confirm password is required.';
+  if (password && reenter_password && password !== reenter_password)
+    newErrors.reenter_password = 'Passwords do not match.';
+  if (!phone_number) newErrors.phone_number = 'Phone number is required.';
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) return;
 
-    try {
-      // Format phone number (assuming Indian numbers)
-      let phoneNumber = formData.phone_number.replace(/\D/g, ''); // Remove non-digits
-      if (phoneNumber.length === 10) {
-        phoneNumber = '+91' + phoneNumber;
-      } else if (!phoneNumber.startsWith('+91')) {
-        phoneNumber = '+91' + phoneNumber;
-      }
+  setLoader(true);
+  setOtpError("");
 
-      const result = await sendOTP(phoneNumber);
+  try {
+    // Format phone number with selected country code
+    let phoneNumber = formData.phone_number.replace(/\D/g, "");
+    const fullPhoneNumber = selectedCountryCode + phoneNumber;
 
-      if (result.success) {
-        setShowOtp(true);
-        // Clear any previous errors
-        setErrors(prev => ({ ...prev, phone_number: '' }));
-        setShowVerifyOtp(true);
-      } else {
-        setOtpError(result.error || 'Failed to send OTP');
-        setErrors(prev => ({
-          ...prev,
-          phone_number: result.error || 'Failed to send OTP',
-        }));
-      }
-    } catch (error) {
-      console.error('Error sending OTP:', error);
-      setOtpError('Failed to send OTP. Please try again.');
-      setErrors(prev => ({
+    const result = await sendOTP(fullPhoneNumber);
+
+    if (result.success) {
+      setShowOtp(true);
+      setErrors((prev) => ({ ...prev, phone_number: "" }));
+      setShowVerifyOtp(true);
+    } else {
+      setOtpError(result.error || "Failed to send OTP");
+      setErrors((prev) => ({
         ...prev,
-        phone_number: 'Failed to send OTP. Please try again.',
+        phone_number: result.error || "Failed to send OTP",
       }));
-    } finally {
-      setLoader(false);
     }
-  };
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    setOtpError("Failed to send OTP. Please try again.");
+    setErrors((prev) => ({
+      ...prev,
+      phone_number: "Failed to send OTP. Please try again.",
+    }));
+  } finally {
+    setLoader(false);
+  }
+};
 
   const handleVerifyOtp = async () => {
-    const otpCode = otpValues.join('');
+    const otpCode = otpValues.join("");
 
     if (otpCode.length !== 6) {
       // Changed from 4 to 6
-      setOtpError('Please enter complete OTP');
+      setOtpError("Please enter complete OTP");
       return;
     }
 
     setVerifyOtpLoader(true);
-    setOtpError('');
+    setOtpError("");
 
     try {
       const result = await verifyOTP(otpCode);
@@ -284,23 +306,23 @@ const Modal = ({ onClose }) => {
         // OTP verified successfully, now register the user
         await handleSubmit(null, true); // Pass true to indicate OTP is verified
       } else {
-        setOtpError(result.error || 'Invalid OTP');
+        setOtpError(result.error || "Invalid OTP");
       }
     } catch (error) {
-      console.error('Error verifying OTP:', error);
-      setOtpError('Failed to verify OTP. Please try again.');
+      console.error("Error verifying OTP:", error);
+      setOtpError("Failed to verify OTP. Please try again.");
     } finally {
       setVerifyOtpLoader(false);
     }
   };
 
   const handleResendOtp = async () => {
-    setOtpError('');
-    setOtpValues(['', '', '', '', '', '']); // Changed to 6 empty strings
+    setOtpError("");
+    setOtpValues(["", "", "", "", "", ""]); // Changed to 6 empty strings
 
     // Clear OTP inputs
-    otpRef.current.forEach(input => {
-      if (input) input.value = '';
+    otpRef.current.forEach((input) => {
+      if (input) input.value = "";
     });
 
     // Resend OTP
@@ -309,7 +331,7 @@ const Modal = ({ onClose }) => {
 
   const otpRef = useRef([]);
   const handleKeyDown = (e, index) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       if (index < otpRef.current.length - 1) {
         otpRef.current[index + 1]?.focus();
@@ -333,7 +355,7 @@ const Modal = ({ onClose }) => {
 
   const inputRefs = useRef([]);
   const handleFormKeyDown = (e, index) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       const next = inputRefs.current[index + 1];
       if (next) next.focus();
@@ -345,6 +367,31 @@ const Modal = ({ onClose }) => {
 
     // If OTP is not verified yet, just send OTP
     if (!otpVerified) {
+      // Validation
+      const {
+        full_name,
+        last_name,
+        email,
+        password,
+        reenter_password,
+        phone_number,
+      } = formData;
+      const newErrors = {};
+      if (!full_name) newErrors.full_name = "First name is required.";
+      if (!last_name) newErrors.last_name = "Last name is required.";
+      if (!email) newErrors.email = "Email is required.";
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (email && !emailRegex.test(email))
+        newErrors.email = "Please enter a valid email address.";
+      if (!password) newErrors.password = "Password is required.";
+      if (!reenter_password)
+        newErrors.reenter_password = "Confirm password is required.";
+      if (password && reenter_password && password !== reenter_password)
+        newErrors.reenter_password = "Passwords do not match.";
+      if (!phone_number) newErrors.phone_number = "Phone number is required.";
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0) return;
+
       // Send OTP first
       await handleSendOtp();
       return;
@@ -358,13 +405,13 @@ const Modal = ({ onClose }) => {
           API_URL.REGISTER.REFFERAL_REGISTER(referralCode),
           formData
         );
-        console.log('refferal');
+        console.log("refferal");
       } else {
         response = await axiosInstance.post(
           API_URL.REGISTER.REGISTER,
           formData
         );
-        console.log('normal');
+        console.log("normal");
       }
       console.log(response);
 
@@ -379,23 +426,23 @@ const Modal = ({ onClose }) => {
       };
 
       // Save individual items to localStorage
-      localStorage.setItem('uuid', response?.data?.data?.uuid || '');
-      localStorage.setItem('userData', JSON.stringify(userData));
-      localStorage.setItem('login', 'true');
+      localStorage.setItem("uuid", response?.data?.data?.uuid || "");
+      localStorage.setItem("userData", JSON.stringify(userData));
+      localStorage.setItem("login", "true");
 
       setFormData({
-        full_name: '',
-        last_name: '',
-        email: '',
-        password: '',
-        reenter_password: '',
-        phone_number: '',
+        full_name: "",
+        last_name: "",
+        email: "",
+        password: "",
+        reenter_password: "",
+        phone_number: "",
       });
 
-      navigate('/user/personal-details');
+      navigate("/user/personal-details");
     } catch (err) {
       console.log(err);
-      setOtpError('Registration failed. Please try again.');
+      setOtpError("Registration failed. Please try again.");
     }
   };
 
@@ -404,6 +451,19 @@ const Modal = ({ onClose }) => {
 
   // Show Verify OTP
   const [showVerifyOtp, setShowVerifyOtp] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".country-dropdown")) {
+        setShowCountryDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -416,7 +476,7 @@ const Modal = ({ onClose }) => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
-        transition={{ duration: 0.4, ease: 'easeInOut' }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
       >
         <div className="flex xl:p-5 w-[70vw] h-[60vh] md:h-[50vh] md:w-[60vw] lg:h-[40vh] lg:w-[50vw] xl:w-[60vw] xl:h-[80vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014] overflow-hidden ">
           <div className="w-[50%] hidden xl:block">
@@ -441,7 +501,7 @@ const Modal = ({ onClose }) => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 30 }}
-                        transition={{ duration: 0.4, ease: 'easeInOut' }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
                         className="flex flex-col gap-2 items-center font-inter"
                       >
                         <p className="text-[16px] font-semibold">Enter OTP</p>
@@ -461,11 +521,11 @@ const Modal = ({ onClose }) => {
                             .map((_, i) => (
                               <input
                                 key={i}
-                                ref={el => (otpRef.current[i] = el)}
+                                ref={(el) => (otpRef.current[i] = el)}
                                 className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
                                 placeholder="-"
-                                onKeyDown={e => handleKeyDown(e, i)}
-                                onChange={e => handleOtpChange(e, i)}
+                                onKeyDown={(e) => handleKeyDown(e, i)}
+                                onChange={(e) => handleOtpChange(e, i)}
                                 maxLength={1}
                                 type="text"
                                 value={otpValues[i]}
@@ -486,7 +546,7 @@ const Modal = ({ onClose }) => {
                         </div>
                         <div>
                           <p className="font-poppins text-[14px]">
-                            Don't receive code?{' '}
+                            Don't receive code?{" "}
                             <span
                               className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
                               onClick={handleResendOtp}
