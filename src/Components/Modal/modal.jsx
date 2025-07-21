@@ -1,18 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoCloseOutline } from "react-icons/io5";
 import { LineSpinner } from "ldrs/react";
-import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
+import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 
 import "ldrs/react/LineSpinner.css";
 import { Spiral } from "ldrs/react";
 import "ldrs/react/Spiral.css";
-import { countryCodes } from './country.js'; // Adjust path as needed
+import { countryCodes } from "./country.js"; // Adjust path as needed
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom';
-import axiosInstance from '../../services/axios';
-import { API_URL } from '../../services/api_url';
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import axiosInstance from "../../services/axios";
+import { API_URL } from "../../services/api_url";
 
 // Import Firebase OTP functions
 import {
@@ -20,85 +20,86 @@ import {
   verifyOTP,
   initializeRecaptcha,
   resetRecaptcha,
-} from "../../services/firebase/firebaseApp.ts";
+} from '../../services/firebase/firebaseApp.ts';
 
-const Modal = ({ onClose }) => {
+const Modal = ({ onClose, initialView = 'login' }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // const referralCode = searchParams.get('refferal-code');
-  const referralCode = localStorage.getItem('referralCode')
+  const referralCode = localStorage.getItem("referralCode");
   console.log(referralCode);
 
   const [showOtp, setShowOtp] = useState(false);
   const [loader, setLoader] = useState(false);
   const [verifyOtpLoader, setVerifyOtpLoader] = useState(false);
-  const [otpError, setOtpError] = useState("");
-  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
+  const [otpError, setOtpError] = useState('');
+  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [showCountryModal, setShowCountryModal] = useState(false);
 
   // Add formData state
   const [formData, setFormData] = useState({
-    full_name: "",
-    last_name: "",
-    email: "",
-    password: "",
-    reenter_password: "",
-    phone_number: "",
+    full_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    reenter_password: '',
+    phone_number: '',
   });
   const [errors, setErrors] = useState({});
-  const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); // Default to India
+  const [selectedCountryCode, setSelectedCountryCode] = useState('+91'); // Default to India
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [countrySearchTerm, setCountrySearchTerm] = useState("");
+  const [countrySearchTerm, setCountrySearchTerm] = useState('');
+  const [isOtpSending, setIsOtpSending] = useState(false); // Add this state
 
   // Add state for login form
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [loginError, setLoginError] = useState("");
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [loginError, setLoginError] = useState('');
   const [loginLoader, setLoginLoader] = useState(false);
 
   // State for Forgot Password
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordData, setForgotPasswordData] = useState({
-    newPassword: '',
-    confirmPassword: '',
+    newPassword: "",
+    confirmPassword: "",
   });
-  const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [forgotPasswordError, setForgotPasswordError] = useState("");
   const [forgotPasswordLoader, setForgotPasswordLoader] = useState(false);
 
   // Handle login input change
-  const handleLoginChange = (e) => {
+  const handleLoginChange = e => {
     const { name, value } = e.target;
-    setLoginData(prev => ({ ...prev, [name]: value }));
-    setLoginError('');
+    setLoginData((prev) => ({ ...prev, [name]: value }));
+    setLoginError("");
   };
 
   const handleForgotPasswordClick = () => {
     if (!loginData.email) {
-      setLoginError('Please enter your email address first.');
+      setLoginError("Please enter your email address first.");
       return;
     }
-    setLoginError('');
+    setLoginError("");
     setShowForgotPassword(true);
   };
 
-  const handleForgotPasswordChange = e => {
+  const handleForgotPasswordChange = (e) => {
     const { name, value } = e.target;
-    setForgotPasswordData(prev => ({ ...prev, [name]: value }));
-    setForgotPasswordError('');
+    setForgotPasswordData((prev) => ({ ...prev, [name]: value }));
+    setForgotPasswordError("");
   };
 
   const handleResetPassword = async () => {
     const { newPassword, confirmPassword } = forgotPasswordData;
     if (!newPassword || !confirmPassword) {
-      setForgotPasswordError('Please fill in both password fields.');
+      setForgotPasswordError("Please fill in both password fields.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setForgotPasswordError('Passwords do not match.');
+      setForgotPasswordError("Passwords do not match.");
       return;
     }
 
     setForgotPasswordLoader(true);
-    setForgotPasswordError('');
+    setForgotPasswordError("");
 
     try {
       // 1. Fetch user by email to get UUID
@@ -108,7 +109,7 @@ const Modal = ({ onClose }) => {
 
       const users = userResponse.data?.data;
       if (!users || users.length === 0) {
-        setForgotPasswordError('No account found with this email address.');
+        setForgotPasswordError("No account found with this email address.");
         setForgotPasswordLoader(false);
         return;
       }
@@ -123,13 +124,13 @@ const Modal = ({ onClose }) => {
       // Success
       setForgotPasswordLoader(false);
       setShowForgotPassword(false);
-      setLoginError('Password has been reset successfully. Please login.');
-      setForgotPasswordData({ newPassword: '', confirmPassword: '' });
+      setLoginError("Password has been reset successfully. Please login.");
+      setForgotPasswordData({ newPassword: "", confirmPassword: "" });
     } catch (err) {
       console.error(err);
       setForgotPasswordError(
         err?.response?.data?.error ||
-          'Failed to reset password. Please try again.'
+          "Failed to reset password. Please try again."
       );
       setForgotPasswordLoader(false);
     }
@@ -137,9 +138,9 @@ const Modal = ({ onClose }) => {
 
   // Handle login submit
   const handleLogin = async () => {
-    setLoginError("");
+    setLoginError('');
     if (!loginData.email || !loginData.password) {
-      setLoginError("Please enter both email and password.");
+      setLoginError('Please enter both email and password.');
       return;
     }
     setLoginLoader(true);
@@ -147,16 +148,15 @@ const Modal = ({ onClose }) => {
       const response = await axiosInstance.post(API_URL.LOGIN.LOGIN, loginData);
       console.log(response);
 
-
       // Save user data to localStorage (customize as needed)
       const user = response?.data?.data;
       if (user?.uuid) {
-        localStorage.setItem("uuid", user.uuid);
-        localStorage.setItem("userData", JSON.stringify(user));
-        localStorage.setItem("login", "true");
-        navigate("/user/profile");
+        localStorage.setItem('uuid', user.uuid);
+        localStorage.setItem('userData', JSON.stringify(user));
+        localStorage.setItem('login', 'true');
+        navigate('/user/profile');
       } else {
-        setLoginError("Login failed. Please try again.");
+        setLoginError('Login failed. Please try again.');
       }
     } catch (err) {
       setLoginError(
@@ -169,135 +169,181 @@ const Modal = ({ onClose }) => {
   };
 
   // Initialize reCAPTCHA on component mount
- // Replace the existing reCAPTCHA useEffect with this
-useEffect(() => {
-  let isInitialized = false;
-  
-  const initRecaptcha = async () => {
-    // Create reCAPTCHA container if it doesn't exist
-    if (!document.getElementById("recaptcha-container")) {
-      const recaptchaDiv = document.createElement("div");
-      recaptchaDiv.id = "recaptcha-container";
-      recaptchaDiv.style.display = "none";
-      document.body.appendChild(recaptchaDiv);
-    }
+  // Replace the existing reCAPTCHA useEffect with this
+  // Replace the existing reCAPTCHA useEffect with this
+  useEffect(() => {
+    let isComponentMounted = true;
+    let cleanupTimeout;
 
-    // Only initialize if not already done
-    if (!isInitialized) {
-      const success = await initializeRecaptcha("recaptcha-container");
-      if (success) {
-        isInitialized = true;
+    const initRecaptcha = async () => {
+      // Clean up any existing reCAPTCHA first
+      resetRecaptcha();
+
+      // Create reCAPTCHA container if it doesn't exist
+      let recaptchaDiv = document.getElementById("recaptcha-container");
+      if (!recaptchaDiv) {
+        recaptchaDiv = document.createElement("div");
+        recaptchaDiv.id = "recaptcha-container";
+        recaptchaDiv.style.display = "none";
+        recaptchaDiv.style.position = "fixed";
+        recaptchaDiv.style.top = "0";
+        recaptchaDiv.style.left = "0";
+        recaptchaDiv.style.zIndex = "9999";
+        document.body.appendChild(recaptchaDiv);
       }
-    }
-  };
 
-  initRecaptcha();
+      // Wait longer before initializing to avoid conflicts
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // Cleanup on unmount
-  return () => {
-    resetRecaptcha();
-    const recaptchaDiv = document.getElementById("recaptcha-container");
-    if (recaptchaDiv) {
-      recaptchaDiv.remove();
-    }
-    isInitialized = false;
-  };
-}, []); // Empty dependency array - only run once
+      // Only initialize if component is still mounted and container is clean
+      if (
+        isComponentMounted &&
+        !recaptchaDiv.hasAttribute("data-recaptcha-initialized")
+      ) {
+        try {
+          await initializeRecaptcha("recaptcha-container");
+        } catch (error) {
+          console.log("Failed to initialize reCAPTCHA on mount:", error);
+        }
+      }
+    };
+
+    // Delay initialization to ensure DOM is ready
+    cleanupTimeout = setTimeout(initRecaptcha, 500);
+
+    // Cleanup on unmount
+    return () => {
+      isComponentMounted = false;
+
+      if (cleanupTimeout) {
+        clearTimeout(cleanupTimeout);
+      }
+
+      // Clean up reCAPTCHA
+      resetRecaptcha();
+
+      // Remove container after delay to ensure cleanup
+      setTimeout(() => {
+        const recaptchaDiv = document.getElementById("recaptcha-container");
+        if (recaptchaDiv) {
+          recaptchaDiv.remove();
+        }
+      }, 500);
+    };
+  }, []);
 
   useEffect(() => {
     // Disable scroll on mount
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden';
 
     // Enable scroll on unmount
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = 'auto';
     };
   }, []);
 
   // Common handleChange function
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const filteredCountries = countryCodes.filter(
-    (country) =>
+    country =>
       country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
       country.code.includes(countrySearchTerm) ||
       country.country.toLowerCase().includes(countrySearchTerm.toLowerCase())
   );
 
-const handleSendOtp = async () => {
-  // Validation
-  const {
-    full_name,
-    last_name,
-    email,
-    password,
-    reenter_password,
-    phone_number,
-  } = formData;
-  const newErrors = {};
-  if (!full_name) newErrors.full_name = 'First name is required.';
-  if (!last_name) newErrors.last_name = 'Last name is required.';
-  if (!email) newErrors.email = 'Email is required.';
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (email && !emailRegex.test(email))
-    newErrors.email = 'Please enter a valid email address.';
-  if (!password) newErrors.password = 'Password is required.';
-  if (!reenter_password)
-    newErrors.reenter_password = 'Confirm password is required.';
-  if (password && reenter_password && password !== reenter_password)
-    newErrors.reenter_password = 'Passwords do not match.';
-  if (!phone_number) newErrors.phone_number = 'Phone number is required.';
-  setErrors(newErrors);
-  if (Object.keys(newErrors).length > 0) return;
-
-  setLoader(true);
-  setOtpError("");
-
-  try {
-    // Format phone number with selected country code
-    let phoneNumber = formData.phone_number.replace(/\D/g, "");
-    const fullPhoneNumber = selectedCountryCode + phoneNumber;
-
-    const result = await sendOTP(fullPhoneNumber);
-
-    if (result.success) {
-      setShowOtp(true);
-      setErrors((prev) => ({ ...prev, phone_number: "" }));
-      setShowVerifyOtp(true);
-    } else {
-      setOtpError(result.error || "Failed to send OTP");
-      setErrors((prev) => ({
-        ...prev,
-        phone_number: result.error || "Failed to send OTP",
-      }));
+  const handleSendOtp = async () => {
+    // Prevent multiple simultaneous calls
+    if (isOtpSending || loader) {
+      console.log('OTP send already in progress');
+      return;
     }
-  } catch (error) {
-    console.error("Error sending OTP:", error);
-    setOtpError("Failed to send OTP. Please try again.");
-    setErrors((prev) => ({
-      ...prev,
-      phone_number: "Failed to send OTP. Please try again.",
-    }));
-  } finally {
-    setLoader(false);
-  }
-};
+
+    // Validation (keep existing validation code)
+    const {
+      full_name,
+      last_name,
+      email,
+      password,
+      reenter_password,
+      phone_number,
+    } = formData;
+
+    const newErrors = {};
+    if (!full_name) newErrors.full_name = "First name is required.";
+    if (!last_name) newErrors.last_name = "Last name is required.";
+    if (!email) newErrors.email = "Email is required.";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && !emailRegex.test(email))
+      newErrors.email = "Please enter a valid email address.";
+    if (!password) newErrors.password = "Password is required.";
+    if (!reenter_password)
+      newErrors.reenter_password = "Confirm password is required.";
+    if (password && reenter_password && password !== reenter_password)
+      newErrors.reenter_password = "Passwords do not match.";
+    if (!phone_number) newErrors.phone_number = "Phone number is required.";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    setIsOtpSending(true);
+    setLoader(true);
+    setOtpError("");
+
+    try {
+      // Format phone number with selected country code
+      let phoneNumber = formData.phone_number.replace(/\D/g, '');
+      const fullPhoneNumber = selectedCountryCode + phoneNumber;
+
+      // Add longer delay to ensure UI updates and avoid conflicts
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      console.log("Attempting to send OTP to:", fullPhoneNumber);
+      const result = await sendOTP(fullPhoneNumber);
+
+      if (result.success) {
+        setShowOtp(true);
+        setErrors(prev => ({ ...prev, phone_number: '' }));
+        setShowVerifyOtp(true);
+        console.log("OTP sent successfully, UI updated");
+      } else {
+        const errorMessage = result.error || "Failed to send OTP";
+        console.error("OTP send failed:", errorMessage);
+        setOtpError(errorMessage);
+        setErrors(prev => ({
+          ...prev,
+          phone_number: errorMessage,
+        }));
+      }
+    } catch (error) {
+      console.error("Error in handleSendOtp:", error);
+      const errorMessage = "Failed to send OTP. Please try again.";
+      setOtpError(errorMessage);
+      setErrors(prev => ({
+        ...prev,
+        phone_number: errorMessage,
+      }));
+    } finally {
+      setLoader(false);
+      setIsOtpSending(false);
+    }
+  };
 
   const handleVerifyOtp = async () => {
-    const otpCode = otpValues.join("");
+    const otpCode = otpValues.join('');
 
     if (otpCode.length !== 6) {
       // Changed from 4 to 6
-      setOtpError("Please enter complete OTP");
+      setOtpError('Please enter complete OTP');
       return;
     }
 
     setVerifyOtpLoader(true);
-    setOtpError("");
+    setOtpError('');
 
     try {
       const result = await verifyOTP(otpCode);
@@ -306,32 +352,44 @@ const handleSendOtp = async () => {
         // OTP verified successfully, now register the user
         await handleSubmit(null, true); // Pass true to indicate OTP is verified
       } else {
-        setOtpError(result.error || "Invalid OTP");
+        setOtpError(result.error || 'Invalid OTP');
       }
     } catch (error) {
-      console.error("Error verifying OTP:", error);
-      setOtpError("Failed to verify OTP. Please try again.");
+      console.error('Error verifying OTP:', error);
+      setOtpError('Failed to verify OTP. Please try again.');
     } finally {
       setVerifyOtpLoader(false);
     }
   };
 
   const handleResendOtp = async () => {
-    setOtpError("");
-    setOtpValues(["", "", "", "", "", ""]); // Changed to 6 empty strings
+    // Prevent multiple resend attempts
+    if (isOtpSending || loader) {
+      return;
+    }
+
+    console.log("Resending OTP...");
+
+    // Reset confirmation result and cleanup
+    resetRecaptcha();
+
+    setOtpError('');
+    setOtpValues(['', '', '', '', '', '']);
 
     // Clear OTP inputs
-    otpRef.current.forEach((input) => {
-      if (input) input.value = "";
+    otpRef.current.forEach(input => {
+      if (input) input.value = '';
     });
 
-    // Resend OTP
-    await handleSendOtp();
+    // Wait longer before resending to ensure cleanup is complete
+    setTimeout(() => {
+      handleSendOtp();
+    }, 2000); // Increased delay
   };
 
   const otpRef = useRef([]);
   const handleKeyDown = (e, index) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       if (index < otpRef.current.length - 1) {
         otpRef.current[index + 1]?.focus();
@@ -355,7 +413,7 @@ const handleSendOtp = async () => {
 
   const inputRefs = useRef([]);
   const handleFormKeyDown = (e, index) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       const next = inputRefs.current[index + 1];
       if (next) next.focus();
@@ -377,18 +435,18 @@ const handleSendOtp = async () => {
         phone_number,
       } = formData;
       const newErrors = {};
-      if (!full_name) newErrors.full_name = "First name is required.";
-      if (!last_name) newErrors.last_name = "Last name is required.";
-      if (!email) newErrors.email = "Email is required.";
+      if (!full_name) newErrors.full_name = 'First name is required.';
+      if (!last_name) newErrors.last_name = 'Last name is required.';
+      if (!email) newErrors.email = 'Email is required.';
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (email && !emailRegex.test(email))
-        newErrors.email = "Please enter a valid email address.";
-      if (!password) newErrors.password = "Password is required.";
+        newErrors.email = 'Please enter a valid email address.';
+      if (!password) newErrors.password = 'Password is required.';
       if (!reenter_password)
-        newErrors.reenter_password = "Confirm password is required.";
+        newErrors.reenter_password = 'Confirm password is required.';
       if (password && reenter_password && password !== reenter_password)
-        newErrors.reenter_password = "Passwords do not match.";
-      if (!phone_number) newErrors.phone_number = "Phone number is required.";
+        newErrors.reenter_password = 'Passwords do not match.';
+      if (!phone_number) newErrors.phone_number = 'Phone number is required.';
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) return;
 
@@ -405,13 +463,13 @@ const handleSendOtp = async () => {
           API_URL.REGISTER.REFFERAL_REGISTER(referralCode),
           formData
         );
-        console.log("refferal");
+        console.log('refferal');
       } else {
         response = await axiosInstance.post(
           API_URL.REGISTER.REGISTER,
           formData
         );
-        console.log("normal");
+        console.log('normal');
       }
       console.log(response);
 
@@ -426,42 +484,42 @@ const handleSendOtp = async () => {
       };
 
       // Save individual items to localStorage
-      localStorage.setItem("uuid", response?.data?.data?.uuid || "");
-      localStorage.setItem("userData", JSON.stringify(userData));
-      localStorage.setItem("login", "true");
+      localStorage.setItem('uuid', response?.data?.data?.uuid || '');
+      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem('login', 'true');
 
       setFormData({
-        full_name: "",
-        last_name: "",
-        email: "",
-        password: "",
-        reenter_password: "",
-        phone_number: "",
+        full_name: '',
+        last_name: '',
+        email: '',
+        password: '',
+        reenter_password: '',
+        phone_number: '',
       });
 
-      navigate("/user/personal-details");
+      navigate('/user/personal-details');
     } catch (err) {
       console.log(err);
-      setOtpError("Registration failed. Please try again.");
+      setOtpError('Registration failed. Please try again.');
     }
   };
 
   // State for Login
-  const [showSigUp, setShowSignUp] = useState(false);
+  const [showSigUp, setShowSignUp] = useState(initialView === 'signup');
 
   // Show Verify OTP
   const [showVerifyOtp, setShowVerifyOtp] = useState(false);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".country-dropdown")) {
+    const handleClickOutside = event => {
+      if (!event.target.closest('.country-dropdown')) {
         setShowCountryDropdown(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -476,7 +534,7 @@ const handleSendOtp = async () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
+        transition={{ duration: 0.4, ease: 'easeInOut' }}
       >
         <div className="flex xl:p-5 w-[70vw] h-[60vh] md:h-[50vh] md:w-[60vw] lg:h-[40vh] lg:w-[50vw] xl:w-[60vw] xl:h-[80vh] bg-white rounded-[22px] mx-auto relative z-50 shadow-[0_0_17px_0_#00000014] overflow-hidden ">
           <div className="w-[50%] hidden xl:block">
@@ -501,7 +559,7 @@ const handleSendOtp = async () => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 30 }}
-                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        transition={{ duration: 0.4, ease: 'easeInOut' }}
                         className="flex flex-col gap-2 items-center font-inter"
                       >
                         <p className="text-[16px] font-semibold">Enter OTP</p>
@@ -521,11 +579,11 @@ const handleSendOtp = async () => {
                             .map((_, i) => (
                               <input
                                 key={i}
-                                ref={(el) => (otpRef.current[i] = el)}
+                                ref={el => (otpRef.current[i] = el)}
                                 className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
                                 placeholder="-"
-                                onKeyDown={(e) => handleKeyDown(e, i)}
-                                onChange={(e) => handleOtpChange(e, i)}
+                                onKeyDown={e => handleKeyDown(e, i)}
+                                onChange={e => handleOtpChange(e, i)}
                                 maxLength={1}
                                 type="text"
                                 value={otpValues[i]}
@@ -546,7 +604,7 @@ const handleSendOtp = async () => {
                         </div>
                         <div>
                           <p className="font-poppins text-[14px]">
-                            Don't receive code?{" "}
+                            Don't receive code?{' '}
                             <span
                               className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
                               onClick={handleResendOtp}
@@ -571,8 +629,8 @@ const handleSendOtp = async () => {
                       <div className="flex gap-3">
                         <div className="w-[50%]">
                           <input
-                            ref={el => (inputRefs.current[0] = el)}
-                            onKeyDown={e => handleFormKeyDown(e, 0)}
+                            ref={(el) => (inputRefs.current[0] = el)}
+                            onKeyDown={(e) => handleFormKeyDown(e, 0)}
                             className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                             placeholder="First Name"
                             name="full_name"
@@ -587,8 +645,8 @@ const handleSendOtp = async () => {
                         </div>
                         <div className="w-[50%]">
                           <input
-                            ref={el => (inputRefs.current[1] = el)}
-                            onKeyDown={e => handleFormKeyDown(e, 1)}
+                            ref={(el) => (inputRefs.current[1] = el)}
+                            onKeyDown={(e) => handleFormKeyDown(e, 1)}
                             className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                             placeholder="Last Name"
                             name="last_name"
@@ -610,8 +668,8 @@ const handleSendOtp = async () => {
                         Email
                       </label>
                       <input
-                        ref={el => (inputRefs.current[2] = el)}
-                        onKeyDown={e => handleFormKeyDown(e, 2)}
+                        ref={(el) => (inputRefs.current[2] = el)}
+                        onKeyDown={(e) => handleFormKeyDown(e, 2)}
                         className="w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                         placeholder="Enter your email"
                         name="email"
@@ -633,11 +691,11 @@ const handleSendOtp = async () => {
                       <div className="flex flex-col gap-2">
                         <div className="relative">
                           <input
-                            ref={el => (inputRefs.current[3] = el)}
-                            onKeyDown={e => handleFormKeyDown(e, 3)}
+                            ref={(el) => (inputRefs.current[3] = el)}
+                            onKeyDown={(e) => handleFormKeyDown(e, 3)}
                             className="w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                             placeholder="Enter your password"
-                            type={showPassword ? 'text' : 'password'}
+                            type={showPassword ? "text" : "password"}
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
@@ -661,11 +719,11 @@ const handleSendOtp = async () => {
                         )}
                         <div className="relative">
                           <input
-                            ref={el => (inputRefs.current[4] = el)}
-                            onKeyDown={e => handleFormKeyDown(e, 4)}
+                            ref={(el) => (inputRefs.current[4] = el)}
+                            onKeyDown={(e) => handleFormKeyDown(e, 4)}
                             className="w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                             placeholder="Confirm password"
-                            type={showConfirmPassword ? 'text' : 'password'}
+                            type={showConfirmPassword ? "text" : "password"}
                             name="reenter_password"
                             value={formData.reenter_password}
                             onChange={handleChange}
@@ -697,32 +755,40 @@ const handleSendOtp = async () => {
                       <label className="font-medium text-[14px] text-[#111111]">
                         Phone Number
                       </label>
-                      <div className="flex gap-3">
-                        <input
-                          ref={el => (inputRefs.current[5] = el)}
-                          onKeyDown={e => handleFormKeyDown(e, 5)}
-                          className="w-[20%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                          placeholder="+91"
-                          value="+91"
-                          readOnly
-                        />
+                      <div className="flex gap-3 items-start">
+                        {/* Country Code Button */}
+                        <div
+                          className="w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
+                          onClick={() => setShowCountryModal(true)}
+                        >
+                          <span className="text-[#333] font-medium">
+                            {selectedCountryCode}
+                          </span>
+                        </div>
+
+                        {/* Phone Number Input */}
                         <input
                           ref={el => (inputRefs.current[6] = el)}
                           onKeyDown={e => handleFormKeyDown(e, 6)}
-                          className="w-[50%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                          placeholder="00000 0000"
+                          className="flex-1 p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
+                          placeholder="Phone number"
                           name="phone_number"
                           value={formData.phone_number}
                           onChange={handleChange}
-                          maxLength="10"
+                          type="tel"
                         />
 
+                        {/* Send OTP Button */}
                         <div
-                          onClick={handleSendOtp}
-                          className="bg-[#467EF8] w-[30%] rounded-[9px] flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-200"
+                          onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
+                          className={`rounded-[9px] w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm ${
+                            isOtpSending
+                              ? "bg-[#a5a5a5] cursor-not-allowed"
+                              : "bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95"
+                          }`}
                         >
                           {loader ? (
-                            <div className="flex items-center justify-center">
+                            <div className="flex items-center justify-center py-2">
                               <LineSpinner
                                 size={20}
                                 color="white"
@@ -730,21 +796,137 @@ const handleSendOtp = async () => {
                               />
                             </div>
                           ) : (
-                            <p className="font-semibold text-[11px] text-white">
-                              Send OTP
+                            <p className="font-semibold text-[11px] text-white py-2 px-2 text-center">
+                              {isOtpSending ? "Sending..." : "Send OTP"}
                             </p>
                           )}
                         </div>
                       </div>
+
                       {errors.phone_number && (
                         <span className="text-red-500 text-xs mt-1">
                           {errors.phone_number}
                         </span>
                       )}
                     </div>
+
+                    {/* Country Code Selection Modal */}
+                    {showCountryModal && (
+                      <AnimatePresence>
+                        <motion.div
+                          className="fixed inset-0 z-[70] flex items-center justify-center backdrop-blur-sm bg-black/50"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          onClick={() => setShowCountryModal(false)}
+                        >
+                          <motion.div
+                            className="bg-white rounded-[16px] shadow-2xl w-[90%] max-w-[400px] h-[70vh] max-h-[500px] flex flex-col overflow-hidden mx-4"
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            onClick={e => e.stopPropagation()}
+                          >
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-[#e5e7eb]">
+                              <h3 className="text-[18px] font-semibold text-[#111111] font-poppins">
+                                Select Country Code
+                              </h3>
+                              <button
+                                onClick={() => setShowCountryModal(false)}
+                                className="text-[#666] hover:text-[#111] transition-colors p-1"
+                              >
+                                <IoCloseOutline size={24} />
+                              </button>
+                            </div>
+
+                            {/* Search Input */}
+                            <div className="p-4 border-b border-[#f1f3f4]">
+                              <input
+                                type="text"
+                                placeholder="Search country or code..."
+                                className="w-full p-3 text-[14px] border border-[#d1d5db] rounded-[10px] focus:outline-none focus:border-[#467EF8] focus:ring-2 focus:ring-[#467EF8]/20 transition-all duration-200"
+                                value={countrySearchTerm}
+                                onChange={(e) =>
+                                  setCountrySearchTerm(e.target.value)
+                                }
+                                autoFocus
+                              />
+                            </div>
+
+                            {/* Countries List */}
+                            <div className="flex-1 overflow-y-auto">
+                              {filteredCountries.length > 0 ? (
+                                <div className="p-2">
+                                  {filteredCountries.map((country, index) => (
+                                    <motion.div
+                                      key={index}
+                                      className="p-3 hover:bg-[#f8fafc] cursor-pointer rounded-[8px] flex items-center justify-between transition-colors duration-150 mx-2"
+                                      whileHover={{
+                                        backgroundColor: '#f1f5f9',
+                                      }}
+                                      onClick={() => {
+                                        setSelectedCountryCode(country.code);
+                                        setShowCountryModal(false);
+                                        setCountrySearchTerm('');
+                                      }}
+                                    >
+                                      <div className="flex-1">
+                                        <div className="text-[14px] font-medium text-[#374151] mb-1">
+                                          {country.name}
+                                        </div>
+                                        <div className="text-[12px] text-[#6b7280]">
+                                          {country.country}
+                                        </div>
+                                      </div>
+                                      <div className="bg-[#f3f4f6] px-3 py-1 rounded-full">
+                                        <span className="text-[#467EF8] font-semibold text-[13px]">
+                                          {country.code}
+                                        </span>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="flex-1 flex items-center justify-center">
+                                  <div className="text-center py-8">
+                                    <div className="text-[48px] text-[#e5e7eb] mb-2">
+                                      🔍
+                                    </div>
+                                    <p className="text-[#9ca3af] text-[14px]">
+                                      No countries found
+                                    </p>
+                                    <p className="text-[#d1d5db] text-[12px] mt-1">
+                                      Try searching with a different term
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-4 border-t border-[#f1f3f4] bg-[#fafbfc]">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setShowCountryModal(false);
+                                    setCountrySearchTerm('');
+                                  }}
+                                  className="flex-1 py-2 px-4 border border-[#d1d5db] rounded-[8px] text-[#374151] text-[14px] font-medium hover:bg-[#f9fafb] transition-colors duration-200"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </motion.div>
+                      </AnimatePresence>
+                    )}
                     <div className="mt-1">
                       <p className="font-poppins text-[14px]">
-                        Already have an account?{' '}
+                        Already have an account?{" "}
                         <span
                           onClick={() => setShowSignUp(false)}
                           className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
@@ -773,7 +955,7 @@ const handleSendOtp = async () => {
                     </p>
                     <form
                       className="flex flex-col gap-5"
-                      onSubmit={e => e.preventDefault()}
+                      onSubmit={(e) => e.preventDefault()}
                     >
                       <div className="flex flex-col">
                         <label className="font-medium text-[14px] text-[#111111]">
@@ -833,7 +1015,7 @@ const handleSendOtp = async () => {
                     <p className="font-semibold text-[#111111]">
                       Start
                       <span className="font-medium text-[#00A397]">
-                        {' '}
+                        {" "}
                         Collecting
                       </span>
                     </p>
@@ -842,14 +1024,14 @@ const handleSendOtp = async () => {
                   <div className="flex flex-col ">
                     <form
                       className="flex flex-col gap-5  "
-                      onSubmit={e => e.preventDefault()}
+                      onSubmit={(e) => e.preventDefault()}
                     >
                       <div className="flex flex-col ">
                         <label className="font-medium text-[14px] text-[#111111]">
                           Email
                         </label>
                         <input
-                          onKeyDown={e => handleFormKeyDown(e, 2)}
+                          onKeyDown={(e) => handleFormKeyDown(e, 2)}
                           className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                           placeholder="Enter your email"
                           name="email"
@@ -862,15 +1044,28 @@ const handleSendOtp = async () => {
                           Password
                         </label>
                         <div className="flex flex-col gap-2">
-                          <input
-                            onKeyDown={e => handleFormKeyDown(e, 3)}
-                            className="w-[90%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                            placeholder="Enter your password"
-                            type="password"
-                            name="password"
-                            value={loginData.password}
-                            onChange={handleLoginChange}
-                          />
+                          <div className="relative w-[90%]">
+                            <input
+                              onKeyDown={e => handleFormKeyDown(e, 3)}
+                              className="w-full p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                              placeholder="Enter your password"
+                              type={showLoginPassword ? 'text' : 'password'}
+                              name="password"
+                              onChange={handleChange}
+                            />
+                            <div
+                              className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                              onClick={() =>
+                                setShowLoginPassword(!showLoginPassword)
+                              }
+                            >
+                              {showLoginPassword ? (
+                                <IoEyeOffOutline />
+                              ) : (
+                                <IoEyeOutline />
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </form>
@@ -879,12 +1074,12 @@ const handleSendOtp = async () => {
                         {loginError}
                       </div>
                     )}
-                    <div
+                    {/* <div
                       className="text-[13px]  cursor-pointer text-[#00A397] text-right w-[90%] hover:text-[#3c8984] "
                       onClick={handleForgotPasswordClick}
                     >
                       <p>Forgot Password?</p>
-                    </div>
+                    </div> */}
 
                     <div
                       className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-20 cursor-pointer mx-auto mt-5 flex items-center justify-center gap-2"
@@ -899,7 +1094,7 @@ const handleSendOtp = async () => {
 
                     <div className="mt-10 text-center">
                       <p className="font-poppins text-[14px]">
-                        Don't have an account yet?{' '}
+                        Don't have an account yet?{" "}
                         <span
                           onClick={() => setShowSignUp(true)}
                           className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
@@ -910,7 +1105,7 @@ const handleSendOtp = async () => {
                     </div>
                     <div className="text-center mt-3 text-[12px] text-[#475467]">
                       <p>
-                        By signing up, you agree to the <u>Terms of Service</u>{' '}
+                        By signing up, you agree to the <u>Terms of Service</u>{" "}
                         and <u>Privacy Policy</u>, including <u>cookie use</u>.
                       </p>
                     </div>
