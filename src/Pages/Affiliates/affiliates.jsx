@@ -162,6 +162,30 @@ const Affiliates = () => {
       });
   };
 
+  const handleShareOnWhatsApp = () => {
+    if (!user.referral?.referral_code) return;
+    const referralUrl = `${window.location.origin}/?refferal-code=${user.referral?.referral_code}`;
+    const message = `Join me using this referral link: ${referralUrl}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+      message
+    )}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleShareViaEmail = () => {
+    if (!user.referral?.referral_code) return;
+    const recipientEmail = prompt("Please enter the recipient's email address:");
+    if (recipientEmail) {
+      const referralUrl = `${window.location.origin}/?refferal-code=${user.referral?.referral_code}`;
+      const subject = "You're invited!";
+      const body = `Join me using this referral link: ${referralUrl}`;
+      const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(
+        subject
+      )}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailtoLink;
+    }
+  };
+
   const maxReferrals = 100;
   const displayedReferrals = refferalData.slice(0, maxReferrals).map((item, idx) => ({
     ...item,
@@ -192,8 +216,14 @@ const Affiliates = () => {
                   </p>
 
                   <div className="flex gap-2">
-                    <IoLogoWhatsapp className=" text-[#00AA39] text-[20px] cursor-pointer hover:text-[#108628] transition-colors duration-150 " />
-                    <FaEnvelope className=" text-[#107D91] text-[20px] cursor-pointer hover:text-[#52B7C6] transition-colors duration-150 " />
+                    <IoLogoWhatsapp
+                      onClick={handleShareOnWhatsApp}
+                      className=" text-[#00AA39] text-[20px] cursor-pointer hover:text-[#108628] transition-colors duration-150 "
+                    />
+                    <FaEnvelope
+                      onClick={handleShareViaEmail}
+                      className=" text-[#107D91] text-[20px] cursor-pointer hover:text-[#52B7C6] transition-colors duration-150 "
+                    />
                     <IoIosCopy
                       className=" text-[#107D91] text-[20px] cursor-pointer hover:text-[#52B7C6] transition-colors duration-150  "
                       onClick={handleCopyReferralLink}
