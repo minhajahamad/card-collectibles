@@ -79,12 +79,14 @@ const LandinHero = ({ onLearnMoreClick }) => {
               </p>
             </div>
             <div className="w-[100vw] mt-5  relative fade-effect xl:hidden">
-              <div className="marquee-track">
-                {[...LandinImages, ...LandinImages].map((image, index) => (
-                  <div key={index} className="marquee-image">
-                    <img src={image} alt="" />
-                  </div>
-                ))}
+            <div className="marquee-container">
+                <div className="marquee-track">
+                  {[...LandinImages, ...LandinImages].map((image, index) => (
+                    <div key={index} className="marquee-image">
+                      <img src={image} alt={`Collectible ${index + 1}`} />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             <div
@@ -250,7 +252,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
         </div>
         <div className="bg-[#09778E] h-[40%] xl:py-3 xl:pl-25 hidden xl:block">
           <div className="xl:w-[750px] overflow-hidden relative fade-effect">
-            <div className="marquee-track">
+            {/* <div className="marquee-track">
               {[...LandinImages, ...LandinImages].map((image, index) => (
                 <div
                   key={index}
@@ -270,6 +272,30 @@ const LandinHero = ({ onLearnMoreClick }) => {
                   />
                 </div>
               ))}
+            </div> */}
+              <div className="marquee-container">
+              <div className="marquee-track">
+                {[...LandinImages, ...LandinImages].map((image, index) => (
+                  <div
+                    key={index}
+                    onMouseEnter={() => setHoveredImageIndex(index)}
+                    onMouseLeave={() => setHoveredImageIndex(null)}
+                    className="marquee-image"
+                  >
+                    <img
+                      src={image}
+                      alt={`Collectible ${index + 1}`}
+                      className={`cursor-pointer transition-all duration-400 ease-in-out ${
+                        hoveredImageIndex === null
+                          ? 'opacity-100'
+                          : hoveredImageIndex === index
+                          ? 'scale-105 opacity-100 z-10 shadow-lg'
+                          : 'opacity-30'
+                      }`}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
