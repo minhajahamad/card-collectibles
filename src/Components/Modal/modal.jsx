@@ -50,6 +50,8 @@ const Modal = ({ onClose, initialView = "login" }) => {
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
   const [isOtpSending, setIsOtpSending] = useState(false); // Add this state
+  const [isEmailValidating, setIsEmailValidating] = useState(false);
+  const [isPhoneValidating, setIsPhoneValidating] = useState(false);
 
   // Add state for login form
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -88,6 +90,73 @@ const Modal = ({ onClose, initialView = "login" }) => {
     const { name, value } = e.target;
     setForgotPasswordData(prev => ({ ...prev, [name]: value }));
     setForgotPasswordError('');
+  };
+
+  const handleEmailBlur = async (e) => {
+    const email = e.target.value.trim();
+    if (!email) {
+      setErrors((prev) => ({ ...prev, email: '' }));
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: 'Please enter a valid email address.',
+      }));
+      return;
+    }
+
+    setIsEmailValidating(true);
+    try {
+      const response = await axiosInstance.get(API_URL.USER.GET_USER, {
+        params: { email },
+      });
+
+      if (response.data?.data?.length > 0) {
+        setErrors((prev) => ({
+          ...prev,
+          email: 'This email is already registered.',
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, email: '' }));
+      }
+    } catch (err) {
+      console.error('Email validation error:', err);
+    } finally {
+      setIsEmailValidating(false);
+    }
+  };
+
+  const handlePhoneBlur = async (e) => {
+    const phoneNumber = e.target.value.trim();
+    if (!phoneNumber) {
+      setErrors((prev) => ({ ...prev, phone_number: '' }));
+      return;
+    }
+
+    const fullPhoneNumber = selectedCountryCode + phoneNumber.replace(/\D/g, '');
+
+    setIsPhoneValidating(true);
+    try {
+      const response = await axiosInstance.get(API_URL.USER.GET_USER, {
+        params: { phone_number: fullPhoneNumber },
+      });
+
+      if (response.data?.data?.length > 0) {
+        setErrors((prev) => ({
+          ...prev,
+          phone_number: 'This phone number is already registered.',
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, phone_number: '' }));
+      }
+    } catch (err) {
+      console.error('Phone validation error:', err);
+    } finally {
+      setIsPhoneValidating(false);
+    }
   };
 
   const handleResetPassword = async () => {
@@ -675,19 +744,25 @@ const Modal = ({ onClose, initialView = "login" }) => {
             <label className="font-medium text-[14px] text-[#111111]">
               Email
             </label>
-            <input
-              ref={el => (inputRefs.current[2] = el)}
-              onKeyDown={e => handleFormKeyDown(e, 2)}
-              className="w-full sm:w-[90%] xl:w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-              placeholder="Enter your email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-            />
+            <div className="relative w-full sm:w-[90%] xl:w-[100%]">
+              <input
+                ref={(el) => (inputRefs.current[2] = el)}
+                onKeyDown={(e) => handleFormKeyDown(e, 2)}
+                className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                placeholder="Enter your email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleEmailBlur}
+              />
+              {isEmailValidating && (
+                <div className="absolute top-1/2 right-3 transform -translate-y-1/2">
+                  <LineSpinner size="16" color="#424242" stroke="1.5" />
+                </div>
+              )}
+            </div>
             {errors.email && (
-              <span className="text-red-500 text-xs mt-1">
-                {errors.email}
-              </span>
+              <span className="text-red-500 text-xs mt-1">{errors.email}</span>
             )}
           </div>
 
@@ -775,16 +850,24 @@ const Modal = ({ onClose, initialView = "login" }) => {
               </div>
 
               {/* Phone Number Input */}
-              <input
-                ref={(el) => (inputRefs.current[6] = el)}
-                onKeyDown={(e) => handleFormKeyDown(e, 6)}
-                className="flex-1 p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
-                placeholder="Phone number"
-                name="phone_number"
-                value={formData.phone_number}
-                onChange={handleChange}
-                type="tel"
-              />
+              <div className="relative flex-1">
+                <input
+                  ref={(el) => (inputRefs.current[6] = el)}
+                  onKeyDown={(e) => handleFormKeyDown(e, 6)}
+                  className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
+                  placeholder="Phone number"
+                  name="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                  type="tel"
+                  onBlur={handlePhoneBlur}
+                />
+                {isPhoneValidating && (
+                  <div className="absolute top-1/2 right-3 transform -translate-y-1/2">
+                    <LineSpinner size="16" color="#424242" stroke="1.5" />
+                  </div>
+                )}
+              </div>
 
               {/* Send OTP Button */}
               <div
