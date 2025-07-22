@@ -49,7 +49,7 @@ const NavBar = ({ onLoginClick }) => {
               onClick={onLoginClick}
               className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
             >
-              <p>SignIn / SignUp</p>
+              <p>Sign In / Sign Up</p>
             </div>
             {/* Hamburger menu removed as per new requirements */}
           </div>
