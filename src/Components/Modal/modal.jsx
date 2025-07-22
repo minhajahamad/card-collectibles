@@ -1083,12 +1083,12 @@ const Modal = ({ onClose, initialView = "login" }) => {
                         {loginError}
                       </div>
                     )}
-                    <div
+                    {/* <div
                       className="text-[13px]  cursor-pointer text-[#00A397] text-right w-[90%] hover:text-[#3c8984] "
                       onClick={handleForgotPasswordClick}
                     >
                       <p>Forgot Password?</p>
-                    </div>
+                    </div> */}
 
                     <div
                       className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-12 sm:px-16 xl:px-20 cursor-pointer mx-auto mt-5 flex items-center justify-center gap-2"
