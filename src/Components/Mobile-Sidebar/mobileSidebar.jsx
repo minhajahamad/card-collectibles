@@ -47,7 +47,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
         className={`fixed top-0 right-0 h-screen w-[270px] sm:w-[330px] md:w-[400px] lg:w-[500px] bg-white rounded-bl-[12px] rounded-tl-[12px] shadow-lg z-50 transform transition-transform duration-300 ease-in-out
         ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
-        } xl:hidden flex flex-col`}
+        } xl:hidden flex flex-col `}
       >
         {/* Top Content */}
         <div className="flex flex-col flex-1 overflow-y-auto">
@@ -70,9 +70,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
                   className="w-[60px] sm:w-[70px] md:w-[85px] h-[60px] sm:h-[70px] md:h-[85px] object-cover rounded-full object-top"
                 />
               </div>
-              {/* <p className="text-[12px] sm:text-[13px] md:text-[14px] underline cursor-pointer text-gray-600">
-                Edit Profile Image
-              </p> */}
+
               <p className="font-semibold text-[14px] sm:text-[15px] md:text-[16px]">
                 {userData?.full_name} {userData?.last_name}
               </p>
@@ -123,7 +121,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
         </div>
 
         {/* Logout Button (bottom fixed) */}
-        <div className="p-4 sm:p-5">
+        <div className="p-4 sm:p-5 ">
           <div
             onClick={() => {
               localStorage.clear();
@@ -132,7 +130,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
                 navigate('/');
               }, 250);
             }}
-            className="w-full border border-[#107D91] text-[#09778E] cursor-pointer font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-full flex items-center gap-2 shadow-[0px_2px_16.4px_0px_#0000001C]   text-[13px] sm:text-[14px] md:text-[15px] justify-center group"
+            className="w-full border border-[#107D91] text-[#09778E] cursor-pointer font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-[14px] flex items-center gap-2 shadow-[0px_2px_16.4px_0px_#0000001C]   text-[13px] sm:text-[14px] md:text-[15px] justify-center group"
           >
             <CiPower className="text-lg text-[#C84047] group-active:scale-90 transition duration-150 ease-in-out" />
             Log Out
