@@ -24,6 +24,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
 
   const [isModalOpen, setIsmodalOpen] = useState(false);
   const [modalType, setModalType] = useState('login');
+  const [showLoggedInTooltip, setShowLoggedInTooltip] = useState(false);
 
   const handleModalOpen = (type = 'login') => {
     setModalType(type);
@@ -79,7 +80,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
               </p>
             </div>
             <div className="w-[100vw] mt-5  relative fade-effect xl:hidden">
-            <div className="marquee-container">
+              <div className="marquee-container">
                 <div className="marquee-track">
                   {[...LandinImages, ...LandinImages].map((image, index) => (
                     <div key={index} className="marquee-image">
@@ -135,12 +136,26 @@ const LandinHero = ({ onLearnMoreClick }) => {
 
             <div className="flex flex-col items-center gap-3 mt-5">
               <div className="flex gap-5 font-semibold font-montserrat">
-                <div
-                  onClick={() => handleModalOpen('signup')}
-                  className="rounded-[6px]  bg-[#00A397] text-white w-[250px] xl:w-[280px] py-2 pl-3 cursor-pointer flex items-center  gap-2 group "
-                >
-                  <p>Register Now-Early Access!</p>
-                  <TiArrowRight className="text-[24px] font-light group-hover:ml-1 transition-all duration-300 ease-in-out group-active:ml-1 group-lg:active:ml-0" />
+                <div className="relative">
+                  <div
+                    onClick={() => {
+                      if (!localStorage.getItem('uuid')) {
+                        handleModalOpen('signup');
+                      } else {
+                        setShowLoggedInTooltip(true);
+                        setTimeout(() => setShowLoggedInTooltip(false), 2000);
+                      }
+                    }}
+                    className="rounded-[6px] bg-[#00A397] text-white w-[250px] md:w-[270px] xl:w-[300px] py-2 pl-3 cursor-pointer flex items-center gap-2 group whitespace-nowrap text-sm sm:text-base md:text-base xl:text-lg"
+                  >
+                    <p>Register Now-Early Access!</p>
+                    <TiArrowRight className="text-[24px] md:text-[28px] xl:text-[36px] font-light group-hover:ml-1 transition-all duration-300 ease-in-out group-active:ml-1 group-lg:active:ml-0" />
+                  </div>
+                  {showLoggedInTooltip && (
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-1 shadow-lg z-50 whitespace-nowrap">
+                      You are already logged in
+                    </div>
+                  )}
                 </div>
                 <div
                   onClick={onLearnMoreClick}
@@ -273,7 +288,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                 </div>
               ))}
             </div> */}
-              <div className="marquee-container">
+            <div className="marquee-container">
               <div className="marquee-track">
                 {[...LandinImages, ...LandinImages].map((image, index) => (
                   <div
