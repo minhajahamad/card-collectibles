@@ -240,12 +240,12 @@ const Affiliates = () => {
                       bgColor="#FFFFFF"
                       fgColor="#000000"
                       includeMargin={false} // optional, deprecated
-                      marginSize={4} // preferred way to add margin
+                      marginSize={2} // preferred way to add margin
                       title="User Referral QR Code"
                       minVersion={1}
                       boostLevel={true}
                       imageSettings={{
-                        src: 'https://example.com/logo.png', // replace with your logo URL
+                        src: '/Images/logo.png', // replace with your logo URL
                         height: 30,
                         width: 30,
                         excavate: true,
@@ -296,19 +296,19 @@ const Affiliates = () => {
                 bgColor="#FFFFFF"
                 fgColor="#000000"
                 includeMargin={false} // optional, deprecated
-                marginSize={4} // preferred way to add margin
+                marginSize={2} // preferred way to add margin
                 title="User Referral QR Code"
                 minVersion={1}
                 boostLevel={true}
                 imageSettings={{
-                  src: 'https://example.com/logo.png', // replace with your logo URL
+                  src: '/Images/logo.png', // replace with your logo URL
                   height: 30,
-                  width: 30,
+                  width: 60,
                   excavate: true,
                   opacity: 1,
                   crossOrigin: 'anonymous',
                   // Optional offsets to position image manually:
-                  x: 40,
+                  x: 20,
                   y: 40
                 }}
               />
