@@ -1,6 +1,6 @@
 import axios from "axios";
 
-
+ 
 const API_BASE_URL = "https://card-collectibles-2.onrender.com/";
 
 const axiosInstance = axios.create({
@@ -9,6 +9,7 @@ const axiosInstance = axios.create({
 
 //https://card-collectibles-2.onrender.com
 //http://127.0.0.1:8000/
+// https://api.collectedcompany.com/
 
 // Request interceptor to add auth header conditionally
 // axiosInstance.interceptors.request.use(
