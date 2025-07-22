@@ -57,8 +57,6 @@ const Modal = ({ onClose, initialView = "login" }) => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [loginLoader, setLoginLoader] = useState(false);
-
-  console.log(loginData);
   
 
   // State for Forgot Password
@@ -94,6 +92,8 @@ const Modal = ({ onClose, initialView = "login" }) => {
 
   const handleEmailBlur = async (e) => {
     const email = e.target.value.trim();
+    console.log(email);
+    
     if (!email) {
       setErrors((prev) => ({ ...prev, email: '' }));
       return;
@@ -110,10 +110,13 @@ const Modal = ({ onClose, initialView = "login" }) => {
 
     setIsEmailValidating(true);
     try {
-      const response = await axiosInstance.get(API_URL.USER.GET_USER, {
+      const response = await axiosInstance.get(API_URL.VALIDATION.EMAIL, {
         params: { email },
       });
 
+      console.log(response.data.data);
+      console.log(email);
+      
       if (response.data?.data?.length > 0) {
         setErrors((prev) => ({
           ...prev,
@@ -140,9 +143,10 @@ const Modal = ({ onClose, initialView = "login" }) => {
 
     setIsPhoneValidating(true);
     try {
-      const response = await axiosInstance.get(API_URL.USER.GET_USER, {
-        params: { phone_number: fullPhoneNumber },
+      const response = await axiosInstance.get(API_URL.VALIDATION.PHONE_NUMBER,{
+        params: {phone_number : phoneNumber}
       });
+      
 
       if (response.data?.data?.length > 0) {
         setErrors((prev) => ({
@@ -744,7 +748,7 @@ const Modal = ({ onClose, initialView = "login" }) => {
             <label className="font-medium text-[14px] text-[#111111]">
               Email
             </label>
-            <div className="relative w-full sm:w-[90%] xl:w-[100%]">
+            <div className="relative w-full sm:w-[100%] xl:w-[100%]">
               <input
                 ref={(el) => (inputRefs.current[2] = el)}
                 onKeyDown={(e) => handleFormKeyDown(e, 2)}
@@ -776,7 +780,7 @@ const Modal = ({ onClose, initialView = "login" }) => {
                 <input
                   ref={el => (inputRefs.current[3] = el)}
                   onKeyDown={e => handleFormKeyDown(e, 3)}
-                  className="w-full sm:w-[90%] xl:w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                  className="w-full sm:w-[100%] xl:w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                   placeholder="Enter your password"
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -838,7 +842,7 @@ const Modal = ({ onClose, initialView = "login" }) => {
             <label className="font-medium text-[14px] text-[#111111]">
               Phone Number
             </label>
-            <div className="flex  sm:flex-row gap-1 items-center">
+            <div className="flex sm:flex-row gap-1 items-center">
               {/* Country Code Button */}
               <div
                 className="w-[20%] sm:w-[25%] xl:w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
@@ -850,11 +854,11 @@ const Modal = ({ onClose, initialView = "login" }) => {
               </div>
 
               {/* Phone Number Input */}
-              <div className="relative flex-1">
+              {/* <div className="relative flex-1"> */}
                 <input
                   ref={(el) => (inputRefs.current[6] = el)}
                   onKeyDown={(e) => handleFormKeyDown(e, 6)}
-                  className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
+                  className="flex-1 sm:w-[90%] xl:w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
                   placeholder="Phone number"
                   name="phone_number"
                   value={formData.phone_number}
@@ -867,12 +871,12 @@ const Modal = ({ onClose, initialView = "login" }) => {
                     <LineSpinner size="16" color="#424242" stroke="1.5" />
                   </div>
                 )}
-              </div>
+              {/* </div> */}
 
               {/* Send OTP Button */}
               <div
                 onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
-                className={`rounded-[9px] w-full sm:w-[35%] xl:w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm  ${
+                className={`rounded-[9px] sm:w-[20%] xl:w-[20%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm  ${
                   isOtpSending
                     ? 'bg-[#a5a5a5] cursor-not-allowed'
                     : 'bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95'

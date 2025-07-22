@@ -109,7 +109,7 @@ const Affiliates = () => {
   const handleShareOnWhatsApp = () => {
     if (!user.referral?.referral_code) return;
     const referralUrl = `${window.location.origin}/?refferal-code=${user.referral?.referral_code}`;
-    const message = `Join me using this referral link: ${referralUrl}`;
+    const message = `Join early for the signup bonus, a premier platform for trading cards, comics, and collectibles.\n\nUse my Collected Company referral to secure your selling spot.\n\nFollow the link now: ${referralUrl}`;
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
       message
     )}`;
