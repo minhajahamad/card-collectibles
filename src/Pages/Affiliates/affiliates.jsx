@@ -324,7 +324,7 @@ const Affiliates = () => {
               <p className="md:text-[18px]">{refferal.email}</p>
               <div className="flex items-center justify-between ">
                 <p>
-                  DOJ : <span className="text-[#107D91]">{refferal.referred_date ? item.referred_date.split('T')[0] : ''}</span>
+                  DOJ : <span className="text-[#107D91]">{refferal.referred_date ? refferal.referred_date.split('T')[0] : ''}</span>
                 </p>
                 <p className="text-[#107D91]">{refferal.phone_number}</p>
               </div>
