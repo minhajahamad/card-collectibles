@@ -47,7 +47,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
         className={`fixed top-0 right-0 h-screen w-[270px] sm:w-[330px] md:w-[400px] lg:w-[500px] bg-white rounded-bl-[12px] rounded-tl-[12px] shadow-lg z-50 transform transition-transform duration-300 ease-in-out
         ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
-        } xl:hidden flex flex-col justify-between pb-10 `}
+        } xl:hidden flex flex-col justify-between pb-30 `}
       >
         {/* Top Content */}
         <div className="flex flex-col ">
