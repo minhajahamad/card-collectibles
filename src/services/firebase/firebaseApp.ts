@@ -43,6 +43,16 @@ interface FirebaseAuthResult {
   userId?: string;
 }
 
+declare global {
+  interface Window {
+    grecaptcha?: {
+      reset?: () => void;
+      render?: (container: string | Element, parameters?: any) => number;
+      execute?: (siteKey?: string) => Promise<string>;
+    };
+  }
+}
+
 interface EmailVerificationResult {
   success: boolean;
   error?: string;
@@ -80,10 +90,10 @@ export const initializeRecaptcha = async (
     return false;
   }
 
-  // Clean up any existing verifier first
-  resetRecaptcha();
-
   try {
+    // Force complete cleanup first
+    await resetRecaptcha();
+    
     // Wait longer for cleanup to complete
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -93,16 +103,26 @@ export const initializeRecaptcha = async (
       return false;
     }
 
-    // Clear container content and ensure it's visible for reCAPTCHA
-    container.innerHTML = '';
-    container.style.display = 'block';
-
-    // Check if reCAPTCHA is already initialized on this container
-    if (container.hasAttribute('data-recaptcha-initialized')) {
-      console.log("reCAPTCHA already initialized on this container");
-      return false;
+    // Check if already initialized - be more thorough
+    if (recaptchaVerifier || container.hasChildNodes()) {
+      console.log("reCAPTCHA already exists, cleaning up first...");
+      await resetRecaptcha();
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
 
+    // Ensure container is completely clean
+    container.innerHTML = '';
+    container.removeAttribute('data-recaptcha-initialized');
+    
+    // Make container properly available for reCAPTCHA
+    container.style.display = 'block';
+    container.style.visibility = 'hidden';
+    container.style.position = 'absolute';
+    container.style.top = '-9999px';
+    container.style.width = '304px';
+    container.style.height = '78px';
+
+    // Create new reCAPTCHA verifier
     recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
       size: "invisible",
       callback: () => {
@@ -110,35 +130,30 @@ export const initializeRecaptcha = async (
       },
       "expired-callback": () => {
         console.log("reCAPTCHA expired, resetting...");
-        container.removeAttribute('data-recaptcha-initialized');
         resetRecaptcha();
       },
       "error-callback": (error: any) => {
         console.error("reCAPTCHA error:", error);
-        container.removeAttribute('data-recaptcha-initialized');
         resetRecaptcha();
       }
     });
 
-    // Mark container as initialized
+    // Render the reCAPTCHA
+    await recaptchaVerifier.render();
+    
+    // Mark as initialized
     container.setAttribute('data-recaptcha-initialized', 'true');
-
-    // Add timeout for render
-    const renderPromise = recaptchaVerifier.render();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('reCAPTCHA render timeout')), 15000)
-    );
-
-    await Promise.race([renderPromise, timeoutPromise]);
+    
     console.log("reCAPTCHA rendered successfully");
     return true;
 
   } catch (error) {
     console.error("Error initializing reCAPTCHA:", error);
-    resetRecaptcha();
+    await resetRecaptcha();
     return false;
   }
 };
+
 
 /**
  * Sends OTP to the provided phone number
@@ -161,43 +176,65 @@ export const sendOTP = async (
   }
 
   try {
-    // Reset everything first to avoid conflicts
-    resetRecaptcha();
+    // Force complete cleanup first
+    await resetRecaptcha();
     
-    // Wait longer for cleanup
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Wait longer for cleanup to ensure no conflicts
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    // Check if container exists, if not create it
+    // Ensure container exists with proper setup
     let container = document.getElementById("recaptcha-container");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "recaptcha-container";
-      container.style.display = "none";
-      container.style.position = "fixed";
-      container.style.top = "0";
-      container.style.left = "0";
-      container.style.zIndex = "9999";
-      document.body.appendChild(container);
+    if (container) {
+      // If container exists, clean it thoroughly
+      container.remove();
+    }
+    
+    // Create fresh container
+    container = document.createElement("div");
+    container.id = "recaptcha-container";
+    container.style.position = "absolute";
+    container.style.top = "-9999px";
+    container.style.left = "-9999px";
+    container.style.width = "304px";
+    container.style.height = "78px";
+    container.style.zIndex = "-1";
+    document.body.appendChild(container);
+
+    // Wait for DOM to settle
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Initialize fresh reCAPTCHA with retry logic
+    let recaptchaSuccess = false;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (!recaptchaSuccess && attempts < maxAttempts) {
+      attempts++;
+      console.log(`reCAPTCHA initialization attempt ${attempts}/${maxAttempts}`);
+      
+      recaptchaSuccess = await initializeRecaptcha("recaptcha-container");
+      
+      if (!recaptchaSuccess && attempts < maxAttempts) {
+        await resetRecaptcha();
+        await new Promise(resolve => setTimeout(resolve, 500 * attempts));
+      }
     }
 
-    // Initialize reCAPTCHA fresh
-    const recaptchaSuccess = await initializeRecaptcha("recaptcha-container");
-    if (!recaptchaSuccess) {
+    if (!recaptchaSuccess || !recaptchaVerifier) {
       return {
         success: false,
-        error: "Failed to initialize security verification",
+        error: "Security verification setup failed. Please refresh the page and try again.",
         code: "recaptcha/init-failed",
       };
     }
 
-    // Format phone number
+    // Format and validate phone number
     let formattedNumber = phoneNumber;
     if (!phoneNumber.startsWith("+")) {
       formattedNumber = `+${phoneNumber}`;
     }
 
-    // Basic validation
-    if (!formattedNumber.match(/^\+[1-9]\d{1,14}$/)) {
+    if (!formattedNumber.match(/^\+[1-9]\d{8,14}$/)) {
       return {
         success: false,
         error: "Invalid phone number format. Please enter a valid international number.",
@@ -207,10 +244,10 @@ export const sendOTP = async (
 
     console.log("Sending OTP to:", formattedNumber);
     
-    // Add longer timeout for signInWithPhoneNumber
-    const signInPromise = signInWithPhoneNumber(auth, formattedNumber, recaptchaVerifier!);
+    // Send OTP with extended timeout
+    const signInPromise = signInWithPhoneNumber(auth, formattedNumber, recaptchaVerifier);
     const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error('OTP send timeout')), 60000) // Increased timeout
+      setTimeout(() => reject(new Error('Request timeout')), 45000)
     );
 
     confirmationResult = await Promise.race([signInPromise, timeoutPromise]);
@@ -219,12 +256,13 @@ export const sendOTP = async (
 
   } catch (error: unknown) {
     console.error("Error sending OTP:", error);
-    resetRecaptcha(); // Always reset on error
+    await resetRecaptcha();
 
     if (error instanceof Error) {
       const authError = error as AuthError;
       
       let userMessage = "Failed to send OTP. Please try again.";
+      
       switch (authError.code) {
         case "auth/invalid-phone-number":
           userMessage = "Invalid phone number format. Please enter a valid phone number.";
@@ -241,14 +279,11 @@ export const sendOTP = async (
         case "auth/network-request-failed":
           userMessage = "Network error. Please check your connection and try again.";
           break;
-        case "recaptcha-not-available":
-          userMessage = "reCAPTCHA not available. Please refresh the page and try again.";
-          break;
         default:
           if (error.message.includes('timeout')) {
             userMessage = "Request timed out. Please try again.";
           } else if (error.message.includes('already been rendered')) {
-            userMessage = "Please wait a moment and try again.";
+            userMessage = "Please refresh the page and try again.";
           }
       }
 
@@ -266,6 +301,7 @@ export const sendOTP = async (
     };
   }
 };
+
 
 /**
  * Verifies the OTP entered by the user
@@ -713,77 +749,92 @@ export const onEmailVerificationStateChange = (callback: (isVerified: boolean, u
  * Cleans up reCAPTCHA resources
  */
 
-export const resetRecaptcha = (): void => {
-  try {
-    // Clear confirmation result first
-    confirmationResult = null;
+export const resetRecaptcha = (): Promise<void> => {
+  return new Promise((resolve) => {
+    try {
+      // Clear confirmation result first
+      confirmationResult = null;
 
-    if (recaptchaVerifier) {
-      try {
-        recaptchaVerifier.clear();
-        console.log("reCAPTCHA cleared successfully");
-      } catch (clearError) {
-        console.log("Error clearing reCAPTCHA:", clearError);
+      // Clear the verifier with more robust error handling
+      if (recaptchaVerifier) {
+        try {
+          recaptchaVerifier.clear();
+          console.log("reCAPTCHA cleared successfully");
+        } catch (clearError) {
+          console.log("Error clearing reCAPTCHA (continuing cleanup):", clearError);
+        }
+        recaptchaVerifier = null;
       }
-      recaptchaVerifier = null;
+
+      // More comprehensive DOM cleanup
+      const cleanupDOM = () => {
+        // Clean up main container
+        const container = document.getElementById("recaptcha-container");
+        if (container) {
+          container.innerHTML = "";
+          container.style.display = "none";
+          container.removeAttribute('data-recaptcha-initialized');
+        }
+
+        // Remove all reCAPTCHA related elements
+        const elementsToRemove = [
+          ".grecaptcha-badge",
+          '[id^="grecaptcha-"]',
+          'iframe[src*="recaptcha"]',
+          'iframe[src*="google.com/recaptcha"]',
+          '[data-recaptcha-initialized]'
+        ];
+
+        elementsToRemove.forEach(selector => {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(el => {
+            if (selector === '[data-recaptcha-initialized]') {
+              el.removeAttribute('data-recaptcha-initialized');
+            } else {
+              el.remove();
+            }
+          });
+        });
+
+        // Clean up any remaining Google scripts or widgets - FIXED VERSION
+        const scripts = document.querySelectorAll('script[src*="recaptcha"], script[src*="gstatic.com/recaptcha"]');
+        scripts.forEach(script => {
+          // Type assertion to HTMLScriptElement to access the src property
+          const scriptElement = script as HTMLScriptElement;
+          // Don't remove the main script, just clean up instances
+          if (!scriptElement.src.includes('api.js')) {
+            scriptElement.remove();
+          }
+        });
+      };
+
+      // Immediate cleanup
+      cleanupDOM();
+      
+      // Secondary cleanup after delay to catch any lingering elements
+      setTimeout(() => {
+        cleanupDOM();
+        
+        // Clear any global reCAPTCHA references - FIXED VERSION
+        if (typeof window !== 'undefined') {
+          // Use the declared global interface
+          if (window.grecaptcha && window.grecaptcha.reset) {
+            try {
+              window.grecaptcha.reset();
+            } catch (e) {
+              console.log("Error resetting global grecaptcha:", e);
+            }
+          }
+        }
+        
+        resolve();
+      }, 200);
+
+    } catch (error) {
+      console.log("Error in resetRecaptcha:", error);
+      resolve(); // Always resolve to prevent hanging
     }
-
-    // Clean up DOM elements immediately
-    const container = document.getElementById("recaptcha-container");
-    if (container) {
-      container.innerHTML = "";
-      container.style.display = "none";
-      container.removeAttribute('data-recaptcha-initialized'); // Remove our custom attribute
-    }
-
-    // Remove all reCAPTCHA related elements from DOM
-    const removeElements = () => {
-      // Remove reCAPTCHA badges
-      const badges = document.querySelectorAll(".grecaptcha-badge");
-      badges.forEach((badge) => {
-        try {
-          badge.remove();
-        } catch (e) {
-          console.log("Error removing badge:", e);
-        }
-      });
-
-      // Remove all grecaptcha elements
-      const recaptchaElements = document.querySelectorAll('[id^="grecaptcha-"]');
-      recaptchaElements.forEach((el) => {
-        try {
-          el.remove();
-        } catch (e) {
-          console.log("Error removing element:", e);
-        }
-      });
-
-      // Remove any iframe elements created by reCAPTCHA
-      const iframes = document.querySelectorAll('iframe[src*="recaptcha"]');
-      iframes.forEach((iframe) => {
-        try {
-          iframe.remove();
-        } catch (e) {
-          console.log("Error removing iframe:", e);
-        }
-      });
-
-      // Clean up any remaining reCAPTCHA containers
-      const allContainers = document.querySelectorAll('[data-recaptcha-initialized]');
-      allContainers.forEach((container) => {
-        container.removeAttribute('data-recaptcha-initialized');
-      });
-    };
-
-    // Remove immediately and after delays
-    removeElements();
-    setTimeout(removeElements, 100);
-    setTimeout(removeElements, 500);
-    setTimeout(removeElements, 1000);
-
-  } catch (error) {
-    console.log("Error resetting reCAPTCHA:", error);
-  }
+  });
 };
 
 
