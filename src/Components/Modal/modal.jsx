@@ -56,6 +56,9 @@ const Modal = ({ onClose, initialView = "login" }) => {
   const [loginError, setLoginError] = useState("");
   const [loginLoader, setLoginLoader] = useState(false);
 
+  console.log(loginData);
+  
+
   // State for Forgot Password
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordData, setForgotPasswordData] = useState({
@@ -119,6 +122,7 @@ const Modal = ({ onClose, initialView = "login" }) => {
       // 2. Patch the new password
       await axiosInstance.patch(API_URL.USER.PATCH_USER_UUID(uuid), {
         password: newPassword,
+        reenter_password: confirmPassword,
       });
 
       // Success
@@ -138,7 +142,8 @@ const Modal = ({ onClose, initialView = "login" }) => {
 
   // Handle login submit
   const handleLogin = async () => {
-    setLoginError("");
+    setLoginError('');
+ 
     if (!loginData.email || !loginData.password) {
       setLoginError("Please enter both email and password.");
       return;
@@ -1048,9 +1053,10 @@ const Modal = ({ onClose, initialView = "login" }) => {
                               onKeyDown={(e) => handleFormKeyDown(e, 3)}
                               className="w-full p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
                               placeholder="Enter your password"
-                              type={showLoginPassword ? "text" : "password"}
+                              value={loginData.password}
+                              type={showLoginPassword ? 'text' : 'password'}
                               name="password"
-                              onChange={handleChange}
+                              onChange={handleLoginChange}
                             />
                             <div
                               className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-500"
@@ -1073,12 +1079,12 @@ const Modal = ({ onClose, initialView = "login" }) => {
                         {loginError}
                       </div>
                     )}
-                    {/* <div
+                    <div
                       className="text-[13px]  cursor-pointer text-[#00A397] text-right w-[90%] hover:text-[#3c8984] "
                       onClick={handleForgotPasswordClick}
                     >
                       <p>Forgot Password?</p>
-                    </div> */}
+                    </div>
 
                     <div
                       className="bg-[#00A397] text-white font-semibold shadow-lg text-[16px] rounded-[8px] active:scale-95 transition-all duration-300 ease-in-out w-fit py-2 px-12 sm:px-16 xl:px-20 cursor-pointer mx-auto mt-5 flex items-center justify-center gap-2"
