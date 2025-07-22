@@ -247,13 +247,11 @@ const Affiliates = () => {
                       imageSettings={{
                         src: '/Images/logo.png', // replace with your logo URL
                         height: 30,
-                        width: 30,
+                        width: 65,
                         excavate: true,
                         opacity: 1,
                         crossOrigin: 'anonymous',
-                        // Optional offsets to position image manually:
-                        x: 40,
-                        y: 40
+              
                       }}
                     />
                     
@@ -303,13 +301,12 @@ const Affiliates = () => {
                 imageSettings={{
                   src: '/Images/logo.png', // replace with your logo URL
                   height: 30,
-                  width: 60,
+                  width: 65,
                   excavate: true,
                   opacity: 1,
                   crossOrigin: 'anonymous',
                   // Optional offsets to position image manually:
-                  x: 20,
-                  y: 40
+                 
                 }}
               />
               
