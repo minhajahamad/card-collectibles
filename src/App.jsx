@@ -7,17 +7,23 @@ import Profile from './Pages/Profile/profile';
 import Affiliates from './Pages/Affiliates/affiliates';
 import HelpSupport from './Pages/Help & Support/helpSupport';
 import PersonalDetailForm from './Pages/Personal-Details-Form/personalDetailForm';
+import ProtectedRoute from './Components/ProtectedRoute';
 
 const App = () => {
   return (
     <>
       <Routes>
         <Route path="/" element={<Landin />} />
-        {/* <Route path="/user/signUp" element={<Registeration />} /> */}
-        <Route path="/user/profile" element={<Profile />} />
-        <Route path="/user/affiliates" element={<Affiliates />} />
-        <Route path="/user/help-support" element={<HelpSupport />} />
-        <Route path="/user/personal-details" element={<PersonalDetailForm />} />
+        {/* Protected Routes */}
+        <Route>
+          <Route path="/user/profile" element={<Profile />} />
+          <Route path="/user/affiliates" element={<Affiliates />} />
+          <Route path="/user/help-support" element={<HelpSupport />} />
+          <Route
+            path="/user/personal-details"
+            element={<PersonalDetailForm />}
+          />
+        </Route>
       </Routes>
     </>
   );

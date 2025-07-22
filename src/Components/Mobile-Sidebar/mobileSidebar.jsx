@@ -7,10 +7,9 @@ const MobileSidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const userData = JSON.parse(localStorage.getItem("userData"))
+  const userData = JSON.parse(localStorage.getItem('userData'));
 
   console.log(userData);
-  
 
   const getActiveTab = () => {
     if (location.pathname.includes('/user/profile')) return 'profile';
@@ -64,9 +63,9 @@ const MobileSidebar = ({ isOpen, onClose }) => {
           <div className="flex flex-col px-5 gap-5">
             {/* Profile Section */}
             <div className="flex flex-col items-center gap-2 text-[#09778E]">
-              <div className="rounded-full border-2 border-[#09778E] p-1">
+              <div className="rounded-full border-2 border-black p-1">
                 <img
-                  src="/Images/username.png"
+                  src="/Images/Landin-img-6.png"
                   alt="Profile"
                   className="w-[60px] sm:w-[70px] md:w-[85px] h-[60px] sm:h-[70px] md:h-[85px] object-cover rounded-full object-top"
                 />
@@ -122,8 +121,6 @@ const MobileSidebar = ({ isOpen, onClose }) => {
             </div>
           </div>
         </div>
-
-
 
         {/* Logout Button (bottom fixed) */}
         <div className="p-4 sm:p-5">
