@@ -26,7 +26,6 @@ const NavBar = ({ onLoginClick }) => {
 
   console.log(sidebarOpen);
 
-
   useEffect(() => {
     fetchUser();
   }, []);
@@ -34,7 +33,7 @@ const NavBar = ({ onLoginClick }) => {
   return (
     <>
       <nav className="w-full h-[70px] lg:h-[85px]   flex items-center bg-[#09778E]  justify-between px-4 md:px-15 lg:px-20  ">
-        <div onClick={() => navigate("/")} className="  cursor-pointer ">
+        <div onClick={() => navigate('/')} className="  cursor-pointer ">
           <img
             src="/Images/logo.png"
             className="  object-cover w-[115px] h-[50px] lg:w-[158px] lg:h-[70px] "
@@ -42,9 +41,7 @@ const NavBar = ({ onLoginClick }) => {
         </div>
 
         {!uuid ? (
-          <div
-            className="flex gap-3 items-center justifu-center text-white text-[24px] lg:text-[30px] cursor-pointer"
-          >
+          <div className="flex gap-3 items-center justifu-center text-white text-[24px] lg:text-[30px] cursor-pointer">
             <div
               onClick={onLoginClick}
               className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
@@ -74,7 +71,10 @@ const NavBar = ({ onLoginClick }) => {
                 </p>
               </div>
             </div>
-            <RxHamburgerMenu onClick={() => setSidebarOpen(true)} className="block xl:hidden" />
+            <RxHamburgerMenu
+              onClick={() => setSidebarOpen(true)}
+              className="block xl:hidden text-white text-[22px]"
+            />
           </>
         )}
       </nav>
