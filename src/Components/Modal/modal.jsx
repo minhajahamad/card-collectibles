@@ -52,6 +52,7 @@ const Modal = ({ onClose, initialView = "login" }) => {
   const [isOtpSending, setIsOtpSending] = useState(false); // Add this state
   const [isEmailValidating, setIsEmailValidating] = useState(false);
   const [isPhoneValidating, setIsPhoneValidating] = useState(false);
+  const [isPhoneAvailable, setIsPhoneAvailable] = useState(false);
 
   // Add state for login form
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -136,6 +137,7 @@ const Modal = ({ onClose, initialView = "login" }) => {
     const phoneNumber = e.target.value.trim();
     if (!phoneNumber) {
       setErrors((prev) => ({ ...prev, phone_number: '' }));
+      setIsPhoneAvailable(false);
       return;
     }
 
@@ -153,11 +155,14 @@ const Modal = ({ onClose, initialView = "login" }) => {
           ...prev,
           phone_number: 'This phone number is already registered.',
         }));
+        setIsPhoneAvailable(false);
       } else {
         setErrors((prev) => ({ ...prev, phone_number: '' }));
+        setIsPhoneAvailable(true);
       }
     } catch (err) {
       console.error('Phone validation error:', err);
+      setIsPhoneAvailable(false);
     } finally {
       setIsPhoneValidating(false);
     }
@@ -875,12 +880,18 @@ const Modal = ({ onClose, initialView = "login" }) => {
 
               {/* Send OTP Button */}
               <div
-                onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
+                onClick={
+                  isOtpSending || !isPhoneAvailable
+                    ? undefined
+                    : handleSendOtp
+                }
                 className={`rounded-[9px] sm:w-[20%] xl:w-[20%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm  ${
-                  isOtpSending
-                    ? 'bg-[#a5a5a5] cursor-not-allowed'
+                  isOtpSending || !isPhoneAvailable
+                    ? 'bg-[#a5a5a5] cursor-not-allowed opacity-60'
                     : 'bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95'
                 }`}
+                disabled={isOtpSending || !isPhoneAvailable}
+                aria-disabled={isOtpSending || !isPhoneAvailable}
               >
                 {loader ? (
                   <div className="flex items-center justify-center py-2">

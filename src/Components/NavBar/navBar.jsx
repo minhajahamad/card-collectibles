@@ -56,9 +56,9 @@ const NavBar = ({ onLoginClick }) => {
               className="lg:w-[105px] xl:w-[115px] h-full xl:flex items-center justify-between hidden xl:block hover:cursor-pointer xl:flex xl:items-center xl:justify-between xl:w-[115px] xl:h-full xl:border-0 xl:rounded-none xl:bg-transparent xl:text-white"
               onClick={() => navigate('/user/profile')}
             >
-              <div className="rounded-full border-2 border-white">
+              <div className="rounded-full border-2 border-black">
                 <img
-                  src="/Images/username.png"
+                  src="/Images/Landin-img-6.png"
                   className="rounded-full object-top object-cover cursor-pointer w-[25px] h-[25px] md:w-[30px] md:h-[30px]"
                 />
               </div>

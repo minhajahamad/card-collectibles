@@ -752,6 +752,7 @@ const Stepper = ({ step, setStep }) => (
 );
 
 const MultiStepForm = () => {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1);
   const [user, setUser] = useState({});
   const uuid = localStorage.getItem('uuid');
@@ -859,8 +860,9 @@ const MultiStepForm = () => {
       }
 
       // Navigate to profile page after successful submission
+
       setTimeout(() => {
-        window.location.href = '/user/profile';
+        navigate("/user/profile");
       }, 200);
     } catch (err) {
       setApiErrors({ general: 'Unexpected error occurred' });
