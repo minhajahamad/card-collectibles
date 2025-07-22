@@ -548,402 +548,406 @@ const Modal = ({ onClose, initialView = "login" }) => {
           {/* SignUp Form */}
 
           {showSigUp ? (
-            <div className="w-full xl:w-[50%] px-4 py-6 sm:px-6 sm:py-8 xl:px-5 xl:py-10 flex flex-col justify-center gap-2 xl:pl-10">
-              <div className="font-poppins text-[28px] sm:text-[35px] xl:text-[42px] leading-tight">
-                <p className="font-semibold text-[#111111]">Lets Get</p>
-                <p className="font-medium text-[#00A397]">Started!</p>
+  <div className="w-full xl:w-[50%] px-4 py-6 sm:px-6 sm:py-8 xl:px-5 xl:py-10 flex flex-col justify-center gap-2 xl:pl-10">
+    {/* Conditionally render heading - only show when NOT in verify OTP mode */}
+    {!showVerifyOtp && (
+      <div className="font-poppins text-[28px] sm:text-[35px] xl:text-[42px] leading-tight">
+        <p className="font-semibold text-[#111111]">Lets Get</p>
+        <p className="font-medium text-[#00A397]">Started!</p>
+      </div>
+    )}
+
+    <div className="flex flex-col gap-5">
+      {/* OTP Section */}
+      {showVerifyOtp ? (
+        <AnimatePresence>
+          {showOtp && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="flex flex-col gap-2 items-center font-inter"
+            >
+              <p className="text-[16px] font-semibold">Enter OTP</p>
+              <p className="text-[12px] text-[#475467]">
+                We have sent an OTP to your mobile number
+              </p>
+
+              {otpError && (
+                <p className="text-red-500 text-xs text-center">
+                  {otpError}
+                </p>
+              )}
+
+              <div className="flex items-center justify-center gap-2">
+                {Array(6) // Changed from 4 to 6
+                  .fill(0)
+                  .map((_, i) => (
+                    <input
+                      key={i}
+                      ref={(el) => (otpRef.current[i] = el)}
+                      className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
+                      placeholder="-"
+                      onKeyDown={(e) => handleKeyDown(e, i)}
+                      onChange={(e) => handleOtpChange(e, i)}
+                      maxLength={1}
+                      type="text"
+                      value={otpValues[i]}
+                    />
+                  ))}
               </div>
-
-              <div className="flex flex-col gap-5">
-                {/* OTP Section */}
-                {showVerifyOtp ? (
-                  <AnimatePresence>
-                    {showOtp && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 30 }}
-                        transition={{ duration: 0.4, ease: "easeInOut" }}
-                        className="flex flex-col gap-2 items-center font-inter"
-                      >
-                        <p className="text-[16px] font-semibold">Enter OTP</p>
-                        <p className="text-[12px] text-[#475467]">
-                          We have sent an OTP to your mobile number
-                        </p>
-
-                        {otpError && (
-                          <p className="text-red-500 text-xs text-center">
-                            {otpError}
-                          </p>
-                        )}
-
-                        <div className="flex items-center justify-center gap-2">
-                          {Array(6) // Changed from 4 to 6
-                            .fill(0)
-                            .map((_, i) => (
-                              <input
-                                key={i}
-                                ref={(el) => (otpRef.current[i] = el)}
-                                className="w-[12%] border-2 border-[#e3e3e3] rounded-[12px] py-3 placeholder:text-center focus:outline-none focus:border-[#424242] text-center " // Changed width from 15% to 12%
-                                placeholder="-"
-                                onKeyDown={(e) => handleKeyDown(e, i)}
-                                onChange={(e) => handleOtpChange(e, i)}
-                                maxLength={1}
-                                type="text"
-                                value={otpValues[i]}
-                              />
-                            ))}
-                        </div>
-                        <div
-                          onClick={handleVerifyOtp}
-                          className="bg-[#467EF8] rounded-[12px] w-[60%] sm:w-[50%] xl:w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
-                        >
-                          {verifyOtpLoader ? (
-                            <Spiral size="20" color="white" speed={2} />
-                          ) : (
-                            <p className="font-montserrat font-semibold text-[14px]">
-                              Verify OTP
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-poppins text-[14px]">
-                            Don't receive code?{" "}
-                            <span
-                              className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
-                              onClick={handleResendOtp}
-                            >
-                              Resend OTP
-                            </span>
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+              <div
+                onClick={handleVerifyOtp}
+                className="bg-[#467EF8] rounded-[12px] w-[60%] sm:w-[50%] xl:w-[40%] py-3 text-white cursor-pointer active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                {verifyOtpLoader ? (
+                  <Spiral size="20" color="white" speed={2} />
                 ) : (
-                  <form
-                    className="font-montserrat flex flex-col gap-2 "
-                    onSubmit={handleSubmit}
+                  <p className="font-montserrat font-semibold text-[14px]">
+                    Verify OTP
+                  </p>
+                )}
+              </div>
+              <div>
+                <p className="font-poppins text-[14px]">
+                  Don't receive code?{" "}
+                  <span
+                    className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
+                    onClick={handleResendOtp}
                   >
-                    {/* Full Name */}
-                    <div className="flex flex-col">
-                      <label className="font-medium text-[14px] text-[#111111]">
-                        Full Name
-                      </label>
-                      <div className="flex flex-col sm:flex-row xl:flex-row gap-3">
-                        <div className="w-full sm:w-[50%]">
-                          <input
-                            ref={el => (inputRefs.current[0] = el)}
-                            onKeyDown={e => handleFormKeyDown(e, 0)}
-                            className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                            placeholder="First Name"
-                            name="full_name"
-                            value={formData.full_name}
-                            onChange={handleChange}
-                          />
-                          {errors.full_name && (
-                            <span className="text-red-500 text-xs mt-1">
-                              {errors.full_name}
-                            </span>
-                          )}
-                        </div>
-                        <div className="w-full sm:w-[50%]">
-                          <input
-                            ref={el => (inputRefs.current[1] = el)}
-                            onKeyDown={e => handleFormKeyDown(e, 1)}
-                            className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                            placeholder="Last Name"
-                            name="last_name"
-                            value={formData.last_name}
-                            onChange={handleChange}
-                          />
-                          {errors.last_name && (
-                            <span className="text-red-500 text-xs mt-1">
-                              {errors.last_name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Email */}
-                    <div className="flex flex-col">
-                      <label className="font-medium text-[14px] text-[#111111]">
-                        Email
-                      </label>
-                      <input
-                        ref={el => (inputRefs.current[2] = el)}
-                        onKeyDown={e => handleFormKeyDown(e, 2)}
-                        className="w-full sm:w-[90%] xl:w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                        placeholder="Enter your email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                      />
-                      {errors.email && (
-                        <span className="text-red-500 text-xs mt-1">
-                          {errors.email}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Password */}
-                    <div className="flex flex-col">
-                      <label className="font-medium text-[14px] text-[#111111]">
-                        Password
-                      </label>
-                      <div className="flex flex-col gap-2">
-                        <div className="relative">
-                          <input
-                            ref={el => (inputRefs.current[3] = el)}
-                            onKeyDown={e => handleFormKeyDown(e, 3)}
-                            className="w-full sm:w-[90%] xl:w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                            placeholder="Enter your password"
-                            type={showPassword ? 'text' : 'password'}
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                          />
-                          <div
-                            className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-500"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <IoEyeOffOutline />
-                            ) : (
-                              <IoEyeOutline />
-                            )}
-                          </div>
-                        </div>
-
-                        {errors.password && (
-                          <span className="text-red-500 text-xs mt-1">
-                            {errors.password}
-                          </span>
-                        )}
-                        <div className="relative">
-                          <input
-                            ref={el => (inputRefs.current[4] = el)}
-                            onKeyDown={e => handleFormKeyDown(e, 4)}
-                            className="w-full p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
-                            placeholder="Confirm password"
-                            type={showConfirmPassword ? 'text' : 'password'}
-                            name="reenter_password"
-                            value={formData.reenter_password}
-                            onChange={handleChange}
-                          />
-                          <div
-                            className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-500"
-                            onClick={() =>
-                              setShowConfirmPassword(!showConfirmPassword)
-                            }
-                          >
-                            {showConfirmPassword ? (
-                              <IoEyeOffOutline />
-                            ) : (
-                              <IoEyeOutline />
-                            )}
-                          </div>
-                        </div>
-
-                        {errors.reenter_password && (
-                          <span className="text-red-500 text-xs mt-1">
-                            {errors.reenter_password}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Phone Number */}
-                    <div className="flex flex-col">
-                      <label className="font-medium text-[14px] text-[#111111]">
-                        Phone Number
-                      </label>
-                      <div className="flex  sm:flex-row gap-1 items-center">
-                        {/* Country Code Button */}
-                        <div
-                          className="w-[20%] sm:w-[25%] xl:w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
-                          onClick={() => setShowCountryModal(true)}
-                        >
-                          <span className="text-[#333] font-medium">
-                            {selectedCountryCode}
-                          </span>
-                        </div>
-
-                        {/* Phone Number Input */}
-                        <input
-                          ref={(el) => (inputRefs.current[6] = el)}
-                          onKeyDown={(e) => handleFormKeyDown(e, 6)}
-                          className="flex-1 p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
-                          placeholder="Phone number"
-                          name="phone_number"
-                          value={formData.phone_number}
-                          onChange={handleChange}
-                          type="tel"
-                        />
-
-                        {/* Send OTP Button */}
-                        <div
-                          onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
-                          className={`rounded-[9px] w-full sm:w-[35%] xl:w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm  ${
-                            isOtpSending
-                              ? 'bg-[#a5a5a5] cursor-not-allowed'
-                              : 'bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95'
-                          }`}
-                        >
-                          {loader ? (
-                            <div className="flex items-center justify-center py-2">
-                              <LineSpinner
-                                size={20}
-                                color="white"
-                                stroke="1.5"
-                              />
-                            </div>
-                          ) : (
-                            <p className="font-semibold text-[11px] text-white py-2 px-2 text-center">
-                              {isOtpSending ? 'Sending...' : 'Send OTP'}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {errors.phone_number && (
-                        <span className="text-red-500 text-xs mt-1">
-                          {errors.phone_number}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Country Code Selection Modal */}
-                    {showCountryModal && (
-                      <AnimatePresence>
-                        <motion.div
-                          className="fixed inset-0 z-[70] flex items-center justify-center backdrop-blur-sm bg-black/50"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          onClick={() => setShowCountryModal(false)}
-                        >
-                          <motion.div
-                            className="bg-white rounded-[16px] shadow-2xl w-[95%] sm:w-[90%] max-w-[400px] h-[70vh] max-h-[500px] flex flex-col overflow-hidden mx-4"
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {/* Modal Header */}
-                            <div className="flex items-center justify-between p-4 border-b border-[#e5e7eb]">
-                              <h3 className="text-[18px] font-semibold text-[#111111] font-poppins">
-                                Select Country Code
-                              </h3>
-                              <button
-                                onClick={() => setShowCountryModal(false)}
-                                className="text-[#666] hover:text-[#111] transition-colors p-1"
-                              >
-                                <IoCloseOutline size={24} />
-                              </button>
-                            </div>
-
-                            {/* Search Input */}
-                            <div className="p-4 border-b border-[#f1f3f4]">
-                              <input
-                                type="text"
-                                placeholder="Search country or code..."
-                                className="w-full p-3 text-[14px] border border-[#d1d5db] rounded-[10px] focus:outline-none focus:border-[#467EF8] focus:ring-2 focus:ring-[#467EF8]/20 transition-all duration-200"
-                                value={countrySearchTerm}
-                                onChange={e =>
-                                  setCountrySearchTerm(e.target.value)
-                                }
-                                autoFocus
-                              />
-                            </div>
-
-                            {/* Countries List */}
-                            <div className="flex-1 overflow-y-auto">
-                              {filteredCountries.length > 0 ? (
-                                <div className="p-2">
-                                  {filteredCountries.map((country, index) => (
-                                    <motion.div
-                                      key={index}
-                                      className="p-3 hover:bg-[#f8fafc] cursor-pointer rounded-[8px] flex items-center justify-between transition-colors duration-150 mx-2"
-                                      whileHover={{
-                                        backgroundColor: "#f1f5f9",
-                                      }}
-                                      onClick={() => {
-                                        setSelectedCountryCode(country.code);
-                                        setShowCountryModal(false);
-                                        setCountrySearchTerm("");
-                                      }}
-                                    >
-                                      <div className="flex-1">
-                                        <div className="text-[14px] font-medium text-[#374151] mb-1">
-                                          {country.name}
-                                        </div>
-                                        <div className="text-[12px] text-[#6b7280]">
-                                          {country.country}
-                                        </div>
-                                      </div>
-                                      <div className="bg-[#f3f4f6] px-3 py-1 rounded-full">
-                                        <span className="text-[#467EF8] font-semibold text-[13px]">
-                                          {country.code}
-                                        </span>
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="flex-1 flex items-center justify-center">
-                                  <div className="text-center py-8">
-                                    <div className="text-[48px] text-[#e5e7eb] mb-2">
-                                      🔍
-                                    </div>
-                                    <p className="text-[#9ca3af] text-[14px]">
-                                      No countries found
-                                    </p>
-                                    <p className="text-[#d1d5db] text-[12px] mt-1">
-                                      Try searching with a different term
-                                    </p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Modal Footer */}
-                            <div className="p-4 border-t border-[#f1f3f4] bg-[#fafbfc]">
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    setShowCountryModal(false);
-                                    setCountrySearchTerm("");
-                                  }}
-                                  className="flex-1 py-2 px-4 border border-[#d1d5db] rounded-[8px] text-[#374151] text-[14px] font-medium hover:bg-[#f9fafb] transition-colors duration-200"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        </motion.div>
-                      </AnimatePresence>
-                    )}
-                    <div className="mt-1">
-                      <p className="font-poppins text-[14px]">
-                        Already have an account?{' '}
-                        <span
-                          onClick={() => setShowSignUp(false)}
-                          className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
-                        >
-                          Login
-                        </span>
-                      </p>
-                    </div>
-                  </form>
+                    Resend OTP
+                  </span>
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
+        <form
+          className="font-montserrat flex flex-col gap-2 "
+          onSubmit={handleSubmit}
+        >
+          {/* Your existing form content remains the same */}
+          {/* Full Name */}
+          <div className="flex flex-col">
+            <label className="font-medium text-[14px] text-[#111111]">
+              Full Name
+            </label>
+            <div className="flex flex-col sm:flex-row xl:flex-row gap-3">
+              <div className="w-full sm:w-[50%]">
+                <input
+                  ref={el => (inputRefs.current[0] = el)}
+                  onKeyDown={e => handleFormKeyDown(e, 0)}
+                  className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                  placeholder="First Name"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleChange}
+                />
+                {errors.full_name && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.full_name}
+                  </span>
+                )}
+              </div>
+              <div className="w-full sm:w-[50%]">
+                <input
+                  ref={el => (inputRefs.current[1] = el)}
+                  onKeyDown={e => handleFormKeyDown(e, 1)}
+                  className="w-full p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                  placeholder="Last Name"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                />
+                {errors.last_name && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.last_name}
+                  </span>
                 )}
               </div>
             </div>
-          ) : (
+          </div>
+
+          {/* Email */}
+          <div className="flex flex-col">
+            <label className="font-medium text-[14px] text-[#111111]">
+              Email
+            </label>
+            <input
+              ref={el => (inputRefs.current[2] = el)}
+              onKeyDown={e => handleFormKeyDown(e, 2)}
+              className="w-full sm:w-[90%] xl:w-[100%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+              placeholder="Enter your email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+            {errors.email && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.email}
+              </span>
+            )}
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col">
+            <label className="font-medium text-[14px] text-[#111111]">
+              Password
+            </label>
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <input
+                  ref={el => (inputRefs.current[3] = el)}
+                  onKeyDown={e => handleFormKeyDown(e, 3)}
+                  className="w-full sm:w-[90%] xl:w-[100%] p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                  placeholder="Enter your password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+                <div
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <IoEyeOffOutline />
+                  ) : (
+                    <IoEyeOutline />
+                  )}
+                </div>
+              </div>
+
+              {errors.password && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.password}
+                </span>
+              )}
+              <div className="relative">
+                <input
+                  ref={el => (inputRefs.current[4] = el)}
+                  onKeyDown={e => handleFormKeyDown(e, 4)}
+                  className="w-full p-2 pr-10 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px]"
+                  placeholder="Confirm password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="reenter_password"
+                  value={formData.reenter_password}
+                  onChange={handleChange}
+                />
+                <div
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <IoEyeOffOutline />
+                  ) : (
+                    <IoEyeOutline />
+                  )}
+                </div>
+              </div>
+
+              {errors.reenter_password && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.reenter_password}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Phone Number */}
+          <div className="flex flex-col">
+            <label className="font-medium text-[14px] text-[#111111]">
+              Phone Number
+            </label>
+            <div className="flex  sm:flex-row gap-1 items-center">
+              {/* Country Code Button */}
+              <div
+                className="w-[20%] sm:w-[25%] xl:w-[30%] p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white cursor-pointer flex items-center justify-center hover:border-[#424242] transition-colors duration-200"
+                onClick={() => setShowCountryModal(true)}
+              >
+                <span className="text-[#333] font-medium">
+                  {selectedCountryCode}
+                </span>
+              </div>
+
+              {/* Phone Number Input */}
+              <input
+                ref={(el) => (inputRefs.current[6] = el)}
+                onKeyDown={(e) => handleFormKeyDown(e, 6)}
+                className="flex-1 p-2 text-[13px] border border-[#aeaeae] rounded-[8px] bg-white focus:outline-none focus:border-[#424242] placeholder:text-[12px] transition-colors duration-200"
+                placeholder="Phone number"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                type="tel"
+              />
+
+              {/* Send OTP Button */}
+              <div
+                onClick={isOtpSending ? undefined : handleSendOtp} // Prevent clicks when sending
+                className={`rounded-[9px] w-full sm:w-[35%] xl:w-[30%] min-w-[80px] flex items-center justify-center cursor-pointer transition-all duration-200 shadow-sm  ${
+                  isOtpSending
+                    ? 'bg-[#a5a5a5] cursor-not-allowed'
+                    : 'bg-[#467EF8] hover:bg-[#3b6de8] active:scale-95'
+                }`}
+              >
+                {loader ? (
+                  <div className="flex items-center justify-center py-2">
+                    <LineSpinner
+                      size={20}
+                      color="white"
+                      stroke="1.5"
+                    />
+                  </div>
+                ) : (
+                  <p className="font-semibold text-[11px] text-white py-2 px-2 text-center">
+                    {isOtpSending ? 'Sending...' : 'Send OTP'}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {errors.phone_number && (
+              <span className="text-red-500 text-xs mt-1">
+                {errors.phone_number}
+              </span>
+            )}
+          </div>
+
+          {/* Country Code Selection Modal */}
+          {showCountryModal && (
+            <AnimatePresence>
+              <motion.div
+                className="fixed inset-0 z-[70] flex items-center justify-center backdrop-blur-sm bg-black/50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={() => setShowCountryModal(false)}
+              >
+                <motion.div
+                  className="bg-white rounded-[16px] shadow-2xl w-[95%] sm:w-[90%] max-w-[400px] h-[70vh] max-h-[500px] flex flex-col overflow-hidden mx-4"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between p-4 border-b border-[#e5e7eb]">
+                    <h3 className="text-[18px] font-semibold text-[#111111] font-poppins">
+                      Select Country Code
+                    </h3>
+                    <button
+                      onClick={() => setShowCountryModal(false)}
+                      className="text-[#666] hover:text-[#111] transition-colors p-1"
+                    >
+                      <IoCloseOutline size={24} />
+                    </button>
+                  </div>
+
+                  {/* Search Input */}
+                  <div className="p-4 border-b border-[#f1f3f4]">
+                    <input
+                      type="text"
+                      placeholder="Search country or code..."
+                      className="w-full p-3 text-[14px] border border-[#d1d5db] rounded-[10px] focus:outline-none focus:border-[#467EF8] focus:ring-2 focus:ring-[#467EF8]/20 transition-all duration-200"
+                      value={countrySearchTerm}
+                      onChange={e =>
+                        setCountrySearchTerm(e.target.value)
+                      }
+                      autoFocus
+                    />
+                  </div>
+
+                  {/* Countries List */}
+                  <div className="flex-1 overflow-y-auto">
+                    {filteredCountries.length > 0 ? (
+                      <div className="p-2">
+                        {filteredCountries.map((country, index) => (
+                          <motion.div
+                            key={index}
+                            className="p-3 hover:bg-[#f8fafc] cursor-pointer rounded-[8px] flex items-center justify-between transition-colors duration-150 mx-2"
+                            whileHover={{
+                              backgroundColor: "#f1f5f9",
+                            }}
+                            onClick={() => {
+                              setSelectedCountryCode(country.code);
+                              setShowCountryModal(false);
+                              setCountrySearchTerm("");
+                            }}
+                          >
+                            <div className="flex-1">
+                              <div className="text-[14px] font-medium text-[#374151] mb-1">
+                                {country.name}
+                              </div>
+                              <div className="text-[12px] text-[#6b7280]">
+                                {country.country}
+                              </div>
+                            </div>
+                            <div className="bg-[#f3f4f6] px-3 py-1 rounded-full">
+                              <span className="text-[#467EF8] font-semibold text-[13px]">
+                                {country.code}
+                              </span>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center">
+                        <div className="text-center py-8">
+                          <div className="text-[48px] text-[#e5e7eb] mb-2">
+                            🔍
+                          </div>
+                          <p className="text-[#9ca3af] text-[14px]">
+                            No countries found
+                          </p>
+                          <p className="text-[#d1d5db] text-[12px] mt-1">
+                            Try searching with a different term
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="p-4 border-t border-[#f1f3f4] bg-[#fafbfc]">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setShowCountryModal(false);
+                          setCountrySearchTerm("");
+                        }}
+                        className="flex-1 py-2 px-4 border border-[#d1d5db] rounded-[8px] text-[#374151] text-[14px] font-medium hover:bg-[#f9fafb] transition-colors duration-200"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
+          )}
+          <div className="mt-1">
+            <p className="font-poppins text-[14px]">
+              Already have an account?{' '}
+              <span
+                onClick={() => setShowSignUp(false)}
+                className="text-[#6941C6] font-semibold cursor-pointer hover:text-[#9d80e1] transition-all duration-200"
+              >
+                Login
+              </span>
+            </p>
+          </div>
+        </form>
+      )}
+    </div>
+  </div>
+) : (
             // Login Form
             <div className="w-full xl:w-[50%] px-4 py-6 sm:px-6 sm:py-8 xl:py-10 flex flex-col justify-center gap-5 xl:px-10 xl:pl-10">
               {showForgotPassword ? (

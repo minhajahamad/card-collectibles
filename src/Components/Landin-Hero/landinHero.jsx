@@ -79,7 +79,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
               </p>
             </div>
             <div className="w-[100vw] mt-5  relative fade-effect xl:hidden">
-            <div className="marquee-container">
+              <div className="marquee-container">
                 <div className="marquee-track">
                   {[...LandinImages, ...LandinImages].map((image, index) => (
                     <div key={index} className="marquee-image">
@@ -273,7 +273,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                 </div>
               ))}
             </div> */}
-              <div className="marquee-container">
+            <div className="marquee-container">
               <div className="marquee-track">
                 {[...LandinImages, ...LandinImages].map((image, index) => (
                   <div
