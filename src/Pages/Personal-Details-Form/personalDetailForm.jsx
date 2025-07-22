@@ -478,6 +478,7 @@ const PersonalDetailForm = ({
                 className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
                 placeholder="Pin"
                 name="pin"
+                type='number'
                 value={addressData.pin}
                 onChange={handleChange}
               />
