@@ -6,6 +6,10 @@ export const API_URL = {
     LOGIN:{
         LOGIN: "/api/login/"
     },
+    VALIDATION: {
+        EMAIL: "/api/check-user/",
+        PHONE_NUMBER: "/api/check-user/"
+    },
     USER: {
         GET_USER: "/api/users/",
         GET_USER_UUID:uuid=> `/api/user/${uuid}/`,
@@ -15,8 +19,6 @@ export const API_URL = {
 
     CATEGORY: {
         GET_CATEGORY: "/api/categories/",
-      
-
     },
     ADDRESS: {
         GET_ADDRESS: "/api/addresses/",
