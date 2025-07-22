@@ -234,12 +234,29 @@ const Affiliates = () => {
                   >
                     {user?.referral?.referral_code ? (
                       <QRCodeCanvas
-                        value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
-                        size={110}
-                        bgColor="#FFFFFF"
-                        fgColor="#000000"
-                        level="H"
-                      />
+                      value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
+                      size={110}
+                      level="H"
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                      includeMargin={false} // optional, deprecated
+                      marginSize={4} // preferred way to add margin
+                      title="User Referral QR Code"
+                      minVersion={1}
+                      boostLevel={true}
+                      imageSettings={{
+                        src: 'https://example.com/logo.png', // replace with your logo URL
+                        height: 30,
+                        width: 30,
+                        excavate: true,
+                        opacity: 1,
+                        crossOrigin: 'anonymous',
+                        // Optional offsets to position image manually:
+                        x: 40,
+                        y: 40
+                      }}
+                    />
+                    
                     ) : (
                       <QRCodeCanvas
                         size={110}
@@ -273,12 +290,29 @@ const Affiliates = () => {
             >
               {user?.referral?.referral_code ? (
                 <QRCodeCanvas
-                  value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
-                  size={110}
-                  bgColor="#FFFFFF"
-                  fgColor="#000000"
-                  level="H"
-                />
+                value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
+                size={110}
+                level="H"
+                bgColor="#FFFFFF"
+                fgColor="#000000"
+                includeMargin={false} // optional, deprecated
+                marginSize={4} // preferred way to add margin
+                title="User Referral QR Code"
+                minVersion={1}
+                boostLevel={true}
+                imageSettings={{
+                  src: 'https://example.com/logo.png', // replace with your logo URL
+                  height: 30,
+                  width: 30,
+                  excavate: true,
+                  opacity: 1,
+                  crossOrigin: 'anonymous',
+                  // Optional offsets to position image manually:
+                  x: 40,
+                  y: 40
+                }}
+              />
+              
               ) : (
                 <QRCodeCanvas
                   size={110}
