@@ -148,7 +148,7 @@ const Affiliates = () => {
       try {
         await navigator.share({
           title: "You're invited!",
-          text: `Join me using this referral links: ${referralUrl}`,
+          text: `Join me at collectibles using this referral link: ${referralUrl}`,
           files: [file],
         });
         console.log('Successful share');
