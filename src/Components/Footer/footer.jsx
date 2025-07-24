@@ -11,7 +11,7 @@ const Footer = () => {
           Join thousands of sellers building their business with us.{' '}
           <br className="hidden md:block" />
           <span className="text-[#7E7E7E] text-[14px] hidden xl:block">
-            © 2024 Collected Company. All rights reserved.
+            © 2025 Collected Company. All rights reserved.
           </span>
         </p>
       </div>
@@ -49,7 +49,7 @@ const Footer = () => {
       </div>
 
       <span className="text-[#7E7E7E] text-[14px] xl:hidden text-center mt-5 ">
-        © 2024 Collected Company. All rights reserved.
+        © 2025 Collected Company. All rights reserved.
       </span>
     </div>
   );

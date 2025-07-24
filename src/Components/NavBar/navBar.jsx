@@ -26,7 +26,6 @@ const NavBar = ({ onLoginClick }) => {
 
   console.log(sidebarOpen);
 
-
   useEffect(() => {
     fetchUser();
   }, []);
@@ -34,7 +33,7 @@ const NavBar = ({ onLoginClick }) => {
   return (
     <>
       <nav className="w-full h-[70px] lg:h-[85px]   flex items-center bg-[#09778E]  justify-between px-4 md:px-15 lg:px-20  ">
-        <div onClick={() => navigate("/")} className="  cursor-pointer ">
+        <div onClick={() => navigate('/')} className="  cursor-pointer ">
           <img
             src="/Images/logo.png"
             className="  object-cover w-[115px] h-[50px] lg:w-[158px] lg:h-[70px] "
@@ -42,14 +41,12 @@ const NavBar = ({ onLoginClick }) => {
         </div>
 
         {!uuid ? (
-          <div
-            className="flex gap-3 items-center justifu-center text-white text-[24px] lg:text-[30px] cursor-pointer"
-          >
+          <div className="flex gap-3 items-center justifu-center text-white text-[24px] lg:text-[30px] cursor-pointer">
             <div
               onClick={onLoginClick}
               className="bg-white rounded-[6px] text-[#00A397] text-[16px] font-montserrat px-3 py-2 font-semibold cursor-pointer"
             >
-              <p>SignIn / SignUp</p>
+              <p>Sign In / Sign Up</p>
             </div>
             {/* Hamburger menu removed as per new requirements */}
           </div>
@@ -59,9 +56,9 @@ const NavBar = ({ onLoginClick }) => {
               className="lg:w-[105px] xl:w-[115px] h-full xl:flex items-center justify-between hidden xl:block hover:cursor-pointer xl:flex xl:items-center xl:justify-between xl:w-[115px] xl:h-full xl:border-0 xl:rounded-none xl:bg-transparent xl:text-white"
               onClick={() => navigate('/user/profile')}
             >
-              <div className="rounded-full border-2 border-white">
+              <div className="rounded-full border-2 border-black">
                 <img
-                  src="/Images/username.png"
+                  src="/Images/Landin-img-6.png"
                   className="rounded-full object-top object-cover cursor-pointer w-[25px] h-[25px] md:w-[30px] md:h-[30px]"
                 />
               </div>
@@ -74,7 +71,10 @@ const NavBar = ({ onLoginClick }) => {
                 </p>
               </div>
             </div>
-            <RxHamburgerMenu onClick={() => setSidebarOpen(true)} className="block xl:hidden" />
+            <RxHamburgerMenu
+              onClick={() => setSidebarOpen(true)}
+              className="block xl:hidden text-white text-[22px]"
+            />
           </>
         )}
       </nav>

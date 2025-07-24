@@ -109,7 +109,7 @@ const Affiliates = () => {
   const handleShareOnWhatsApp = () => {
     if (!user.referral?.referral_code) return;
     const referralUrl = `${window.location.origin}/?refferal-code=${user.referral?.referral_code}`;
-    const message = `Join me using this referral link: ${referralUrl}`;
+    const message = `Join early for the signup bonus, a premier platform for trading cards, comics, and collectibles.\n\nUse my Collected Company referral to secure your selling spot.\n\nFollow the link now: ${referralUrl}`;
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
       message
     )}`;
@@ -148,7 +148,7 @@ const Affiliates = () => {
       try {
         await navigator.share({
           title: "You're invited!",
-          text: `Join me using this referral link: ${referralUrl}`,
+          text: `Join early for the signup bonus, a premier platform for trading cards, comics, and collectibles.\n\nUse my Collected Company referral to secure your selling spot.\n\nFollow the link now: ${referralUrl}`,
           files: [file],
         });
         console.log('Successful share');
@@ -234,12 +234,27 @@ const Affiliates = () => {
                   >
                     {user?.referral?.referral_code ? (
                       <QRCodeCanvas
-                        value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
-                        size={110}
-                        bgColor="#FFFFFF"
-                        fgColor="#000000"
-                        level="H"
-                      />
+                      value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
+                      size={110}
+                      level="H"
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                      includeMargin={false} // optional, deprecated
+                      marginSize={2} // preferred way to add margin
+                      title="User Referral QR Code"
+                      minVersion={1}
+                      boostLevel={true}
+                      imageSettings={{
+                        src: '/Images/logo.png', // replace with your logo URL
+                        height: 30,
+                        width: 65,
+                        excavate: true,
+                        opacity: 1,
+                        crossOrigin: 'anonymous',
+              
+                      }}
+                    />
+                    
                     ) : (
                       <QRCodeCanvas
                         size={110}
@@ -273,12 +288,28 @@ const Affiliates = () => {
             >
               {user?.referral?.referral_code ? (
                 <QRCodeCanvas
-                  value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
-                  size={110}
-                  bgColor="#FFFFFF"
-                  fgColor="#000000"
-                  level="H"
-                />
+                value={`${window.location.origin}/?refferal-code=${user.referral.referral_code}`}
+                size={110}
+                level="H"
+                bgColor="#FFFFFF"
+                fgColor="#000000"
+                includeMargin={false} // optional, deprecated
+                marginSize={2} // preferred way to add margin
+                title="User Referral QR Code"
+                minVersion={1}
+                boostLevel={true}
+                imageSettings={{
+                  src: '/Images/logo.png', // replace with your logo URL
+                  height: 30,
+                  width: 65,
+                  excavate: true,
+                  opacity: 1,
+                  crossOrigin: 'anonymous',
+                  // Optional offsets to position image manually:
+                 
+                }}
+              />
+              
               ) : (
                 <QRCodeCanvas
                   size={110}
@@ -324,7 +355,7 @@ const Affiliates = () => {
               <p className="md:text-[18px]">{refferal.email}</p>
               <div className="flex items-center justify-between ">
                 <p>
-                  DOJ : <span className="text-[#107D91]">{refferal.referred_date ? item.referred_date.split('T')[0] : ''}</span>
+                  DOJ : <span className="text-[#107D91]">{refferal.referred_date ? refferal.referred_date.split('T')[0] : ''}</span>
                 </p>
                 <p className="text-[#107D91]">{refferal.phone_number}</p>
               </div>

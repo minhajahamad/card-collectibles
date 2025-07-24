@@ -304,6 +304,17 @@ const Profile = () => {
     setIsEditing(!isEditing);
   };
 
+  // Add this helper function before handleSave
+  const isAnyFieldBlank = () => {
+    // User fields (email and phone are disabled, so only full_name is required)
+    if (!userData.full_name.trim()) return true;
+    // Address fields (all except uuid and address_type are required)
+    if (!addressData.street_address.trim() || !addressData.apartment.trim() || !addressData.city.trim() || !addressData.state.trim() || !addressData.postal_code.trim() || !addressData.country.trim()) return true;
+    // Store fields
+    if (!storeData.store_name.trim() || storeData.categories.length === 0 || !storeData.inventory_estimate.trim() || !storeData.specialization.trim()) return true;
+    return false;
+  };
+
   // Save all changes
 const handleSave = async () => {
   setSaving(true);
@@ -425,17 +436,22 @@ const handleSave = async () => {
     setIsEditing(false);
   } catch (error) {
     console.error('Error saving profile:', error);
-
-    // More detailed error handling
+    let userFriendlyMessage = 'Error saving profile. Please try again.';
     if (error.response && error.response.data) {
-      console.error('Error details:', error.response.data);
-      const errorMessage = typeof error.response.data === 'string'
-        ? error.response.data
-        : JSON.stringify(error.response.data);
-      alert(`Error saving profile: ${errorMessage}`);
-    } else {
-      alert('Error saving profile. Please try again.');
+      // Try to extract a meaningful message
+      if (typeof error.response.data === 'string') {
+        userFriendlyMessage = `Could not save profile: ${error.response.data}`;
+      } else if (error.response.data.detail) {
+        userFriendlyMessage = `Could not save profile: ${error.response.data.detail}`;
+      } else if (error.response.data.message) {
+        userFriendlyMessage = `Could not save profile: ${error.response.data.message}`;
+      } else if (Array.isArray(error.response.data.errors)) {
+        userFriendlyMessage = error.response.data.errors.map(e => e.message || e).join('\n');
+      } else {
+        userFriendlyMessage = 'Could not save profile due to a server error.';
+      }
     }
+    alert(userFriendlyMessage);
   } finally {
     setSaving(false);
   }
@@ -478,7 +494,7 @@ const handleSave = async () => {
             {isEditing && (
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || isAnyFieldBlank()}
                 className="absolute top-5 right-5 xl:top-2 xl:right-2 bg-[#107d91] text-white px-4 py-2 rounded-lg hover:bg-[#0d6b7a] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? 'Saving...' : 'Save'}
@@ -541,6 +557,7 @@ const handleSave = async () => {
                         onChange={(e) => handleUserInputChange('full_name', e.target.value)}
                         disabled={!isEditing}
                         placeholder="Full Name"
+                        required
                         className={`w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                           }`}
                       />
@@ -586,6 +603,7 @@ const handleSave = async () => {
                       onChange={(e) => handleAddressInputChange('street_address', e.target.value)}
                       disabled={!isEditing}
                       placeholder="Street Address"
+                      required
                       className={`w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                         }`}
                     />
@@ -594,6 +612,7 @@ const handleSave = async () => {
                       onChange={(e) => handleAddressInputChange('apartment', e.target.value)}
                       disabled={!isEditing}
                       placeholder="Apartment/Suite"
+                      required
                       className={`w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                         }`}
                     />
@@ -602,6 +621,7 @@ const handleSave = async () => {
                       onChange={(e) => handleAddressInputChange('city', e.target.value)}
                       disabled={!isEditing}
                       placeholder="City"
+                      required
                       className={`w-[90%] xl:w-[350px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                         }`}
                     />
@@ -611,6 +631,7 @@ const handleSave = async () => {
                         onChange={(e) => handleAddressInputChange('state', e.target.value)}
                         disabled={!isEditing}
                         placeholder="State"
+                        required
                         className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                           }`}
                       />
@@ -619,6 +640,7 @@ const handleSave = async () => {
                         onChange={(e) => handleAddressInputChange('postal_code', e.target.value)}
                         disabled={!isEditing}
                         placeholder="Postal Code"
+                        required
                         className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                           }`}
                       />
@@ -628,6 +650,7 @@ const handleSave = async () => {
                       onChange={(e) => handleAddressInputChange('country', e.target.value)}
                       disabled={!isEditing}
                       placeholder="Country"
+                      required
                       className={`w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'
                         }`}
                     />
@@ -652,6 +675,7 @@ const handleSave = async () => {
                         onChange={(e) => handleStoreInputChange('store_name', e.target.value)}
                         disabled={!isEditing}
                         placeholder="Store Name"
+                        required
                         className={`w-[90%] xl:w-[290px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'}`}
                       />
                     </div>
@@ -683,6 +707,7 @@ const handleSave = async () => {
                       value={storeData.inventory_estimate}
                       onChange={(e) => handleStoreInputChange('inventory_estimate', e.target.value)}
                       disabled={!isEditing}
+                      required
                       className={`w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] pl-1 focus:outline-none focus:border-[#8d8c8c] ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'}`}
                     >
                       <option value="">Select estimate</option>
@@ -703,6 +728,7 @@ const handleSave = async () => {
                     onChange={(e) => handleStoreInputChange('specialization', e.target.value)}
                     disabled={!isEditing}
                     placeholder="Describe your store's specialization..."
+                    required
                     style={{ overflowY: 'scroll', scrollbarWidth: 'none' }}
                     className={`w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto ${isEditing ? 'bg-white' : 'bg-[#F4F4F4]'}`}
                   ></textarea>

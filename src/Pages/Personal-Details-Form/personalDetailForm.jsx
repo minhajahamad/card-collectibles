@@ -476,8 +476,9 @@ const PersonalDetailForm = ({
             <div className="flex flex-col">
               <input
                 className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
-                placeholder="Pin"
+                placeholder="Postal Code"
                 name="pin"
+                type='number'
                 value={addressData.pin}
                 onChange={handleChange}
               />
@@ -751,6 +752,7 @@ const Stepper = ({ step, setStep }) => (
 );
 
 const MultiStepForm = () => {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1);
   const [user, setUser] = useState({});
   const uuid = localStorage.getItem('uuid');
@@ -858,8 +860,9 @@ const MultiStepForm = () => {
       }
 
       // Navigate to profile page after successful submission
+
       setTimeout(() => {
-        window.location.href = '/user/profile';
+        navigate("/user/profile");
       }, 200);
     } catch (err) {
       setApiErrors({ general: 'Unexpected error occurred' });
