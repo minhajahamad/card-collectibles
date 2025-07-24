@@ -17,6 +17,12 @@ export const API_URL = {
 
     },
 
+    EMAIL_LOGIN:{
+      POST_EMAIL:"/api/send-verification/",
+            GET_EMAIL_VERIFIED:"/api/verify-email/"
+
+    },
+
     CATEGORY: {
         GET_CATEGORY: "/api/categories/",
     },

@@ -1,15 +1,7 @@
-// export default PersonalDetailForm;
 import React, { useEffect, useState } from 'react';
-// import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../services/axios';
 import { API_URL } from '../../services/api_url';
-import {
-  sendEmailVerificationLink,
-  handleEmailVerificationLink,
-  checkEmailVerificationStatus,
-  onEmailVerificationStateChange,
-} from '../../services/firebase/firebaseApp'; // Adjust path as needed
 
 const PersonalDetailForm = ({
   onNext,
@@ -35,7 +27,6 @@ const PersonalDetailForm = ({
         API_URL.USER.GET_USER_UUID(uuid)
       );
       console.log(response);
-
       setUser(response.data.data);
     } catch (err) {
       console.log(err);
@@ -51,49 +42,46 @@ const PersonalDetailForm = ({
     }
   };
 
-  // Check for email verification link on component mount
+  // Check email verification status on component mount
   useEffect(() => {
-    const checkForVerificationLink = async () => {
-      try {
-        const result = await handleEmailVerificationLink();
-        if (result.success && result.isVerified) {
-          setEmailVerificationStatus({
-            isVerified: true,
-            isSending: false,
-            message: 'Email verified successfully!',
-            isError: false,
-          });
-
-          // Update user verification status in your backend if needed
-          // You can call your API here to update the user's email verification status
-        }
-      } catch (error) {
-        console.log('No verification link found or error:', error);
-      }
-    };
-
-    checkForVerificationLink();
-    fetchUser();
-    fetchAddress();
-  }, []);
-
-  // Set up auth state listener to monitor email verification
-  useEffect(() => {
-    const unsubscribe = onEmailVerificationStateChange(
-      (isVerified, firebaseUser) => {
-        if (firebaseUser && isVerified) {
-          setEmailVerificationStatus(prev => ({
-            ...prev,
-            isVerified: true,
-            message: 'Email verified successfully!',
-            isError: false,
-          }));
-        }
+   const checkEmailVerification = async () => {
+  try {
+    const response = await axiosInstance.get(
+      API_URL.EMAIL_LOGIN.GET_EMAIL_VERIFIED,
+      {
+        params: { email: user.email },
       }
     );
+    // If we get a successful response, email is verified
+    if (response.data.message === "Email verified and updated in the system.") {
+      setEmailVerificationStatus({
+        isVerified: true,
+        isSending: false,
+        message: 'Email verified successfully!',
+        isError: false,
+      });
+    }
+  } catch (error) {
+    // If error is "Firebase user not found", email is not verified
+    if (error.response?.data?.error === "Firebase user not found.") {
+      setEmailVerificationStatus(prev => ({
+        ...prev,
+        isVerified: false,
+      }));
+    }
+    console.log('Error checking email verification status:', error);
+  }
+};
 
-    return () => unsubscribe(); // Cleanup subscription
-  }, []);
+
+    fetchUser();
+    fetchAddress();
+    if (user.email) {
+      checkEmailVerification();
+    }
+  }, [user.email]);
+
+  // Handle email verification by calling the POST_EMAIL API
   const handleEmailVerification = async () => {
     if (!user.email) {
       setEmailVerificationStatus({
@@ -113,39 +101,28 @@ const PersonalDetailForm = ({
     }));
 
     try {
-      const result = await sendEmailVerificationLink(user.email);
-
-      if (result.success) {
-        if (result.isVerified) {
-          setEmailVerificationStatus({
-            isVerified: true,
-            isSending: false,
-            message: 'Email is already verified!',
-            isError: false,
-          });
-        } else {
-          setEmailVerificationStatus({
-            isVerified: false,
-            isSending: false,
-            message:
-              'Verification email sent! Please check your inbox and click the link.',
-            isError: false,
-          });
+      const response = await axiosInstance.post(
+        API_URL.EMAIL_LOGIN.POST_EMAIL,
+        {
+          user_uuid: uuid,
+          email: user.email,
         }
+      );
+
+      if (response.data.is_verified) {
+        setEmailVerificationStatus({
+          isVerified: true,
+          isSending: false,
+          message: 'Email is already verified!',
+          isError: false,
+        });
       } else {
-        // Handle specific error codes
-        let errorMessage = result.error || 'Failed to send verification email';
-
-        if (result.code === 'auth/operation-not-allowed') {
-          errorMessage =
-            'Please enable Email/Password authentication in Firebase Console.';
-        }
-
         setEmailVerificationStatus({
           isVerified: false,
           isSending: false,
-          message: errorMessage,
-          isError: true,
+          message:
+            'Verification email sent! Please check your inbox and click the link.',
+          isError: false,
         });
       }
     } catch (error) {
@@ -153,52 +130,43 @@ const PersonalDetailForm = ({
       setEmailVerificationStatus({
         isVerified: false,
         isSending: false,
-        message: 'Error sending verification email. Please try again.',
+        message: error.response?.data?.message || 'Failed to send verification email',
         isError: true,
       });
     }
   };
 
+  // Check email verification status when tab becomes visible
   useEffect(() => {
-    const checkEmailVerification = async () => {
-      try {
-        const result = await checkEmailVerificationStatus();
-        if (result.success && result.isVerified) {
-          setEmailVerificationStatus({
-            isVerified: true,
-            isSending: false,
-            message: 'Email verified successfully!',
-            isError: false,
-          });
+   const handleVisibilityChange = async () => {
+  if (document.visibilityState === 'visible' && user.email) {
+    try {
+      const response = await axiosInstance.get(
+        API_URL.EMAIL_LOGIN.GET_EMAIL_VERIFIED,
+        {
+          params: { email: user.email },
         }
-      } catch (error) {
-        console.log('Error checking email verification status:', error);
+      );
+      if (response.data.message === "Email verified and updated in the system.") {
+        setEmailVerificationStatus({
+          isVerified: true,
+          isSending: false,
+          message: 'Email verified successfully!',
+          isError: false,
+        });
       }
-    };
-
-    if (user.email) {
-      checkEmailVerification();
+    } catch (error) {
+      if (error.response?.data?.error === "Firebase user not found.") {
+        setEmailVerificationStatus(prev => ({
+          ...prev,
+          isVerified: false,
+        }));
+      }
+      console.log('Error checking email verification status:', error);
     }
-  }, [user.email]);
+  }
+};
 
-  useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && user.email) {
-        try {
-          const result = await checkEmailVerificationStatus();
-          if (result.success && result.isVerified) {
-            setEmailVerificationStatus({
-              isVerified: true,
-              isSending: false,
-              message: 'Email verified successfully!',
-              isError: false,
-            });
-          }
-        } catch (error) {
-          console.log('Error checking email verification status:', error);
-        }
-      }
-    };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -230,7 +198,6 @@ const PersonalDetailForm = ({
     if (!addressData.state) errors.state = 'State is required';
     if (!addressData.country) errors.country = 'Country is required';
     if (!addressData.pin) errors.pin = 'Pin is required';
-    // image is optional
     return errors;
   };
 
@@ -249,7 +216,6 @@ const PersonalDetailForm = ({
       <div className="border-r-0 sm:border-r border-b sm:border-b-0 border-[#DEDEDE] w-full sm:w-[50%] px-5 sm:px-10 flex flex-col gap-5 pb-5 sm:pb-0">
         <form className="flex flex-col gap-8" onSubmit={handleNext}>
           <div className="bg-[#C2C2C233] w-fit rounded-sm flex flex-col items-center relative">
-            {/* File input for image upload, show preview or placeholder */}
             <label
               htmlFor="profile-image-upload"
               className="cursor-pointer relative group"
@@ -350,7 +316,6 @@ const PersonalDetailForm = ({
                   : 'Verify Now'}
               </button>
             </div>
-            {/* Email verification status message */}
             {emailVerificationStatus.message && (
               <div
                 className={`text-sm mt-2 ${
@@ -413,7 +378,6 @@ const PersonalDetailForm = ({
                 </span>
               )}
             </div>
-            {/* No landmark field in API, so skipping */}
             <div className="flex flex-col xl:flex-row gap-[10px]">
               <div className="flex flex-col w-full xl:w-auto">
                 <input
@@ -500,13 +464,6 @@ const PersonalDetailForm = ({
           >
             <p>Next</p>
           </button>
-
-          {/* <button
-            type="submit"
-            className="w-[100px] h-[40px] bg-[#00A397] rounded-[6px] text-white font-semibold font-montserrat text-[18px] flex items-center justify-center absolute bottom-[20px] right-[20px] sm:bottom-[20px] sm:right-[20px] active:scale-95 transition-all duration-300 ease-in-out cursor-pointer"
-          >
-            <p>Next</p>
-          </button> */}
         </form>
       </div>
     </div>
@@ -515,7 +472,7 @@ const PersonalDetailForm = ({
 
 const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState([]); // ensure array
+  const [categories, setCategories] = useState([]);
   const [localErrors, setLocalErrors] = useState({});
   const [apiErrors, setApiErrors] = useState({});
 
@@ -523,7 +480,6 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
     try {
       const response = await axiosInstance.get(API_URL.SELLERS.CATEGORY);
       console.log(response);
-      // Ensure categories is an array
       setCategories(
         Array.isArray(response.data.data) ? response.data.data : []
       );
@@ -539,7 +495,7 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
-      const id = Number(value); // or value if IDs are strings
+      const id = Number(value);
       setSellerData(prev => ({
         ...prev,
         categories: checked
@@ -695,7 +651,6 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
   );
 };
 
-// Progress Bar
 const Stepper = ({ step, setStep }) => (
   <div className="flex items-center gap-6 relative">
     <div
@@ -752,12 +707,11 @@ const Stepper = ({ step, setStep }) => (
 );
 
 const MultiStepForm = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [user, setUser] = useState({});
   const uuid = localStorage.getItem('uuid');
 
-  // State for both forms
   const [addressData, setAddressData] = useState({
     house_name: '',
     street_name: '',
@@ -801,7 +755,6 @@ const MultiStepForm = () => {
   const handleSubmitAll = async setApiErrors => {
     setIsSubmitting(true);
     try {
-      // Submit address data
       const addressFormData = new FormData();
       addressFormData.append('user_uuid', uuid);
       addressFormData.append('house_name', addressData.house_name);
@@ -834,11 +787,10 @@ const MultiStepForm = () => {
         return;
       }
 
-      // Submit seller data
       const sellerPayload = {
         user_uuid: uuid,
         store_name: sellerData.store_name,
-        category_ids: sellerData.categories, // <-- changed from 'categories' to 'category_ids'
+        category_ids: sellerData.categories,
         inventory_estimate: sellerData.inventory_estimate,
         specialization: sellerData.specialization,
       };
@@ -858,8 +810,6 @@ const MultiStepForm = () => {
         setIsSubmitting(false);
         return;
       }
-
-      // Navigate to profile page after successful submission
 
       setTimeout(() => {
         navigate("/user/profile");
