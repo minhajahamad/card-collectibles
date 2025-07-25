@@ -103,7 +103,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                   Ready to Start?
                 </p>
                 <p className="font-medium font-raleway text-[11.48px] text-[#46505E]">
-                  Join thousands of sellers already using our platform.
+                Join Now, thousands of sellers ready to use our platform
                 </p>
               </div>
               <div className="h-[50%] flex justify-around ">
@@ -112,7 +112,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                     1000+
                   </p>
                   <p className="font-medium font-raleway text-[16px] text-[#46505E]">
-                    Active Sellers
+                    Global Sellers
                   </p>
                 </div>
                 <div className=" flex flex-col items-center ">
@@ -120,15 +120,15 @@ const LandinHero = ({ onLearnMoreClick }) => {
                     50K+
                   </p>
                   <p className="font-medium font-raleway text-[16px] text-[#46505E]">
-                    Item Listed
+                  Item To List
                   </p>
                 </div>
                 <div className=" flex flex-col items-center ">
                   <p className="font-bold font-raleway text-[22px] text-[#00A397]">
-                    95%
+                    99%
                   </p>
                   <p className="font-medium font-raleway text-[16px] text-[#46505E]">
-                    Satisfication
+                  Verified Sellers
                   </p>
                 </div>
               </div>
@@ -205,7 +205,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                   Ready to Start?
                 </p>
                 <p className="font-medium font-raleway text-[18px] text-[#46505E]">
-                  Join thousands of sellers already <br /> using our platform.
+                  Join Now, thousands of sellers ready <br />to use our platform.
                 </p>
               </div>
               <div className="xl:pl-5">
@@ -214,7 +214,7 @@ const LandinHero = ({ onLearnMoreClick }) => {
                     1000+
                   </p>
                   <p className="font-medium font-raleway text-[27px] text-[#46505E]">
-                    Active Sellers
+                  Global Sellers
                   </p>
                 </div>
                 <div className="border-b border-[#E9E9E9] xl:py-5 flex flex-col items-center xl:w-[300px]">
@@ -222,15 +222,15 @@ const LandinHero = ({ onLearnMoreClick }) => {
                     50k+
                   </p>
                   <p className="font-medium font-raleway text-[27px] text-[#46505E]">
-                    Items Listed
+                  Item To List
                   </p>
                 </div>
                 <div className=" xl:py-5 flex flex-col items-center xl:w-[300px]">
                   <p className="font-bold font-raleway text-[38px] text-[#00A397]">
-                    95%
+                    99%
                   </p>
                   <p className="font-medium font-raleway text-[27px] text-[#46505E]">
-                    Satisfication
+                  Verified Sellers
                   </p>
                 </div>
               </div>

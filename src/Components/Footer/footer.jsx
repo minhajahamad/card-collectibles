@@ -15,7 +15,7 @@ const Footer = () => {
           </span>
         </p>
       </div>
-      <div className=" w-full flex justify-between xl:justify-end xl:gap-30  px-10 py-5 md:px-30 lg:px-50 xl:py-0 xl:px-0 ">
+      {/* <div className=" w-full flex justify-between xl:justify-end xl:gap-30  px-10 py-5 md:px-30 lg:px-50 xl:py-0 xl:px-0 ">
         <div className="flex flex-col gap-2 text-[15px] font-medium text-[#9BA3AE]  xl:w-[20%]   ">
           <p className="text-white text-[18px] font-extrabold ">Platform</p>
           <p className="hover:text-white hover:ml-1 transition-all duration-200 ease-initial cursor-pointer">
@@ -46,7 +46,7 @@ const Footer = () => {
             Terms of Service
           </p>
         </div>
-      </div>
+      </div> */}
 
       <span className="text-[#7E7E7E] text-[14px] xl:hidden text-center mt-5 ">
         © 2025 Collected Company. All rights reserved.
