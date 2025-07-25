@@ -14,7 +14,7 @@ const HelpSupport = () => {
         >
           <p className="text-[35px] font-bold text-[#464646]">Privacy Policy</p>
           <p className="text-[16px] font-light text-[#777] mb-4">
-            Last Updated: 20/06/2028
+            Last Updated: 20/07/2025
           </p>
           <p className="mb-3">
             At Company, your privacy is important to us. This Privacy Policy
@@ -85,10 +85,10 @@ const HelpSupport = () => {
             <p>
               For questions, contact us at:{' '}
               <a
-                href="mailto:support@yourwebsitename.com"
+                href="mailto:contact@collectedcompany.com"
                 className="text-blue-500 underline"
               >
-                support@yourwebsitename.com
+                contact@collectedcompany.com
               </a>
             </p>
 
@@ -141,7 +141,7 @@ const HelpSupport = () => {
             </p>
             <ul className="list-disc pl-6">
               <li>
-                <strong>Effective Date:</strong> [Insert Date]
+                <strong>Effective Date:</strong> 25-07-2025
               </li>
               <li>
                 <strong>1. User Eligibility:</strong> You must be 18 years or
@@ -167,7 +167,7 @@ const HelpSupport = () => {
               </li>
               <li>
                 <strong>6. Governing Law:</strong> These terms are governed by
-                the laws of [Your Country/Region].
+                the laws of United Arab Emirates.
               </li>
             </ul>
 
@@ -182,27 +182,19 @@ const HelpSupport = () => {
                 promotional credits.
               </li>
               <li>
-                <strong>1. Welcome Bonus:</strong> New users receive a one-time
-                bonus (e.g. 100 credits) upon signing up.
+                <strong>1. Referral Bonus:</strong> Refer a friend and earn
+                (e.g. USD 5 credits) once they complete their first activity.
               </li>
               <li>
-                <strong>2. Referral Bonus:</strong> Refer a friend and earn
-                (e.g. 50 credits) once they complete their first activity.
-              </li>
-              <li>
-                <strong>3. Bonus Activity:</strong> Users may receive bonus
-                credits for activities like surveys, quizzes, etc.
-              </li>
-              <li>
-                <strong>4. Bonus Expiry:</strong> Bonuses are valid for 90 days
+                <strong>2. Bonus Expiry:</strong> Bonuses are valid for 364 days
                 from when they are added.
               </li>
               <li>
-                <strong>5. Abuse Prevention:</strong> If abuse or fraud is
+                <strong>3. Abuse Prevention:</strong> If abuse or fraud is
                 found, bonuses may be revoked and account suspended.
               </li>
               <li className="mb-3">
-                <strong>6. Policy Updates:</strong> We reserve the right to
+                <strong>4. Policy Updates:</strong> We reserve the right to
                 update this policy anytime with/without notice.
               </li>
             </ul>
