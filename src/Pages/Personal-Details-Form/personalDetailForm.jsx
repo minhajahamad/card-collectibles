@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../services/axios';
-import { API_URL } from '../../services/api_url';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../services/axios";
+import { API_URL } from "../../services/api_url";
 
 const PersonalDetailForm = ({
   onNext,
@@ -14,12 +14,15 @@ const PersonalDetailForm = ({
   const [emailVerificationStatus, setEmailVerificationStatus] = useState({
     isVerified: false,
     isSending: false,
-    message: '',
+    isRefreshing: false, // Add this line
+    message: "",
     isError: false,
+    isTempMessage: false,
   });
-  const uuid = localStorage.getItem('uuid');
+  const uuid = localStorage.getItem("uuid");
   const [localErrors, setLocalErrors] = useState({});
   const [apiErrors, setApiErrors] = useState({});
+  const [tempMessage, setTempMessage] = useState("");
 
   const fetchUser = async () => {
     try {
@@ -44,35 +47,39 @@ const PersonalDetailForm = ({
 
   // Check email verification status on component mount
   useEffect(() => {
-   const checkEmailVerification = async () => {
-  try {
-    const response = await axiosInstance.get(
-      API_URL.EMAIL_LOGIN.GET_EMAIL_VERIFIED,
-      {
-        params: { email: user.email },
+    const checkEmailVerification = async () => {
+      try {
+        const response = await axiosInstance.get(
+          API_URL.EMAIL_LOGIN.GET_EMAIL_VERIFIED,
+          {
+            params: { email: user.email },
+          }
+        );
+        // Check the email_verified key from response
+        if (response.data.email_verified === true) {
+          setEmailVerificationStatus({
+            isVerified: true,
+            isSending: false,
+            isRefreshing: false,
+            message: "Email verified successfully!",
+            isError: false,
+          });
+        } else {
+          setEmailVerificationStatus((prev) => ({
+            ...prev,
+            isVerified: false,
+            isRefreshing: false,
+          }));
+        }
+      } catch (error) {
+        setEmailVerificationStatus((prev) => ({
+          ...prev,
+          isVerified: false,
+          isRefreshing: false,
+        }));
+        console.log("Error checking email verification status:", error);
       }
-    );
-    // If we get a successful response, email is verified
-    if (response.data.message === "Email verified and updated in the system.") {
-      setEmailVerificationStatus({
-        isVerified: true,
-        isSending: false,
-        message: 'Email verified successfully!',
-        isError: false,
-      });
-    }
-  } catch (error) {
-    // If error is "Firebase user not found", email is not verified
-    if (error.response?.data?.error === "Firebase user not found.") {
-      setEmailVerificationStatus(prev => ({
-        ...prev,
-        isVerified: false,
-      }));
-    }
-    console.log('Error checking email verification status:', error);
-  }
-};
-
+    };
 
     fetchUser();
     fetchAddress();
@@ -81,22 +88,35 @@ const PersonalDetailForm = ({
     }
   }, [user.email]);
 
+  const handleRefreshVerification = async () => {
+    if (!user.email) return;
+
+    setEmailVerificationStatus((prev) => ({
+      ...prev,
+      isRefreshing: true,
+      message: "Checking verification status...",
+      isError: false,
+    }));
+
+    await checkEmailVerification();
+  };
+
   // Handle email verification by calling the POST_EMAIL API
   const handleEmailVerification = async () => {
     if (!user.email) {
       setEmailVerificationStatus({
         isVerified: false,
         isSending: false,
-        message: 'No email address found',
+        message: "No email address found",
         isError: true,
       });
       return;
     }
 
-    setEmailVerificationStatus(prev => ({
+    setEmailVerificationStatus((prev) => ({
       ...prev,
       isSending: true,
-      message: 'Sending verification email...',
+      message: "Sending verification email...",
       isError: false,
     }));
 
@@ -113,7 +133,7 @@ const PersonalDetailForm = ({
         setEmailVerificationStatus({
           isVerified: true,
           isSending: false,
-          message: 'Email is already verified!',
+          message: "Email is already verified!",
           isError: false,
         });
       } else {
@@ -121,16 +141,17 @@ const PersonalDetailForm = ({
           isVerified: false,
           isSending: false,
           message:
-            'Verification email sent! Please check your inbox and click the link.',
+            "Verification email sent! Please check your inbox and click the link.",
           isError: false,
         });
       }
     } catch (error) {
-      console.error('Email verification error:', error);
+      console.error("Email verification error:", error);
       setEmailVerificationStatus({
         isVerified: false,
         isSending: false,
-        message: error.response?.data?.message || 'Failed to send verification email',
+        message:
+          error.response?.data?.message || "Failed to send verification email",
         isError: true,
       });
     }
@@ -138,70 +159,73 @@ const PersonalDetailForm = ({
 
   // Check email verification status when tab becomes visible
   useEffect(() => {
-   const handleVisibilityChange = async () => {
-  if (document.visibilityState === 'visible' && user.email) {
-    try {
-      const response = await axiosInstance.get(
-        API_URL.EMAIL_LOGIN.GET_EMAIL_VERIFIED,
-        {
-          params: { email: user.email },
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === "visible" && user.email) {
+        try {
+          const response = await axiosInstance.get(
+            API_URL.EMAIL_LOGIN.GET_EMAIL_VERIFIED,
+            {
+              params: { email: user.email },
+            }
+          );
+          if (response.data.email_verified === true) {
+            setEmailVerificationStatus({
+              isVerified: true,
+              isSending: false,
+              isRefreshing: false,
+              message: "Email verified successfully!",
+              isError: false,
+            });
+          } else {
+            setEmailVerificationStatus((prev) => ({
+              ...prev,
+              isVerified: false,
+            }));
+          }
+        } catch (error) {
+          setEmailVerificationStatus((prev) => ({
+            ...prev,
+            isVerified: false,
+          }));
+          console.log("Error checking email verification status:", error);
         }
-      );
-      if (response.data.message === "Email verified and updated in the system.") {
-        setEmailVerificationStatus({
-          isVerified: true,
-          isSending: false,
-          message: 'Email verified successfully!',
-          isError: false,
-        });
       }
-    } catch (error) {
-      if (error.response?.data?.error === "Firebase user not found.") {
-        setEmailVerificationStatus(prev => ({
-          ...prev,
-          isVerified: false,
-        }));
-      }
-      console.log('Error checking email verification status:', error);
-    }
-  }
-};
+    };
 
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [user.email]);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'image') {
-      setAddressData(prev => ({ ...prev, image: files[0] }));
+    if (name === "image") {
+      setAddressData((prev) => ({ ...prev, image: files[0] }));
       if (files[0]) {
         setImagePreview(URL.createObjectURL(files[0]));
       } else {
-        setImagePreview('/Images/image-placeholder.png');
+        setImagePreview("/Images/image-placeholder.png");
       }
     } else {
-      setAddressData(prev => ({ ...prev, [name]: value }));
+      setAddressData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const validateAddress = () => {
     const errors = {};
-    if (!addressData.house_name) errors.house_name = 'House name is required';
+    if (!addressData.house_name) errors.house_name = "House name is required";
     if (!addressData.street_name)
-      errors.street_name = 'Street address is required';
-    if (!addressData.city) errors.city = 'City is required';
-    if (!addressData.state) errors.state = 'State is required';
-    if (!addressData.country) errors.country = 'Country is required';
-    if (!addressData.pin) errors.pin = 'Pin is required';
+      errors.street_name = "Street address is required";
+    if (!addressData.city) errors.city = "City is required";
+    if (!addressData.state) errors.state = "State is required";
+    if (!addressData.country) errors.country = "Country is required";
+    if (!addressData.pin) errors.pin = "Pin is required";
     return errors;
   };
 
-  const handleNext = async e => {
+  const handleNext = async (e) => {
     e.preventDefault();
     const errors = validateAddress();
     setLocalErrors(errors);
@@ -229,9 +253,9 @@ const PersonalDetailForm = ({
                 <button
                   type="button"
                   className="bg-white text-[#467EF8] px-3 py-1 rounded shadow text-xs font-semibold flex items-center gap-1"
-                  onClick={e => {
+                  onClick={(e) => {
                     e.preventDefault();
-                    document.getElementById('profile-image-upload').click();
+                    document.getElementById("profile-image-upload").click();
                   }}
                 >
                   <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
@@ -249,7 +273,7 @@ const PersonalDetailForm = ({
               type="file"
               name="image"
               accept="image/*"
-              style={{ display: 'none' }}
+              style={{ display: "none" }}
               onChange={handleChange}
             />
           </div>
@@ -261,13 +285,13 @@ const PersonalDetailForm = ({
               <input
                 className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-3 focus:outline-none focus:border-[#8d8c8c]"
                 placeholder={user.full_name}
-                value={user.full_name || ''}
+                value={user.full_name || ""}
                 disabled
               />
               <input
                 className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-3 focus:outline-none focus:border-[#8d8c8c]"
                 placeholder={user.last_name}
-                value={user.last_name || ''}
+                value={user.last_name || ""}
                 disabled
               />
             </div>
@@ -279,7 +303,7 @@ const PersonalDetailForm = ({
             <input
               className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-3 focus:outline-none focus:border-[#8d8c8c]"
               placeholder={user.phone_number}
-              value={user.phone_number || ''}
+              value={user.phone_number || ""}
               disabled
             />
           </div>
@@ -287,43 +311,67 @@ const PersonalDetailForm = ({
             <label className="lg:text-[18px] xl:text-[15px] text-[14px] font-bold text-[#464646]">
               Email
             </label>
-            <div className="flex flex-col sm:flex-row sm:gap-2  items-start sm:items-center">
+            <div className="flex flex-col sm:flex-row sm:gap-2 items-start sm:items-center">
               <input
                 className="xl:w-[310px] w-[90%] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-3 focus:outline-none focus:border-[#8d8c8c]"
                 placeholder={user.email}
-                value={user.email || ''}
+                value={user.email || ""}
                 disabled
               />
-              <button
-                type="button"
-                onClick={handleEmailVerification}
-                disabled={
-                  emailVerificationStatus.isSending ||
-                  emailVerificationStatus.isVerified
-                }
-                className={`text-[14px] xl:text-[16px] font-bold font-sans  py-2 rounded transition-all duration-200 ease-initial ${
-                  emailVerificationStatus.isVerified
-                    ? 'text-[#16B338] cursor-default'
+              <div className="flex gap-2 items-center">
+                <button
+                  type="button"
+                  onClick={handleEmailVerification}
+                  disabled={
+                    emailVerificationStatus.isSending ||
+                    emailVerificationStatus.isVerified ||
+                    emailVerificationStatus.isRefreshing
+                  }
+                  className={`text-[14px] xl:text-[16px] font-bold font-sans py-2 rounded transition-all duration-200 ease-initial ${
+                    emailVerificationStatus.isVerified
+                      ? "text-[#16B338] cursor-default"
+                      : emailVerificationStatus.isSending ||
+                        emailVerificationStatus.isRefreshing
+                      ? "text-[#999] cursor-not-allowed"
+                      : "text-[#467EF8] cursor-pointer hover:text-[#769beb]"
+                  }`}
+                >
+                  {emailVerificationStatus.isVerified
+                    ? "✓ Verified"
                     : emailVerificationStatus.isSending
-                    ? 'text-[#999] cursor-not-allowed'
-                    : 'text-[#467EF8] cursor-pointer hover:text-[#769beb]'
-                }`}
-              >
-                {emailVerificationStatus.isVerified
-                  ? '✓ Verified'
-                  : emailVerificationStatus.isSending
-                  ? 'Sending...'
-                  : 'Verify Now'}
-              </button>
+                    ? "Sending..."
+                    : "Verify Now"}
+                </button>
+
+                {!emailVerificationStatus.isVerified && (
+                  <button
+                    type="button"
+                    onClick={handleRefreshVerification}
+                    disabled={
+                      emailVerificationStatus.isSending ||
+                      emailVerificationStatus.isRefreshing
+                    }
+                    className={`text-[14px] xl:text-[16px] font-bold font-sans py-2 px-2 rounded transition-all duration-200 ease-initial ${
+                      emailVerificationStatus.isSending ||
+                      emailVerificationStatus.isRefreshing
+                        ? "text-[#999] cursor-not-allowed"
+                        : "text-[#467EF8] cursor-pointer hover:text-[#769beb]"
+                    }`}
+                    title="Refresh verification status"
+                  >
+                    {emailVerificationStatus.isRefreshing ? "🔄" : "↻"}
+                  </button>
+                )}
+              </div>
             </div>
             {emailVerificationStatus.message && (
               <div
                 className={`text-sm mt-2 ${
                   emailVerificationStatus.isError
-                    ? 'text-red-500'
+                    ? "text-red-500"
                     : emailVerificationStatus.isVerified
-                    ? 'text-green-600'
-                    : 'text-blue-600'
+                    ? "text-green-600"
+                    : "text-blue-600"
                 }`}
               >
                 {emailVerificationStatus.message}
@@ -442,7 +490,7 @@ const PersonalDetailForm = ({
                 className="w-[90%] xl:w-[170px] h-10 border border-[#E3E3E3] focus:outline-none focus:border-[#8d8c8c] rounded-[8px] bg-[#F4F4F4] pl-1"
                 placeholder="Postal Code"
                 name="pin"
-                type='number'
+                type="number"
                 value={addressData.pin}
                 onChange={handleChange}
               />
@@ -492,34 +540,34 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
     fetchCategories();
   }, []);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
+    if (type === "checkbox") {
       const id = Number(value);
-      setSellerData(prev => ({
+      setSellerData((prev) => ({
         ...prev,
         categories: checked
           ? [...(prev.categories || []), id]
-          : (prev.categories || []).filter(catId => catId !== id),
+          : (prev.categories || []).filter((catId) => catId !== id),
       }));
     } else {
-      setSellerData(prev => ({ ...prev, [name]: value }));
+      setSellerData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const validateSeller = () => {
     const errors = {};
-    if (!sellerData.store_name) errors.store_name = 'Store name is required';
+    if (!sellerData.store_name) errors.store_name = "Store name is required";
     if (!sellerData.categories || sellerData.categories.length === 0)
-      errors.categories = 'Select at least one category';
+      errors.categories = "Select at least one category";
     if (!sellerData.inventory_estimate)
-      errors.inventory_estimate = 'Inventory estimate is required';
+      errors.inventory_estimate = "Inventory estimate is required";
     if (!sellerData.specialization)
-      errors.specialization = 'Specialization is required';
+      errors.specialization = "Specialization is required";
     return errors;
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateSeller();
     setLocalErrors(errors);
@@ -540,7 +588,7 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
               className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
               placeholder="Store"
               name="store_name"
-              value={sellerData.store_name || ''}
+              value={sellerData.store_name || ""}
               onChange={handleChange}
             />
             {localErrors.store_name && (
@@ -560,7 +608,7 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
             </label>
             <div className="flex gap-5 flex-wrap">
               {Array.isArray(categories) &&
-                categories.map(cat => (
+                categories.map((cat) => (
                   <label
                     key={cat.id}
                     className="flex gap-1 items-center font-regular text-[#464646]"
@@ -595,7 +643,7 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
               className="w-[90%] xl:w-[210px] h-10 border border-[#E3E3E3] rounded-[8px] bg-[#F4F4F4] pl-1 focus:outline-none focus:border-[#8d8c8c]"
               placeholder="Enter Your Number"
               name="inventory_estimate"
-              value={sellerData.inventory_estimate || ''}
+              value={sellerData.inventory_estimate || ""}
               onChange={handleChange}
             >
               <option value="">Select estimate</option>
@@ -622,11 +670,11 @@ const SellingDetailForm = ({ sellerData, setSellerData, onSubmitAll }) => {
             Specialization
           </label>
           <textarea
-            style={{ overflowY: 'scroll', scrollbarWidth: 'none' }}
+            style={{ overflowY: "scroll", scrollbarWidth: "none" }}
             className="w-[90%] h-[250px] xl:w-[400px] xl:h-[200px] border border-[#E3E3E3] rounded-[14px] focus:outline-none focus:border-[#8d8c8c] p-2 overflow-y-auto"
             placeholder="Eg: Welcome to Itachi Stores, your destination for rare and collectible comics. We specialize in curating vintage issues, limited editions, and must-have graphic novels for dedicated fans and serious collectors alike. Discover the stories that shaped generations."
             name="specialization"
-            value={sellerData.specialization || ''}
+            value={sellerData.specialization || ""}
             onChange={handleChange}
           ></textarea>
           {localErrors.specialization && (
@@ -660,17 +708,17 @@ const Stepper = ({ step, setStep }) => (
       <div
         className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ${
           step === 1
-            ? 'bg-[#464646] text-white'
+            ? "bg-[#464646] text-white"
             : step > 1
-            ? 'bg-[#16B338] text-white'
-            : 'bg-[#E0E0E0] text-[#a0a0a0]'
+            ? "bg-[#16B338] text-white"
+            : "bg-[#E0E0E0] text-[#a0a0a0]"
         }`}
       >
         1
       </div>
       <p
         className={`xl:text-xs text-[10px] sm:text-xs text-center mt-2 leading-tight transition-all duration-300 ${
-          step >= 1 ? 'text-[#464646]' : 'text-[#a0a0a0]'
+          step >= 1 ? "text-[#464646]" : "text-[#a0a0a0]"
         }`}
       >
         Personal
@@ -681,21 +729,21 @@ const Stepper = ({ step, setStep }) => (
     <div className="relative w-20 sm:w-28 h-[8px] bg-[#D3D3D3] overflow-hidden rounded-sm">
       <div
         className={`h-full transition-all duration-1000 ${
-          step === 2 ? 'w-full' : 'w-0'
+          step === 2 ? "w-full" : "w-0"
         } bg-gradient-to-r from-[#16B338] via-[#16B338] to-[#C7C7C7]`}
       />
     </div>
     <div className="flex flex-col items-center">
       <div
         className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ${
-          step === 2 ? 'bg-[#464646] text-white' : 'bg-[#E0E0E0] text-[#a0a0a0]'
+          step === 2 ? "bg-[#464646] text-white" : "bg-[#E0E0E0] text-[#a0a0a0]"
         }`}
       >
         2
       </div>
       <p
         className={`text-[10px] sm:text-xs text-center mt-2 leading-tight transition-all duration-300 ${
-          step === 2 ? 'text-[#464646]' : 'text-[#a0a0a0]'
+          step === 2 ? "text-[#464646]" : "text-[#a0a0a0]"
         }`}
       >
         Seller
@@ -710,29 +758,29 @@ const MultiStepForm = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [user, setUser] = useState({});
-  const uuid = localStorage.getItem('uuid');
+  const uuid = localStorage.getItem("uuid");
 
   const [addressData, setAddressData] = useState({
-    house_name: '',
-    street_name: '',
-    country: '',
-    state: '',
-    pin: '',
-    city: '',
+    house_name: "",
+    street_name: "",
+    country: "",
+    state: "",
+    pin: "",
+    city: "",
     image: null,
   });
 
   const [sellerData, setSellerData] = useState({
-    store_name: '',
+    store_name: "",
     categories: [],
-    inventory_estimate: '',
-    specialization: '',
+    inventory_estimate: "",
+    specialization: "",
   });
 
   console.log(sellerData);
 
   const [imagePreview, setImagePreview] = useState(
-    '/Images/image-placeholder.png'
+    "/Images/image-placeholder.png"
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -752,19 +800,19 @@ const MultiStepForm = () => {
     fetchUser();
   }, []);
 
-  const handleSubmitAll = async setApiErrors => {
+  const handleSubmitAll = async (setApiErrors) => {
     setIsSubmitting(true);
     try {
       const addressFormData = new FormData();
-      addressFormData.append('user_uuid', uuid);
-      addressFormData.append('house_name', addressData.house_name);
-      addressFormData.append('street_name', addressData.street_name);
-      addressFormData.append('country', addressData.country);
-      addressFormData.append('state', addressData.state);
-      addressFormData.append('pin', addressData.pin);
-      addressFormData.append('city', addressData.city);
+      addressFormData.append("user_uuid", uuid);
+      addressFormData.append("house_name", addressData.house_name);
+      addressFormData.append("street_name", addressData.street_name);
+      addressFormData.append("country", addressData.country);
+      addressFormData.append("state", addressData.state);
+      addressFormData.append("pin", addressData.pin);
+      addressFormData.append("city", addressData.city);
       if (addressData.image) {
-        addressFormData.append('image', addressData.image);
+        addressFormData.append("image", addressData.image);
       }
 
       let addressResponse;
@@ -773,15 +821,15 @@ const MultiStepForm = () => {
           API_URL.ADDRESS.POST_ADDRESS,
           addressFormData,
           {
-            headers: { 'Content-Type': 'multipart/form-data' },
+            headers: { "Content-Type": "multipart/form-data" },
           }
         );
-        console.log('Address submitted:', addressResponse);
+        console.log("Address submitted:", addressResponse);
       } catch (err) {
         if (err.response && err.response.data && err.response.data.errors) {
           setApiErrors(err.response.data.errors);
         } else {
-          setApiErrors({ general: 'Failed to submit address' });
+          setApiErrors({ general: "Failed to submit address" });
         }
         setIsSubmitting(false);
         return;
@@ -800,12 +848,12 @@ const MultiStepForm = () => {
           API_URL.SELLERS.POST_SELLERS,
           sellerPayload
         );
-        console.log('Seller data submitted:', sellerResponse);
+        console.log("Seller data submitted:", sellerResponse);
       } catch (err) {
         if (err.response && err.response.data && err.response.data.errors) {
           setApiErrors(err.response.data.errors);
         } else {
-          setApiErrors({ general: 'Failed to submit seller data' });
+          setApiErrors({ general: "Failed to submit seller data" });
         }
         setIsSubmitting(false);
         return;
@@ -815,7 +863,7 @@ const MultiStepForm = () => {
         navigate("/user/profile");
       }, 200);
     } catch (err) {
-      setApiErrors({ general: 'Unexpected error occurred' });
+      setApiErrors({ general: "Unexpected error occurred" });
       setIsSubmitting(false);
     } finally {
       setIsSubmitting(false);
@@ -828,7 +876,7 @@ const MultiStepForm = () => {
         <div className="h-auto sm:h-[20%] border-b border-[#DEDEDE] flex flex-col sm:flex-row justify-between px-5 sm:px-10 py-5 sm:py-0">
           <div className="order-2 sm:order-1 font-sans font-bold text-[24px] md:text-[30px] lg:text-[35px] xl:text-[40px] text-[#464646] items-center flex">
             <p>
-              {step === 1 ? 'Personal Details Form' : 'Selling Details Form'}
+              {step === 1 ? "Personal Details Form" : "Selling Details Form"}
             </p>
           </div>
           <div className="order-1 sm:order-2 flex items-center justify-center sm:justify-end mb-4 sm:mb-0">
