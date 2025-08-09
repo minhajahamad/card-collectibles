@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import LandinHero from '../../Components/Landin-Hero/landinHero';
 import LandinJoin from '../../Components/Landin-Join/landinJoin';
 import Footer from '../../Components/Footer/footer';
+import FloatingSocial from '../../Components/Floating-Social/floatingSocial';
 
 const Landin = () => {
   const joinRef = useRef(null);
@@ -35,6 +36,7 @@ const Landin = () => {
         <LandinJoin />
       </div>
       <Footer />
+      <FloatingSocial />
     </div>
   );
 };
